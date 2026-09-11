@@ -211,6 +211,14 @@
         .relatorio-mec-table tr.pago td { background: #eaf7ee; color: #28a745; }
         .relatorio-mec-footer { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 15px 20px; background: #f8f9fa; border-top: 2px solid var(--primary); flex-wrap: wrap; }
         .relatorio-mec-total { font-size: 18px; font-weight: bold; color: var(--primary); }
+        
+        /* ===== ESTILOS PARA DOCUMENTOS POR PLACA ===== */
+        .doc-placa-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 150px; height: 150px; border: 2px dashed #ccc; border-radius: 8px; background: #fafafa; cursor: pointer; transition: all 0.3s; text-align: center; padding: 10px; position: relative; }
+        .doc-placa-item:hover { border-color: var(--primary); background: #f0f4f8; }
+        .doc-placa-item .icon { font-size: 40px; margin-bottom: 10px; }
+        .doc-placa-item .nome { font-size: 12px; font-weight: bold; color: #333; word-break: break-all; }
+        .doc-placa-item .delete-btn { position: absolute; top: 5px; right: 5px; background: rgba(220,53,69,0.9); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        .doc-placa-item .delete-btn:hover { background: rgba(220,53,69,1); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -567,22 +575,29 @@
                 <button class="sub-tab active" onclick="switchSubTab('novo')">📤 Novo</button>
                 <button class="sub-tab" onclick="switchSubTab('salvos')">📁 DOC Salvos</button>
             </div>
+            
+            <!-- SUB ABA NOVO -->
             <div class="sub-tab-content active" id="subTabNovo">
-                <input type="file" id="compImagem" accept="image/*" style="display: none;" onchange="previewCompImagem()">
-                <div class="image-preview-card">
-                    <img id="compPreview" alt="Preview do comprovante">
-                    <div class="no-image" id="compNoImage">Nenhum comprovante selecionado</div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Selecione a Placa do Veículo:</label>
+                    <select id="compPlacaSelect" class="campo-enter" style="max-width: 400px;">
+                        <option value="">Selecione uma placa</option>
+                    </select>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn-buscar" data-permissao="comprovantes_buscar" onclick="document.getElementById('compImagem').click()">📂 Buscar DOC</button>
-                    <button class="btn-primary" data-permissao="comprovantes_salvar" onclick="salvarComprovante()">💾 Salvar</button>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Documentos (PDF, JPG, JPEG, PNG) - Anexar Múltiplos:</label>
+                    <input type="file" id="compDocumentosUpload" accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none;" onchange="previewCompDocumentos()">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                        <button type="button" class="btn-buscar" data-permissao="comprovantes_buscar" onclick="document.getElementById('compDocumentosUpload').click()" style="padding: 10px 20px; font-size: 14px;">📂 Buscar Documentos</button>
+                        <span id="compDocumentosPreview" style="font-size: 14px; color: #666;">Nenhum arquivo selecionado</span>
+                    </div>
                 </div>
+                <button class="btn-primary" data-permissao="comprovantes_salvar" onclick="salvarComprovantePlaca()">💾 Salvar Documentos</button>
             </div>
+
+            <!-- SUB ABA SALVOS -->
             <div class="sub-tab-content" id="subTabSalvos">
-                <div class="subfolder">
-                    <div class="subfolder-header"><h4>📁 Subpasta: DOC Salvos</h4></div>
-                    <div class="saved-images" id="compSavedImages"></div>
-                </div>
+                <div id="comprovantesPorPlacaContainer"></div>
             </div>
         </div>
 
@@ -1161,7 +1176,7 @@
                 imagens: {
                     garagem: { subpasta: 'Fotos da Garagem', fotos: [] },
                     sos: { subpasta: 'Imagens SOS', fotos: [] },
-                    comprovantes: { subpasta: 'Comprovantes', fotos: [] }
+                    comprovantes: { subpasta: 'Comprovantes', placas: {} }
                 },
                 config: {
                     empresa: 'LOBÃO', cnpj: '', telefone: '', email: '', endereco: '',
@@ -1269,9 +1284,13 @@
                     if (db.imagens.sos.fotos[i].data) db.imagens.sos.fotos[i].data = await comprimirBase64(db.imagens.sos.fotos[i].data, 300, 0.3);
                 }
             }
-            if (db.imagens && db.imagens.comprovantes && db.imagens.comprovantes.fotos) {
-                for (let i = 0; i < db.imagens.comprovantes.fotos.length; i++) {
-                    if (db.imagens.comprovantes.fotos[i].data) db.imagens.comprovantes.fotos[i].data = await comprimirBase64(db.imagens.comprovantes.fotos[i].data, 300, 0.3);
+            if (db.imagens && db.imagens.comprovantes && db.imagens.comprovantes.placas) {
+                for (const placa in db.imagens.comprovantes.placas) {
+                    for (let i = 0; i < db.imagens.comprovantes.placas[placa].length; i++) {
+                        if (db.imagens.comprovantes.placas[placa][i].data) {
+                            db.imagens.comprovantes.placas[placa][i].data = await comprimirBase64(db.imagens.comprovantes.placas[placa][i].data, 500, 0.4);
+                        }
+                    }
                 }
             }
             if (db.documentos) {
@@ -1321,7 +1340,18 @@
                     if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
                     if (!db.historico) db.historico = [];
                     if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
-                    if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', fotos:[]} };
+                    if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', placas:{}} };
+                    
+                    // MIGRAÇÃO DE DADOS ANTIGOS DE COMPROVANTES
+                    if (!db.imagens.comprovantes) db.imagens.comprovantes = { subpasta: 'Comprovantes', placas: {} };
+                    if (!db.imagens.comprovantes.placas) {
+                        db.imagens.comprovantes.placas = {};
+                        if (db.imagens.comprovantes.fotos && Array.isArray(db.imagens.comprovantes.fotos)) {
+                            db.imagens.comprovantes.placas['SEM PLACA'] = db.imagens.comprovantes.fotos;
+                            delete db.imagens.comprovantes.fotos;
+                        }
+                    }
+
                     if (!db.config) db.config = criarDBPadrao().config;
                     if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
                     db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
@@ -1380,6 +1410,9 @@
         // ===== VARIÁVEIS DO RELATÓRIO MECÂNICO =====
         let relatorioMecFiltros = { dataInicio: '', dataFim: '', oficina: '', status: 'todos' };
         let relatorioMecResultados = [];
+
+        // ===== VARIÁVEIS PARA DOCUMENTOS POR PLACA =====
+        let compDocumentosTemp = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.campo-enter').forEach(function(campo) {
@@ -1765,7 +1798,8 @@
             atualizarTabelaHistorico();
             atualizarGaleriaGaragem();
             atualizarGaleriaSOS();
-            atualizarGaleriaComprovantes();
+            atualizarGaleriaComprovantes(); // Nova função
+            atualizarPlacasComprovantes(); // Nova função
             carregarDadosContratos();
             carregarConfiguracoes();
             limparSelfieCliente();
@@ -1778,6 +1812,174 @@
             atualizarSelectPlacasDoc();
             atualizarSubAbasDoc();
         }
+
+        // =============================================
+        // NOVAS FUNÇÕES PARA DOCUMENTOS POR PLACA
+        // =============================================
+
+        function atualizarPlacasComprovantes() {
+            const select = document.getElementById('compPlacaSelect');
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Selecione uma placa</option>';
+            
+            // Adiciona veículos cadastrados
+            db.veiculos.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.placa;
+                opt.textContent = v.placa + ' - ' + v.fabricante;
+                select.appendChild(opt);
+            });
+
+            // Adiciona a opção "SEM PLACA" se existirem documentos legados
+            if (db.imagens.comprovantes.placas && db.imagens.comprovantes.placas['SEM PLACA']) {
+                const opt = document.createElement('option');
+                opt.value = 'SEM PLACA';
+                opt.textContent = 'SEM PLACA (Documentos Antigos)';
+                select.appendChild(opt);
+            }
+
+            if (currentVal && (Array.from(select.options).some(o => o.value === currentVal))) {
+                select.value = currentVal;
+            }
+        }
+
+        async function previewCompDocumentos() {
+            const files = document.getElementById('compDocumentosUpload').files;
+            if (!files || files.length === 0) return;
+            
+            compDocumentosTemp = [];
+            let count = 0;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const extensao = file.name.split('.').pop().toLowerCase();
+                
+                if (['pdf', 'jpg', 'jpeg', 'png'].includes(extensao)) {
+                    let dataUrl;
+                    if (extensao === 'pdf') {
+                        const reader = new FileReader();
+                        dataUrl = await new Promise(resolve => { 
+                            reader.onload = e => resolve(e.target.result); 
+                            reader.readAsDataURL(file); 
+                        });
+                    } else {
+                        dataUrl = await comprimirImagem(file, 800, 0.5); // Melhor qualidade para documentos
+                    }
+                    compDocumentosTemp.push({ nome: file.name, data: dataUrl, tipo: extensao });
+                    count++;
+                }
+            }
+            
+            document.getElementById('compDocumentosPreview').textContent = count + ' arquivo(s) selecionado(s)';
+        }
+
+        function salvarComprovantePlaca() {
+            const placa = document.getElementById('compPlacaSelect').value;
+            if (!placa) { alert('Selecione uma placa!'); return; }
+            if (compDocumentosTemp.length === 0) { alert('Nenhum documento selecionado!'); return; }
+            
+            if (!db.imagens.comprovantes.placas) db.imagens.comprovantes.placas = {};
+            if (!db.imagens.comprovantes.placas[placa]) db.imagens.comprovantes.placas[placa] = [];
+            
+            // Adiciona os novos documentos à lista da placa
+            db.imagens.comprovantes.placas[placa].push(...compDocumentosTemp);
+            
+            // Limpa o cache temporário
+            compDocumentosTemp = [];
+            document.getElementById('compDocumentosUpload').value = '';
+            document.getElementById('compDocumentosPreview').textContent = 'Nenhum arquivo selecionado';
+            
+            atualizarGaleriaComprovantes();
+            salvarDB();
+            alert('Documentos salvos com sucesso para a placa ' + placa + '!');
+            registrarAuditoria('Cadastro', `Documentos anexados para a placa ${placa}`);
+        }
+
+        function atualizarGaleriaComprovantes() {
+            const container = document.getElementById('comprovantesPorPlacaContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const placasObj = db.imagens.comprovantes.placas || {};
+            const placas = Object.keys(placasObj);
+            
+            if (placas.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px; color: #999;">Nenhum documento salvo.</p>';
+                return;
+            }
+            
+            placas.forEach(placa => {
+                const docs = placasObj[placa];
+                if (!docs || docs.length === 0) return;
+                
+                const subfolder = document.createElement('div');
+                subfolder.className = 'subfolder';
+                
+                let docsHtml = '';
+                docs.forEach((doc, index) => {
+                    let thumbHtml = '';
+                    if (doc.tipo === 'pdf') {
+                        thumbHtml = `<div style="width: 100%; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #eee; border-radius: 4px;">
+                            <span style="font-size: 40px;">📄</span>
+                        </div>`;
+                    } else {
+                        thumbHtml = `<img src="${doc.data}" style="width: 100%; height: 120px; object-fit: cover;">`;
+                    }
+                    
+                    docsHtml += `
+                        <div class="doc-placa-item" style="width: 150px; height: auto; display: flex; flex-direction: column; padding: 5px;">
+                            <div style="flex: 1; cursor: pointer; width: 100%;" onclick="${doc.tipo === 'pdf' ? `abrirPdfComprovante('${placa}', ${index})` : `openImageModal('${doc.data}')`}">
+                                ${thumbHtml}
+                            </div>
+                            <button class="delete-btn" onclick="excluirComprovantePlaca('${placa}', ${index})" title="Excluir">×</button>
+                            <div style="padding: 5px; text-align: center; font-size: 11px; font-weight: bold; background: #f0f0f0; border-top: 1px solid #ddd; width: 100%; border-radius: 0 0 4px 4px;">
+                                ${doc.nome.length > 18 ? doc.nome.substring(0, 15) + '...' : doc.nome}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                subfolder.innerHTML = `
+                    <div class="subfolder-header">
+                        <h4>🚗 Placa: ${placa}</h4>
+                        <span style="font-size: 12px; color: #666; margin-left: 10px;">(${docs.length} documento(s))</span>
+                    </div>
+                    <div class="saved-images" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        ${docsHtml}
+                    </div>
+                `;
+                container.appendChild(subfolder);
+            });
+        }
+
+        function abrirPdfComprovante(placa, index) {
+            const doc = db.imagens.comprovantes.placas[placa][index];
+            if (!doc) return;
+            if (doc.data.startsWith('data:application/pdf')) {
+                const win = window.open();
+                win.document.write(`<iframe src="${doc.data}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+            } else {
+                window.open(doc.data, '_blank');
+            }
+        }
+
+        function excluirComprovantePlaca(placa, index) {
+            if (!verificarSenhaAdmin()) return;
+            if (confirm('Excluir este documento?')) {
+                db.imagens.comprovantes.placas[placa].splice(index, 1);
+                if (db.imagens.comprovantes.placas[placa].length === 0) {
+                    delete db.imagens.comprovantes.placas[placa];
+                }
+                atualizarGaleriaComprovantes();
+                salvarDB();
+                registrarAuditoria('Exclusão', `Documento excluído da placa ${placa}`);
+            }
+        }
+
+        // =============================================
+        // FIM NOVAS FUNÇÕES
+        // =============================================
 
         // =============================================
         // RELATÓRIO MECÂNICO
@@ -2307,6 +2509,7 @@
             atualizarPlacasManutencao();
             atualizarPlacasMecanico();
             atualizarVistoria();
+            atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
             const activeTab = document.querySelector('.tab.active');
             if (activeTab && activeTab.classList.contains('hidden-tab')) {
                 const firstAllowedTab = document.querySelector('.tab[data-tab]:not(.hidden-tab)');
@@ -2415,6 +2618,7 @@
                 if (tabId === 'pendente') atualizarTabelaPendentes();
                 if (tabId === 'historico') atualizarTabelaHistorico();
                 if (tabId === 'vistoria') atualizarVistoria();
+                if (tabId === 'comprovantes') { atualizarPlacasComprovantes(); atualizarGaleriaComprovantes(); } // Atualiza a nova aba
                 setTimeout(function() {
                     const primeiroCampo = document.querySelector('.tab-content.active .campo-enter, .tab-content.active input:not([readonly]), .tab-content.active select, .tab-content.active textarea');
                     if (primeiroCampo) primeiroCampo.focus();
@@ -2672,6 +2876,7 @@
             atualizarTabelaVeiculos();
             atualizarPermissoesVeiculos();
             atualizarCombosLocacao();
+            atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
             registrarAuditoria('Cadastro', `Novo veículo: ${veiculo.fabricante} - ${veiculo.placa}`);
             salvarDB();
             alert('Veículo salvo!');
@@ -3511,6 +3716,7 @@
             if (originalIndex > -1) db.veiculos.splice(originalIndex, 1);
             atualizarTabelaVeiculos();
             atualizarCombosLocacao();
+            atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
             registrarAuditoria('Edição', `Veículo editado: ${v.fabricante} - ${v.placa}`);
             salvarDB();
             atualizarPlacasManutencao();
@@ -3530,6 +3736,7 @@
                 atualizarTabelaVeiculos();
                 atualizarPermissoesVeiculos();
                 atualizarCombosLocacao();
+                atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
                 registrarAuditoria('Exclusão', `Veículo excluído: ${v.fabricante} - ${v.placa}`);
                 salvarDB();
                 atualizarPlacasManutencao();
@@ -4210,41 +4417,7 @@
             } else alert('Nenhuma imagem SOS salva!');
         }
 
-        async function salvarComprovante() {
-            const file = document.getElementById('compImagem').files[0];
-            if (file) {
-                const dataUrl = await comprimirImagem(file, 300, 0.35);
-                db.imagens.comprovantes.fotos.push({ nome: file.name, data: dataUrl });
-                atualizarGaleriaComprovantes();
-                salvarDB();
-                alert('Comprovante salvo!');
-                document.getElementById('compImagem').value = '';
-                document.getElementById('compPreview').style.display = 'none';
-                document.getElementById('compPreview').src = '';
-                document.getElementById('compNoImage').style.display = 'flex';
-                registrarAuditoria('Cadastro', 'Comprovante');
-            } else alert('Selecione um comprovante!');
-        }
-
-        function atualizarGaleriaComprovantes() {
-            const container = document.getElementById('compSavedImages');
-            container.innerHTML = '';
-            db.imagens.comprovantes.fotos.forEach((foto, i) => {
-                const div = document.createElement('div');
-                div.className = 'saved-image-item';
-                div.innerHTML = `<img src="${foto.data}" onclick="openImageModal('${foto.data}')"><button class="delete-btn" onclick="excluirComprovante(${i})">×</button>`;
-                container.appendChild(div);
-            });
-        }
-
-        function excluirComprovante(i) {
-            if (!verificarSenhaAdmin()) return;
-            if (confirm('Excluir comprovante?')) {
-                db.imagens.comprovantes.fotos.splice(i, 1);
-                atualizarGaleriaComprovantes();
-                salvarDB();
-            }
-        }
+        // Funções antigas de comprovante foram substituídas pelas novas funções de Documentos por Placa
 
         function openImageModal(src) {
             document.getElementById('modalImage').src = src;
