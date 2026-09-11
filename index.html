@@ -103,7 +103,7 @@
         .modal-close { position: absolute; top: -40px; right: -40px; background: white; color: #333; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .config-section { margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary); }
         .config-section h3 { color: var(--primary); margin-bottom: 15px; }
-        .sub-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .sub-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; flex-wrap: wrap; }
         .sub-tab { padding: 10px 20px; background: transparent; color: var(--primary); border: 2px solid var(--primary); cursor: pointer; border-radius: 5px; font-size: 14px; transition: all 0.3s; font-weight: 600; }
         .sub-tab:hover { background: var(--primary); color: white; }
         .sub-tab.active { background: var(--primary); color: white; }
@@ -165,7 +165,7 @@
         .btn-pdf:hover { background: #5a6268; }
         .despesas-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999; display: none; justify-content: center; align-items: center; }
         .despesas-modal.active { display: flex; }
-        .despesas-modal-content { background: white; width: 90%; max-width: 800px; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; }
+        .despesas-modal-content { background: white; width: 90%; max-width: 800px; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
         .despesas-modal-header { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .despesas-modal-header h3 { margin: 0; }
         .despesas-modal-close { background: none; border: none; color: white; font-size: 28px; cursor: pointer; font-weight: bold; padding: 0 10px; }
@@ -203,6 +203,14 @@
         .lucro-negativo { color: var(--danger); font-weight: bold; }
         /* ====== FIM NOVOS ESTILOS ====== */
         input[type="text"], input[type="search"], textarea { text-transform: uppercase; }
+
+        /* ===== RELATÓRIO MECÂNICO ===== */
+        .relatorio-mec-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .relatorio-mec-table th, .relatorio-mec-table td { padding: 8px 10px; border-bottom: 1px solid #ddd; font-size: 13px; }
+        .relatorio-mec-table th { background: var(--primary); color: white; }
+        .relatorio-mec-table tr.pago td { background: #eaf7ee; color: #28a745; }
+        .relatorio-mec-footer { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 15px 20px; background: #f8f9fa; border-top: 2px solid var(--primary); flex-wrap: wrap; }
+        .relatorio-mec-total { font-size: 18px; font-weight: bold; color: var(--primary); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -440,6 +448,30 @@
                 </div>
             </div>
             <button class="btn-primary" data-permissao="mecanico_salvar" onclick="salvarMecanico()">💾 Salvar</button>
+
+            <!-- ===== RELATÓRIO POR DATA E OFICINA ===== -->
+            <div class="config-section" style="margin-top: 25px; border-left-color: var(--secondary);">
+                <h3>📊 Relatório por Período e Oficina</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Selecione o período e a oficina para gerar o relatório, realizar o pagamento e emitir o recibo em PDF.</p>
+                <div class="form-grid">
+                    <div class="form-group"><label>Data Início</label><input type="date" id="mecRelDataInicio"></div>
+                    <div class="form-group"><label>Data Fim</label><input type="date" id="mecRelDataFim"></div>
+                    <div class="form-group"><label>Oficina</label>
+                        <select id="mecRelOficina"><option value="">Todas as Oficinas</option></select>
+                    </div>
+                    <div class="form-group"><label>Status</label>
+                        <select id="mecRelStatus">
+                            <option value="todos">Todos</option>
+                            <option value="pendente">Somente Pendentes</option>
+                            <option value="pago">Somente Pagos</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="gerarRelatorioMecanico()">📊 Gerar Relatório</button>
+                <button class="btn-secondary" onclick="limparRelatorioMecanico()">🔄 Limpar Filtros</button>
+            </div>
+            <!-- ===== FIM RELATÓRIO ===== -->
+
             <div class="table-container">
                 <table id="tabelaMecanico">
                     <thead><tr><th>Data</th><th>Oficina</th><th>Serviço</th><th>Carro</th><th>Valor</th><th>Ações</th></tr></thead>
@@ -995,6 +1027,29 @@
         </div>
     </div>
 
+    <!-- ===== MODAL DE RELATÓRIO MECÂNICO ===== -->
+    <div class="despesas-modal" id="relatorioMecanicoModal">
+        <div class="despesas-modal-content" style="max-width: 1000px;">
+            <div class="despesas-modal-header">
+                <h3>📊 Relatório de Serviços Mecânicos</h3>
+                <button class="despesas-modal-close" onclick="fecharRelatorioMecanico()">×</button>
+            </div>
+            <div class="despesas-modal-body" id="relatorioMecanicoBody" style="max-height: 60vh;"></div>
+            <div class="relatorio-mec-footer">
+                <div>
+                    <div style="font-size: 12px; color: #666;" id="relatorioMecInfo"></div>
+                    <div class="relatorio-mec-total">Total Selecionado: <span id="relatorioMecTotal">R$ 0,00</span></div>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-success" onclick="pagarRelatorioMecanico()">💰 Pagar Selecionados e Gerar PDF</button>
+                    <button class="btn-info" onclick="gerarPdfRelatorioMecanicoSemPagar()">🖨️ Gerar PDF do Relatório</button>
+                    <button class="btn-secondary" onclick="fecharRelatorioMecanico()">❌ Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ===== FIM MODAL DE RELATÓRIO MECÂNICO ===== -->
+
     <div id="printArea" class="print-area"></div>
 
     <script>
@@ -1322,6 +1377,10 @@
         let vistoriaDataUrl = null;
         let vistoriaLocacaoIndex = null;
 
+        // ===== VARIÁVEIS DO RELATÓRIO MECÂNICO =====
+        let relatorioMecFiltros = { dataInicio: '', dataFim: '', oficina: '', status: 'todos' };
+        let relatorioMecResultados = [];
+
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.campo-enter').forEach(function(campo) {
                 campo.addEventListener('keydown', function(e) {
@@ -1410,7 +1469,10 @@
                 { id: 'locEncerrada_excluir', label: '🗑️ Excluir Permanentemente' }
             ],
             manutencao: [{ id: 'manutencao_salvar', label: '💾 Salvar Manutenção' }],
-            mecanico: [{ id: 'mecanico_salvar', label: '💾 Salvar Serviço' }],
+            mecanico: [
+                { id: 'mecanico_salvar', label: '💾 Salvar Serviço' },
+                { id: 'mecanico_relatorio', label: '📊 Gerar Relatório / Pagar' }
+            ],
             usuario: [
                 { id: 'usuario_salvar', label: '💾 Salvar Usuário' },
                 { id: 'usuario_editar', label: '✏️ Editar Usuário' },
@@ -1710,11 +1772,301 @@
             limparSelfieUsuario();
             atualizarPlacasManutencao();
             atualizarPlacasMecanico();
+            atualizarOficinasMecanico();
             preencherPlacaUsuarioLogado();
             atualizarVistoria();
             atualizarSelectPlacasDoc();
             atualizarSubAbasDoc();
         }
+
+        // =============================================
+        // RELATÓRIO MECÂNICO
+        // =============================================
+
+        function atualizarOficinasMecanico() {
+            const select = document.getElementById('mecRelOficina');
+            if (!select || !db) return;
+            const atual = select.value;
+            const oficinas = Array.from(new Set(db.mecanico.map(m => m.oficina).filter(o => o && o.trim() !== ''))).sort();
+            select.innerHTML = '<option value="">Todas as Oficinas</option>';
+            oficinas.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o;
+                opt.textContent = o;
+                select.appendChild(opt);
+            });
+            if (atual && oficinas.includes(atual)) select.value = atual;
+        }
+
+        function limparRelatorioMecanico() {
+            document.getElementById('mecRelDataInicio').value = '';
+            document.getElementById('mecRelDataFim').value = '';
+            document.getElementById('mecRelOficina').value = '';
+            document.getElementById('mecRelStatus').value = 'todos';
+            relatorioMecResultados = [];
+        }
+
+        function gerarRelatorioMecanico() {
+            const dataInicio = document.getElementById('mecRelDataInicio').value;
+            const dataFim = document.getElementById('mecRelDataFim').value;
+            const oficina = document.getElementById('mecRelOficina').value;
+            const status = document.getElementById('mecRelStatus').value;
+
+            if (dataInicio && dataFim && dataInicio > dataFim) {
+                alert('A Data Início não pode ser maior que a Data Fim!');
+                return;
+            }
+
+            relatorioMecFiltros = { dataInicio, dataFim, oficina, status };
+            relatorioMecResultados = [];
+
+            db.mecanico.forEach((m, index) => {
+                if (dataInicio && m.data < dataInicio) return;
+                if (dataFim && m.data > dataFim) return;
+                if (oficina && m.oficina !== oficina) return;
+                if (status === 'pendente' && m.pago) return;
+                if (status === 'pago' && !m.pago) return;
+                relatorioMecResultados.push({ ...m, _index: index });
+            });
+
+            renderizarRelatorioMecanico();
+            document.getElementById('relatorioMecanicoModal').classList.add('active');
+        }
+
+        function renderizarRelatorioMecanico() {
+            const body = document.getElementById('relatorioMecanicoBody');
+            body.innerHTML = '';
+
+            const infoEl = document.getElementById('relatorioMecInfo');
+            const totalEl = document.getElementById('relatorioMecTotal');
+
+            let periodoTexto = 'Período: Todos';
+            if (relatorioMecFiltros.dataInicio && relatorioMecFiltros.dataFim) {
+                periodoTexto = `Período: ${formatarDataBR(relatorioMecFiltros.dataInicio)} até ${formatarDataBR(relatorioMecFiltros.dataFim)}`;
+            } else if (relatorioMecFiltros.dataInicio) {
+                periodoTexto = `A partir de ${formatarDataBR(relatorioMecFiltros.dataInicio)}`;
+            } else if (relatorioMecFiltros.dataFim) {
+                periodoTexto = `Até ${formatarDataBR(relatorioMecFiltros.dataFim)}`;
+            }
+            const oficinaTexto = relatorioMecFiltros.oficina ? ` | Oficina: ${relatorioMecFiltros.oficina}` : ' | Todas as Oficinas';
+            infoEl.textContent = periodoTexto + oficinaTexto + ` | ${relatorioMecResultados.length} serviço(s) encontrado(s)`;
+
+            if (relatorioMecResultados.length === 0) {
+                body.innerHTML = '<p style="text-align: center; padding: 30px; color: #999;">Nenhum serviço encontrado com os filtros informados.</p>';
+                totalEl.textContent = 'R$ 0,00';
+                return;
+            }
+
+            let html = '<table class="relatorio-mec-table"><thead><tr>' +
+                '<th style="width: 40px;"><input type="checkbox" id="relChkTodos" onclick="toggleTodosRelatorioMec(this.checked)"></th>' +
+                '<th>Data</th><th>Oficina</th><th>Serviço</th><th>Carro</th><th>Placa</th><th>Valor</th><th>Status</th>' +
+                '</tr></thead><tbody>';
+
+            relatorioMecResultados.forEach((m, i) => {
+                const isPago = !!m.pago;
+                const valor = m.valor || 'R$ 0,00';
+                const statusLabel = isPago ? '<span class="status-pago">Pago</span>' : '<span class="status-pendente">Pendente</span>';
+                const checkDisabled = isPago ? 'disabled' : '';
+                const checkChecked = isPago ? '' : 'checked';
+                html += `<tr class="${isPago ? 'pago' : ''}">
+                    <td><input type="checkbox" class="relatorio-mec-checkbox" data-index="${m._index}" data-valor="${valor}" ${checkChecked} ${checkDisabled} onchange="atualizarTotalRelatorioMec()"></td>
+                    <td>${formatarDataBR(m.data)}</td>
+                    <td>${m.oficina || ''}</td>
+                    <td>${m.servico || ''}</td>
+                    <td>${m.carro || ''}</td>
+                    <td>${m.placa || ''}</td>
+                    <td>${valor}</td>
+                    <td>${statusLabel}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            body.innerHTML = html;
+            atualizarTotalRelatorioMec();
+        }
+
+        function toggleTodosRelatorioMec(checked) {
+            document.querySelectorAll('.relatorio-mec-checkbox:not([disabled])').forEach(cb => {
+                cb.checked = checked;
+            });
+            atualizarTotalRelatorioMec();
+        }
+
+        function atualizarTotalRelatorioMec() {
+            let total = 0;
+            document.querySelectorAll('.relatorio-mec-checkbox:checked').forEach(cb => {
+                const v = parseValorMonetario(cb.dataset.valor);
+                total += v;
+            });
+            document.getElementById('relatorioMecTotal').textContent = formatarMoedaBR(total);
+        }
+
+        function fecharRelatorioMecanico() {
+            document.getElementById('relatorioMecanicoModal').classList.remove('active');
+        }
+
+        function obterSelecionadosRelatorioMec() {
+            const selecionados = [];
+            document.querySelectorAll('.relatorio-mec-checkbox:checked').forEach(cb => {
+                const idx = parseInt(cb.dataset.index);
+                if (!isNaN(idx) && db.mecanico[idx]) selecionados.push(idx);
+            });
+            return selecionados;
+        }
+
+        function pagarRelatorioMecanico() {
+            const indices = obterSelecionadosRelatorioMec();
+            if (indices.length === 0) {
+                alert('Selecione pelo menos um serviço para pagar!');
+                return;
+            }
+            const pendentes = indices.filter(i => !db.mecanico[i].pago);
+            if (pendentes.length === 0) {
+                alert('Todos os serviços selecionados já estão pagos!');
+                return;
+            }
+            if (!verificarSenhaAdmin()) return;
+
+            let total = 0;
+            const oficinasSet = new Set();
+            const detalhes = [];
+            pendentes.forEach(i => {
+                const m = db.mecanico[i];
+                const valorNum = parseValorMonetario(m.valor);
+                total += valorNum;
+                oficinasSet.add(m.oficina);
+                detalhes.push({ ...m, _valorNum: valorNum });
+                m.pago = true;
+                m.dataPagamento = new Date().toISOString().split('T')[0];
+            });
+
+            const oficinasStr = Array.from(oficinasSet).join(', ');
+            const hoje = new Date().toISOString().split('T')[0];
+            const valorFormatado = formatarMoedaBR(total);
+
+            let descricao = `Pagamento Oficina(s): ${oficinasStr} - ${pendentes.length} serviço(s)`;
+            let descricaoFinal = descricao;
+            let contador = 1;
+            while (db.fluxoCaixa.some(f => f.data === hoje && f.descricao === descricaoFinal && f.valor === valorFormatado && f.tipo === 'saida')) {
+                contador++;
+                descricaoFinal = descricao + ` (${contador})`;
+            }
+
+            db.fluxoCaixa.push({
+                data: hoje,
+                descricao: descricaoFinal,
+                categoria: 'Mecânico',
+                valor: valorFormatado,
+                tipo: 'saida'
+            });
+
+            atualizarTabelaMecanico();
+            atualizarTabelaFluxoCaixa();
+            atualizarResumoFinanceiro();
+            registrarAuditoria('Cadastro', `Pagamento oficina(s) ${oficinasStr} - ${valorFormatado} (${pendentes.length} serviço(s))`);
+            salvarDB();
+
+            gerarRelatorioMecanico();
+
+            alert(`✅ Pagamento registrado com sucesso!\n\nOficina(s): ${oficinasStr}\nServiços pagos: ${pendentes.length}\nTotal: ${valorFormatado}\n\nLançamento adicionado ao Fluxo de Caixa.`);
+
+            gerarPdfPagamentoMecanico(detalhes, total, oficinasStr);
+        }
+
+        function gerarPdfRelatorioMecanicoSemPagar() {
+            const indices = obterSelecionadosRelatorioMec();
+            const usarSelecionados = indices.length > 0;
+            const lista = usarSelecionados
+                ? indices.map(i => ({ ...db.mecanico[i], _valorNum: parseValorMonetario(db.mecanico[i].valor) }))
+                : relatorioMecResultados.map(m => ({ ...m, _valorNum: parseValorMonetario(m.valor) }));
+
+            if (lista.length === 0) { alert('Nenhum serviço para imprimir!'); return; }
+            const total = lista.reduce((s, m) => s + m._valorNum, 0);
+            const oficinasSet = new Set(lista.map(m => m.oficina).filter(Boolean));
+            const oficinasStr = Array.from(oficinasSet).join(', ') || 'Todas';
+            gerarPdfPagamentoMecanico(lista, total, oficinasStr, true);
+        }
+
+        function gerarPdfPagamentoMecanico(servicos, total, oficinasStr, apenasRelatorio = false) {
+            const printArea = document.getElementById('printArea');
+            // ===== NOME DO SISTEMA FIXO: LOBÃO =====
+            const nomeSistema = 'LOBÃO';
+            const subtituloSistema = 'SISTEMA DE LOCAÇÃO DE CARROS';
+            const cnpj = (db.config && db.config.cnpj) ? db.config.cnpj : '';
+            const telefone = (db.config && db.config.telefone) ? db.config.telefone : '';
+            const endereco = (db.config && db.config.endereco) ? db.config.endereco : '';
+            const dataEmissao = new Date().toLocaleString('pt-BR');
+            const titulo = apenasRelatorio ? 'RELATÓRIO DE SERVIÇOS MECÂNICOS' : 'RECIBO DE PAGAMENTO - SERVIÇOS MECÂNICOS';
+
+            let html = `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                <div style="text-align: center; border-bottom: 3px solid #1a3c6e; padding-bottom: 15px; margin-bottom: 20px;">
+                    <h1 style="margin: 0; color: #1a3c6e; font-size: 26px; letter-spacing: 2px;">🦁 ${nomeSistema}</h1>
+                    <p style="margin: 6px 0 0 0; font-size: 13px; font-weight: bold; color: #e63946; letter-spacing: 1px;">${subtituloSistema}</p>
+                    <p style="margin: 8px 0 0 0; font-size: 11px; color: #555;">${cnpj ? 'CNPJ: ' + cnpj : ''} ${telefone ? ' | Tel: ' + telefone : ''}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #555;">${endereco}</p>
+                </div>
+                <h2 style="text-align: center; font-size: 16px; margin: 15px 0;">${titulo}</h2>
+                <p style="font-size: 12px;"><strong>Data de Emissão:</strong> ${dataEmissao}</p>
+                <p style="font-size: 12px;"><strong>Oficina(s):</strong> ${oficinasStr}</p>
+                <p style="font-size: 12px;"><strong>Quantidade de Serviços:</strong> ${servicos.length}</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px;">
+                    <thead>
+                        <tr style="background: #1a3c6e; color: white;">
+                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Data</th>
+                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Oficina</th>
+                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Serviço</th>
+                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Carro</th>
+                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Placa</th>
+                            <th style="border: 1px solid #999; padding: 8px; text-align: right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            servicos.forEach(m => {
+                const valorFormatado = formatarMoedaBR(m._valorNum !== undefined ? m._valorNum : parseValorMonetario(m.valor));
+                html += `<tr>
+                    <td style="border: 1px solid #999; padding: 8px;">${formatarDataBR(m.data)}</td>
+                    <td style="border: 1px solid #999; padding: 8px;">${m.oficina || ''}</td>
+                    <td style="border: 1px solid #999; padding: 8px;">${m.servico || ''}</td>
+                    <td style="border: 1px solid #999; padding: 8px;">${m.carro || ''}</td>
+                    <td style="border: 1px solid #999; padding: 8px;">${m.placa || ''}</td>
+                    <td style="border: 1px solid #999; padding: 8px; text-align: right;">${valorFormatado}</td>
+                </tr>`;
+            });
+
+            html += `</tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" style="border: 1px solid #999; padding: 10px; text-align: right; font-weight: bold; background: #f0f0f0;">TOTAL:</td>
+                            <td style="border: 1px solid #999; padding: 10px; text-align: right; font-weight: bold; background: #f0f0f0;">${formatarMoedaBR(total)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div style="margin-top: 70px; display: flex; justify-content: space-between; gap: 40px;">
+                    <div style="flex: 1; text-align: center;">
+                        <div style="border-top: 1px solid #333; padding-top: 8px; font-weight: bold;">${nomeSistema}</div>
+                        <div style="font-size: 11px;">Responsável</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="border-top: 1px solid #333; padding-top: 8px; font-weight: bold;">&nbsp;</div>
+                        <div style="font-size: 11px;">Oficina / Recebedor</div>
+                    </div>
+                </div>
+                <p style="font-size: 10px; color: #666; text-align: center; margin-top: 30px;">Documento gerado automaticamente pelo Sistema ${nomeSistema}</p>
+            </div>`;
+
+            printArea.innerHTML = html;
+            printArea.classList.add('print-visible');
+            setTimeout(function() {
+                window.print();
+                printArea.classList.remove('print-visible');
+                printArea.innerHTML = '';
+            }, 250);
+        }
+
+        // =============================================
+        // FIM RELATÓRIO MECÂNICO
+        // =============================================
 
         function atualizarPlacasManutencao() {
             const select = document.getElementById('manPlaca');
@@ -1795,6 +2147,7 @@
             db.historico.push(novoItemHistorico);
             atualizarTabelaHistorico();
             atualizarTabelaMecanico();
+            atualizarOficinasMecanico();
             registrarAuditoria('Cadastro', `Serviço de mecânico: ${servico} - ${placa}`);
             salvarDB();
             alert('Serviço salvo com sucesso e lançado no histórico!');
@@ -1819,6 +2172,7 @@
 
             db.fluxoCaixa.push({ data: hoje, descricao, categoria: 'Mecânico', valor: valorFormatado, tipo: 'saida' });
             m.pago = true;
+            m.dataPagamento = hoje;
             atualizarTabelaMecanico();
             atualizarTabelaFluxoCaixa();
             atualizarResumoFinanceiro();
@@ -2055,7 +2409,7 @@
                 if (tabId === 'locacoes') atualizarCombosLocacao();
                 if (tabId === 'compras') atualizarTabelaCompras();
                 if (tabId === 'manutencao') atualizarPlacasManutencao();
-                if (tabId === 'mecanico') atualizarPlacasMecanico();
+                if (tabId === 'mecanico') { atualizarPlacasMecanico(); atualizarOficinasMecanico(); }
                 if (tabId === 'doc') { preencherPlacaUsuarioLogado(); atualizarTabelaDoc(); atualizarSubAbasDoc(); }
                 if (tabId === 'locEncerrada') atualizarTabelaLocEncerrada();
                 if (tabId === 'pendente') atualizarTabelaPendentes();
@@ -3370,6 +3724,7 @@
             document.getElementById('mecObs').value = m.obs;
             db.mecanico.splice(index, 1);
             atualizarTabelaMecanico();
+            atualizarOficinasMecanico();
             registrarAuditoria('Edição', `Serviço editado: ${m.servico}`);
             salvarDB();
         }
@@ -3380,6 +3735,7 @@
                 const m = db.mecanico[index];
                 db.mecanico.splice(index, 1);
                 atualizarTabelaMecanico();
+                atualizarOficinasMecanico();
                 registrarAuditoria('Exclusão', `Serviço excluído: ${m.servico}`);
                 salvarDB();
             }
