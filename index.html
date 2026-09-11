@@ -21,7 +21,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- ===== GERAÇÃO DE PDF (NOVO) ===== -->
+    <!-- ===== GERAÇÃO DE PDF ===== -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- ===== FIM GERAÇÃO DE PDF ===== -->
@@ -37,6 +37,18 @@
         .login-box input:focus { outline: none; border-color: var(--primary); }
         .login-box button[type="submit"] { width: 100%; padding: 12px; background: var(--primary); color: var(--white); border: none; border-radius: var(--radius); font-size: 16px; cursor: pointer; transition: background 0.3s; font-weight: bold; }
         .login-box button[type="submit"]:hover { background: #0d1b2a; }
+        .login-box button[type="submit"]:disabled { background: #999; cursor: wait; }
+
+        /* ===== INDICADOR DE SINCRONIZAÇÃO ===== */
+        .sync-status { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; padding: 6px 10px; border-radius: 6px; margin-top: 12px; font-weight: bold; }
+        .sync-status.online { background: #d4edda; color: #155724; }
+        .sync-status.offline { background: #fff3cd; color: #856404; }
+        .sync-status.syncing { background: #cce5ff; color: #004085; }
+        .sync-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .sync-status.online .sync-dot { background: #28a745; }
+        .sync-status.offline .sync-dot { background: #ffc107; }
+        .sync-status.syncing .sync-dot { background: #007bff; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         /* ===== BOTÕES DE INSTALAÇÃO PWA ===== */
         .btn-install { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: var(--radius); font-size: 15px; cursor: pointer; font-weight: bold; margin-top: 12px; transition: background 0.3s, transform 0.2s; }
@@ -186,7 +198,6 @@
         .vistoria-foto-item .delete-btn:hover { background: rgba(220,53,69,1); }
         .vistoria-camera-btn { background: var(--primary); color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; margin-right: 10px; transition: background 0.3s; }
         .vistoria-camera-btn:hover { background: #0d1b2a; }
-        /* ====== NOVOS ESTILOS PARA DASHBOARD ====== */
         .dashboard-encerradas { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-card { background: linear-gradient(135deg, #f8f9fa, #ffffff); border-radius: 10px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-left: 6px solid var(--primary); text-align: center; transition: transform 0.2s; }
         .kpi-card:hover { transform: translateY(-3px); }
@@ -205,10 +216,8 @@
         .table-responsive { margin-top: 15px; overflow-x: auto; }
         .lucro-positivo { color: var(--success); font-weight: bold; }
         .lucro-negativo { color: var(--danger); font-weight: bold; }
-        /* ====== FIM NOVOS ESTILOS ====== */
         input[type="text"], input[type="search"], textarea { text-transform: uppercase; }
 
-        /* ===== RELATÓRIO MECÂNICO ===== */
         .relatorio-mec-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .relatorio-mec-table th, .relatorio-mec-table td { padding: 8px 10px; border-bottom: 1px solid #ddd; font-size: 13px; }
         .relatorio-mec-table th { background: var(--primary); color: white; }
@@ -216,13 +225,18 @@
         .relatorio-mec-footer { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 15px 20px; background: #f8f9fa; border-top: 2px solid var(--primary); flex-wrap: wrap; }
         .relatorio-mec-total { font-size: 18px; font-weight: bold; color: var(--primary); }
         
-        /* ===== ESTILOS PARA DOCUMENTOS POR PLACA ===== */
         .doc-placa-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 150px; height: 150px; border: 2px dashed #ccc; border-radius: 8px; background: #fafafa; cursor: pointer; transition: all 0.3s; text-align: center; padding: 10px; position: relative; }
         .doc-placa-item:hover { border-color: var(--primary); background: #f0f4f8; }
         .doc-placa-item .icon { font-size: 40px; margin-bottom: 10px; }
         .doc-placa-item .nome { font-size: 12px; font-weight: bold; color: #333; word-break: break-all; }
         .doc-placa-item .delete-btn { position: absolute; top: 5px; right: 5px; background: rgba(220,53,69,0.9); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; z-index: 2; }
         .doc-placa-item .delete-btn:hover { background: rgba(220,53,69,1); }
+
+        /* ===== BANNER DE AVISO FIREBASE ===== */
+        .firebase-warning { background: #fff3cd; border-left: 4px solid #ffc107; color: #856404; padding: 12px 15px; margin: 10px 20px; border-radius: 6px; font-size: 13px; display: none; }
+        .firebase-warning.active { display: block; }
+        .firebase-warning strong { color: #856404; }
+        .firebase-warning button { background: #ffc107; color: #333; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; font-size: 12px; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -241,15 +255,22 @@
             </form>
             <p id="loginError" style="color: red; margin-top: 10px; display: none;">Usuário ou senha inválidos!</p>
 
-            <!-- ===== BOTÕES DE INSTALAÇÃO PWA ===== -->
+            <div class="sync-status syncing" id="syncStatus">
+                <span class="sync-dot"></span>
+                <span id="syncStatusText">Conectando...</span>
+            </div>
+
             <button type="button" id="installBtn" class="btn-install" onclick="instalarApp()" style="display: none;">📲 Instalar Aplicativo</button>
             <button type="button" id="installHelpBtn" class="btn-install-help" onclick="mostrarAjudaInstalacao()">📲 Como instalar no celular</button>
-            <!-- ===== FIM BOTÕES PWA ===== -->
         </div>
     </div>
 
     <!-- MAIN SYSTEM -->
     <div class="main-container" id="mainContainer">
+        <div class="firebase-warning" id="firebaseWarning">
+            ⚠️ <strong>Firebase não está sincronizando.</strong> Seus dados estão salvos localmente neste navegador. Para sincronizar na nuvem, verifique as regras do Firestore no console do Firebase.
+            <button onclick="mostrarAjudaFirebase()">Como corrigir</button>
+        </div>
         <div class="tabs-container" id="tabsContainer">
             <button class="tab active" data-tab="veiculos">🚗 Veículos</button>
             <button class="tab" data-tab="clientes">👤 Clientes</button>
@@ -275,7 +296,6 @@
             <button class="logout-btn" onclick="sairSistema()">🚪 Sair</button>
         </div>
 
-        <!-- ABA: VEICULOS -->
         <div class="tab-content active" id="veiculos">
             <h2>🚗 Cadastro de Veículos</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar veículos..." id="filterVeiculos">
@@ -307,7 +327,6 @@
             </div>
         </div>
 
-        <!-- ABA: CLIENTES -->
         <div class="tab-content" id="clientes">
             <h2>👤 Cadastro de Clientes</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar clientes..." id="filterClientes">
@@ -339,7 +358,6 @@
             </div>
         </div>
 
-        <!-- ABA: LOCAÇÕES -->
         <div class="tab-content" id="locacoes">
             <h2>📋 Locações Ativas</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar locações..." id="filterLocacoes">
@@ -393,7 +411,6 @@
             </div>
         </div>
 
-        <!-- ABA: LOCAÇÕES ENCERRADAS -->
         <div class="tab-content" id="locEncerrada">
             <h2>🏁 Locações Encerradas</h2>
             <div class="dashboard-encerradas" id="dashboardEncerradas">
@@ -414,7 +431,6 @@
             </div>
         </div>
 
-        <!-- ABA: MANUTENÇÃO -->
         <div class="tab-content" id="manutencao">
             <h2>🔧 Manutenção</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar manutenções..." id="filterManutencao">
@@ -436,7 +452,6 @@
             </div>
         </div>
 
-        <!-- ABA: MECÂNICO -->
         <div class="tab-content" id="mecanico">
             <h2>👨‍🔧 Mecânico</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar serviços..." id="filterMecanico">
@@ -461,7 +476,6 @@
             </div>
             <button class="btn-primary" data-permissao="mecanico_salvar" onclick="salvarMecanico()">💾 Salvar</button>
 
-            <!-- ===== RELATÓRIO POR DATA E OFICINA ===== -->
             <div class="config-section" style="margin-top: 25px; border-left-color: var(--secondary);">
                 <h3>📊 Relatório por Período e Oficina</h3>
                 <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Selecione o período e a oficina para gerar o relatório, realizar o pagamento e emitir o recibo em PDF.</p>
@@ -482,7 +496,6 @@
                 <button class="btn-primary" onclick="gerarRelatorioMecanico()">📊 Gerar Relatório</button>
                 <button class="btn-secondary" onclick="limparRelatorioMecanico()">🔄 Limpar Filtros</button>
             </div>
-            <!-- ===== FIM RELATÓRIO ===== -->
 
             <div class="table-container">
                 <table id="tabelaMecanico">
@@ -492,7 +505,6 @@
             </div>
         </div>
 
-        <!-- ABA: USUÁRIO -->
         <div class="tab-content" id="usuario">
             <h2>👥 Usuários</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar usuários..." id="filterUsuario">
@@ -531,7 +543,6 @@
             </div>
         </div>
 
-        <!-- ABA: GARAGEM -->
         <div class="tab-content" id="garagem">
             <h2>🏠 Garagem</h2>
             <div class="subfolder">
@@ -551,7 +562,6 @@
             </div>
         </div>
 
-        <!-- ABA: SOS -->
         <div class="tab-content" id="sos">
             <h2>🆘 SOS</h2>
             <div class="subfolder">
@@ -572,7 +582,6 @@
             </div>
         </div>
 
-        <!-- ABA: DOCUMENTOS -->
         <div class="tab-content" id="comprovantes">
             <h2>📄 Documentos</h2>
             <div class="sub-tabs">
@@ -580,7 +589,6 @@
                 <button class="sub-tab" onclick="switchSubTab('salvos')">📁 DOC Salvos</button>
             </div>
             
-            <!-- SUB ABA NOVO -->
             <div class="sub-tab-content active" id="subTabNovo">
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label>Selecione a Placa do Veículo:</label>
@@ -599,13 +607,11 @@
                 <button class="btn-primary" data-permissao="comprovantes_salvar" onclick="salvarComprovantePlaca()">💾 Salvar Documentos</button>
             </div>
 
-            <!-- SUB ABA SALVOS -->
             <div class="sub-tab-content" id="subTabSalvos">
                 <div id="comprovantesPorPlacaContainer"></div>
             </div>
         </div>
 
-        <!-- ABA: SUB PAGAMENTOS -->
         <div class="tab-content" id="pagamentos">
             <h2>💰 Sub Pagamentos</h2>
             <div class="sub-tabs"><button class="sub-tab active" onclick="switchSubTabPagamentos('aluguel')">🚗 Aluguel</button></div>
@@ -622,7 +628,6 @@
             </div>
         </div>
 
-        <!-- ABA: BANCO -->
         <div class="tab-content" id="banco">
             <h2>🏦 Banco</h2>
             <div class="form-grid" id="formBanco">
@@ -643,7 +648,6 @@
             </div>
         </div>
 
-        <!-- ABA: FLUXO DE CAIXA -->
         <div class="tab-content" id="fluxocaixa">
             <h2>💵 Fluxo de Caixa</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar transações..." id="filterFluxoCaixa">
@@ -670,7 +674,6 @@
             </div>
         </div>
 
-        <!-- ABA: COMPROVANTE -->
         <div class="tab-content" id="doc">
             <h2>📁 Comprovante</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar comprovantes..." id="filterDoc">
@@ -701,7 +704,6 @@
             </div>
         </div>
 
-        <!-- ABA: COMPRAS -->
         <div class="tab-content" id="compras">
             <h2>🛒 Compras</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar compras..." id="filterCompras">
@@ -754,7 +756,6 @@
             </div>
         </div>
 
-        <!-- ABA: CONFIGURAÇÃO -->
         <div class="tab-content" id="configuracao">
             <h2>⚙️ Configurações do Sistema</h2>
             <div class="config-section">
@@ -790,7 +791,6 @@
             <button class="btn-secondary" data-permissao="config_restaurar" onclick="restaurarPadroes()">🔄 Restaurar Padrões</button>
         </div>
 
-        <!-- ABA: AUDITORIA -->
         <div class="tab-content" id="auditoria">
             <h2>🔍 Auditoria do Sistema</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar registros..." id="filterAuditoria">
@@ -818,7 +818,6 @@
             </div>
         </div>
 
-        <!-- ABA: PENDENTE -->
         <div class="tab-content" id="pendente">
             <h2>⏳ Pendências</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar pendências..." id="filterPendentes">
@@ -851,7 +850,6 @@
             </div>
         </div>
 
-        <!-- ABA: HISTÓRICO -->
         <div class="tab-content" id="historico">
             <h2>📜 Histórico de Lançamentos (Compras & Mecânico)</h2>
             <input type="text" class="filter-input" placeholder="🔍 Pesquisar por texto ou placa..." id="filterHistorico">
@@ -865,7 +863,6 @@
             </div>
         </div>
 
-        <!-- ABA: VISTORIA -->
         <div class="tab-content" id="vistoria">
             <h2>📸 Vistoria de Veículos</h2>
             <p style="margin-bottom: 20px; color: #666;">Selecione uma locação ativa para gerenciar as fotos da vistoria.</p>
@@ -885,7 +882,6 @@
 
     </div>
 
-    <!-- MODAL PARA AMPLIAR IMAGENS -->
     <div class="modal-overlay" id="imageModal" onclick="closeImageModal()">
         <div class="modal-content">
             <button class="modal-close" onclick="closeImageModal()">×</button>
@@ -893,7 +889,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE SELFIE -->
     <div class="selfie-modal" id="selfieModal">
         <div class="selfie-title">📸 Tire sua Selfie</div>
         <div class="selfie-instructions">Posicione seu rosto na frente da câmera e clique em "Capturar"</div>
@@ -913,7 +908,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CÂMERA VISTORIA -->
     <div class="selfie-modal" id="vistoriaCameraModal">
         <div class="selfie-title">📷 Foto de Vistoria</div>
         <div class="selfie-instructions">Aponte a câmera para o veículo e clique em "Capturar"</div>
@@ -932,13 +926,11 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONTRATOS -->
     <div class="contrato-modal" id="contratoModal">
         <div class="contrato-modal-content">
             <div class="contrato-modal-header">
                 <h3>📄 Gerenciador de Contratos</h3>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <!-- NOVO BOTÃO PARA GERAR PDF COMPLETO -->
                     <button class="btn-success" onclick="imprimirTodosDocumentos()" style="padding: 8px 15px; font-size: 14px; margin: 0; background-color: var(--success); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🖨️ Gerar PDF Completo (Todos os Documentos)</button>
                     <button class="contrato-modal-close" onclick="fecharModalContratos()">×</button>
                 </div>
@@ -1039,7 +1031,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE DESPESAS -->
     <div class="despesas-modal" id="despesasModal">
         <div class="despesas-modal-content">
             <div class="despesas-modal-header">
@@ -1050,7 +1041,6 @@
         </div>
     </div>
 
-    <!-- ===== MODAL DE RELATÓRIO MECÂNICO ===== -->
     <div class="despesas-modal" id="relatorioMecanicoModal">
         <div class="despesas-modal-content" style="max-width: 1000px;">
             <div class="despesas-modal-header">
@@ -1071,13 +1061,12 @@
             </div>
         </div>
     </div>
-    <!-- ===== FIM MODAL DE RELATÓRIO MECÂNICO ===== -->
 
     <div id="printArea" class="print-area"></div>
 
     <script>
         // =============================================
-        // CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
+        // CONFIGURAÇÃO FIREBASE
         // =============================================
         const firebaseConfig = {
             apiKey: "AIzaSyCcPHYGMK30pTCTbmbZIVa4IEeBkAf5Bi0",
@@ -1088,12 +1077,29 @@
             appId: "1:479688101660:web:f3e87424e1e874f5ceb4d9",
             measurementId: "G-R4J7S8ZXYC"
         };
-        firebase.initializeApp(firebaseConfig);
-        const firestoreDB = firebase.firestore();
-        const DB_DOC_REF = firestoreDB.collection('sistema').doc('dados');
 
+        let firestoreDB = null;
+        let DB_DOC_REF = null;
+        let firebaseOK = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            firestoreDB = firebase.firestore();
+            DB_DOC_REF = firestoreDB.collection('sistema').doc('dados');
+            firebaseOK = true;
+        } catch (e) {
+            console.error('Falha ao inicializar Firebase:', e);
+            firebaseOK = false;
+        }
+
+        // =============================================
+        // VARIÁVEIS GLOBAIS
+        // =============================================
         let db = null;
         let dbCarregado = false;
+        let firebaseSincronizando = false;
+        let ultimoErroFirebase = '';
+        const STORAGE_KEY = 'lobao_db_local_v2';
 
         // =============================================
         // PWA - INSTALAÇÃO DO APP NO CELULAR
@@ -1111,34 +1117,23 @@
             deferredPrompt = null;
             const btn = document.getElementById('installBtn');
             if (btn) btn.style.display = 'none';
-            alert('✅ Aplicativo LOBÃO instalado com sucesso!');
         });
 
         function instalarApp() {
-            if (!deferredPrompt) {
-                mostrarAjudaInstalacao();
-                return;
-            }
+            if (!deferredPrompt) { mostrarAjudaInstalacao(); return; }
             deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('App instalado pelo usuário');
-                } else {
-                    console.log('Instalação recusada');
-                }
-                deferredPrompt = null;
-            });
+            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
         }
 
         function mostrarAjudaInstalacao() {
             const ua = navigator.userAgent.toLowerCase();
             let mensagem = '';
             if (/iphone|ipad|ipod/.test(ua)) {
-                mensagem = '📱 Para instalar no iPhone/iPad:\n\n1. Abra este site no Safari\n2. Toque no ícone "Compartilhar" (quadrado com seta para cima)\n3. Role para baixo e toque em "Adicionar à Tela de Início"\n4. Confirme tocando em "Adicionar"';
+                mensagem = '📱 Para instalar no iPhone/iPad:\n\n1. Abra este site no Safari\n2. Toque no ícone "Compartilhar"\n3. Role para baixo e toque em "Adicionar à Tela de Início"\n4. Confirme tocando em "Adicionar"';
             } else if (/android/.test(ua)) {
-                mensagem = '📱 Para instalar no Android:\n\n1. Abra este site no Chrome\n2. Toque no menu (3 pontos no canto superior direito)\n3. Toque em "Instalar aplicativo" ou "Adicionar à tela inicial"\n4. Confirme tocando em "Instalar"';
+                mensagem = '📱 Para instalar no Android:\n\n1. Abra este site no Chrome\n2. Toque no menu (3 pontos)\n3. Toque em "Instalar aplicativo" ou "Adicionar à tela inicial"\n4. Confirme tocando em "Instalar"';
             } else {
-                mensagem = '💻 Para instalar no computador:\n\n1. Procure o ícone de instalação na barra de endereço do navegador\n2. Ou acesse o menu do navegador (3 pontos)\n3. Selecione "Instalar LOBÃO" ou "Instalar aplicativo"\n4. Confirme a instalação';
+                mensagem = '💻 Para instalar no computador:\n\n1. Procure o ícone de instalação na barra de endereço\n2. Ou acesse o menu do navegador\n3. Selecione "Instalar LOBÃO"\n4. Confirme';
             }
             alert(mensagem);
         }
@@ -1152,14 +1147,206 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then((registration) => { console.log('Service Worker registrado:', registration.scope); })
-                    .catch((error) => { console.warn('Falha ao registrar Service Worker:', error); });
+                navigator.serviceWorker.register('sw.js').catch(() => {});
             });
         }
+
         // =============================================
-        // FIM PWA
+        // GERENCIAMENTO DE ARMAZENAMENTO (LOCAL + FIREBASE)
         // =============================================
+
+        function atualizarStatusSync(status, mensagem) {
+            const el = document.getElementById('syncStatus');
+            const txt = document.getElementById('syncStatusText');
+            const warn = document.getElementById('firebaseWarning');
+            if (!el || !txt) return;
+            el.classList.remove('online', 'offline', 'syncing');
+            if (status === 'online') {
+                el.classList.add('online');
+                txt.textContent = '☁️ Sincronizado com a nuvem';
+                if (warn) warn.classList.remove('active');
+            } else if (status === 'offline') {
+                el.classList.add('offline');
+                txt.textContent = '💾 Salvo localmente (offline)';
+                if (warn) warn.classList.add('active');
+            } else {
+                el.classList.add('syncing');
+                txt.textContent = 'Sincronizando...';
+            }
+        }
+
+        function salvarLocal() {
+            try {
+                const json = JSON.stringify(db);
+                // Verifica tamanho (localStorage ~5MB)
+                if (json.length > 4.5 * 1024 * 1024) {
+                    console.warn('Banco muito grande para localStorage. Comprimindo...');
+                    // Não vamos comprimir aqui para não bloquear; só avisa
+                }
+                localStorage.setItem(STORAGE_KEY, json);
+                return true;
+            } catch (e) {
+                console.error('Erro ao salvar localmente:', e);
+                if (e.name === 'QuotaExceededError') {
+                    alert('⚠️ Armazenamento local cheio! Considere remover fotos antigas ou sincronizar com Firebase.');
+                }
+                return false;
+            }
+        }
+
+        function carregarLocal() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) return null;
+                return JSON.parse(data);
+            } catch (e) {
+                console.error('Erro ao carregar local:', e);
+                return null;
+            }
+        }
+
+        async function carregarDadosFirestore() {
+            // 1. PRIMEIRO: carrega do localStorage (sempre funciona)
+            const localData = carregarLocal();
+            if (localData) {
+                db = localData;
+                normalizarDB();
+                console.log('✅ Dados carregados do localStorage');
+            } else {
+                db = criarDBPadrao();
+                console.log('📝 Banco novo criado');
+            }
+
+            dbCarregado = true;
+            document.getElementById('loginButton').disabled = false;
+            inicializarSistema();
+
+            // 2. DEPOIS: tenta sincronizar com Firebase em background
+            if (firebaseOK) {
+                tentarSincronizarFirebase();
+            } else {
+                atualizarStatusSync('offline');
+            }
+        }
+
+        function normalizarDB() {
+            if (!db) db = criarDBPadrao();
+            if (!db.pendentes) db.pendentes = [];
+            if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
+            if (!db.historico) db.historico = [];
+            if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
+            if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', placas:{}} };
+            if (!db.imagens.comprovantes) db.imagens.comprovantes = { subpasta: 'Comprovantes', placas: {} };
+            if (!db.imagens.comprovantes.placas) {
+                db.imagens.comprovantes.placas = {};
+                if (db.imagens.comprovantes.fotos && Array.isArray(db.imagens.comprovantes.fotos)) {
+                    db.imagens.comprovantes.placas['SEM PLACA'] = db.imagens.comprovantes.fotos;
+                    delete db.imagens.comprovantes.fotos;
+                }
+            }
+            if (!db.config) db.config = criarDBPadrao().config;
+            if (!db.usuarios) db.usuarios = [];
+            if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
+            if (db.pendentes) db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
+            if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
+                db.usuarios.push({ nome: 'LOBÃO', senha: '18998211', tipo: 'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie: null });
+            }
+        }
+
+        async function tentarSincronizarFirebase() {
+            if (!firebaseOK || !DB_DOC_REF) { atualizarStatusSync('offline'); return; }
+            firebaseSincronizando = true;
+            atualizarStatusSync('syncing');
+            try {
+                const doc = await DB_DOC_REF.get();
+                if (doc.exists) {
+                    const firebaseData = doc.data();
+                    const tsLocal = db._ultimaAtualizacao || 0;
+                    const tsFirebase = firebaseData._ultimaAtualizacao || 0;
+
+                    console.log('📊 Timestamps:', { local: tsLocal, firebase: tsFirebase });
+
+                    // Se o Firebase tem dados MAIS RECENTES que o local, usa os do Firebase
+                    if (tsFirebase > tsLocal) {
+                        db = firebaseData;
+                        normalizarDB();
+                        salvarLocal();
+                        console.log('☁️ Dados do Firebase são mais recentes. Sincronizando para local...');
+                        atualizarTodasTabelas();
+                    } else if (tsLocal > tsFirebase) {
+                        // Local é mais recente: envia para o Firebase
+                        console.log('💾 Dados locais são mais recentes. Enviando para Firebase...');
+                        await DB_DOC_REF.set(db);
+                    }
+                    // Se iguais, não faz nada
+                } else {
+                    // Firebase vazio: envia dados locais
+                    console.log('📤 Enviando dados locais para Firebase (primeira vez)');
+                    db._ultimaAtualizacao = Date.now();
+                    await DB_DOC_REF.set(db);
+                }
+                ultimoErroFirebase = '';
+                atualizarStatusSync('online');
+                console.log('✅ Firebase sincronizado com sucesso');
+            } catch (e) {
+                ultimoErroFirebase = e.message || String(e);
+                console.warn('⚠️ Erro ao sincronizar com Firebase:', ultimoErroFirebase);
+                atualizarStatusSync('offline');
+            } finally {
+                firebaseSincronizando = false;
+            }
+        }
+
+        async function salvarDB() {
+            // 1. SEMPRE salva localmente (nunca falha, dados preservados)
+            db._ultimaAtualizacao = Date.now();
+            salvarLocal();
+
+            // 2. Tenta sincronizar com Firebase (não bloqueia)
+            if (firebaseOK && DB_DOC_REF) {
+                try {
+                    const json = JSON.stringify(db);
+                    if (json.length > 1048576) {
+                        // Documento > 1MB: comprime imagens antes de enviar
+                        console.warn('Documento grande, comprimindo antes de enviar...');
+                        await comprimirDB();
+                        salvarLocal();
+                    }
+                    await DB_DOC_REF.set(db);
+                    ultimoErroFirebase = '';
+                    atualizarStatusSync('online');
+                } catch (e) {
+                    ultimoErroFirebase = e.message || String(e);
+                    console.warn('⚠️ Firebase indisponível, dados salvos localmente:', ultimoErroFirebase);
+                    atualizarStatusSync('offline');
+                }
+            } else {
+                atualizarStatusSync('offline');
+            }
+        }
+
+        function mostrarAjudaFirebase() {
+            alert(
+                '🔧 COMO CORRIGIR A SINCRONIZAÇÃO COM O FIREBASE\n\n' +
+                'Motivo do erro: ' + (ultimoErroFirebase || 'Desconhecido') + '\n\n' +
+                'PASSOS PARA CORRIGIR:\n\n' +
+                '1. Acesse https://console.firebase.google.com/\n\n' +
+                '2. Selecione o projeto "lobao-57c91"\n\n' +
+                '3. No menu lateral, clique em "Firestore Database"\n\n' +
+                '4. Se não existir, clique em "Criar banco de dados" e escolha "Modo de teste"\n\n' +
+                '5. Vá na aba "Regras" e cole:\n\n' +
+                'rules_version = \'2\';\n' +
+                'service cloud.firestore {\n' +
+                '  match /databases/{database}/documents {\n' +
+                '    match /{document=**} {\n' +
+                '      allow read, write: if true;\n' +
+                '    }\n' +
+                '  }\n' +
+                '}\n\n' +
+                '6. Clique em "Publicar"\n\n' +
+                '✅ Enquanto isso, SEUS DADOS ESTÃO SALVOS LOCALMENTE neste navegador.'
+            );
+        }
 
         function criarDBPadrao() {
             return {
@@ -1190,7 +1377,8 @@
                     empresa: 'LOBÃO', cnpj: '', telefone: '', email: '', endereco: '',
                     juros: '', multa: '', minAluguel: '', prazoMax: '',
                     senhaMin: '', sessao: '', backup: 'sim', ultimaLimpezaAuditoria: null
-                }
+                },
+                _ultimaAtualizacao: Date.now()
             };
         }
 
@@ -1338,63 +1526,45 @@
             console.log("Compressão concluída.");
         }
 
-        async function carregarDadosFirestore() {
-            try {
-                document.getElementById('loginButton').disabled = true;
-                const doc = await DB_DOC_REF.get();
-                if (doc.exists) {
-                    db = doc.data();
-                    if (!db.pendentes) db.pendentes = [];
-                    if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
-                    if (!db.historico) db.historico = [];
-                    if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
-                    if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', placas:{}} };
-                    
-                    // MIGRAÇÃO DE DADOS ANTIGOS DE COMPROVANTES
-                    if (!db.imagens.comprovantes) db.imagens.comprovantes = { subpasta: 'Comprovantes', placas: {} };
-                    if (!db.imagens.comprovantes.placas) {
-                        db.imagens.comprovantes.placas = {};
-                        if (db.imagens.comprovantes.fotos && Array.isArray(db.imagens.comprovantes.fotos)) {
-                            db.imagens.comprovantes.placas['SEM PLACA'] = db.imagens.comprovantes.fotos;
-                            delete db.imagens.comprovantes.fotos;
-                        }
-                    }
-
-                    if (!db.config) db.config = criarDBPadrao().config;
-                    if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
-                    db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
-                    if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
-                        db.usuarios.push({ nome: 'LOBÃO', senha: '18998211', tipo: 'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie: null });
-                    }
-                } else {
-                    db = criarDBPadrao();
-                    await DB_DOC_REF.set(db);
-                }
-                dbCarregado = true;
-                document.getElementById('loginButton').disabled = false;
-                inicializarSistema();
-            } catch (error) {
-                console.error('Erro ao carregar dados do Firebase:', error);
-                alert('Erro ao conectar com o Firebase. Verifique sua conexão e recarregue a página.');
-            }
+        function atualizarTodasTabelas() {
+            atualizarTabelaUsuario();
+            gerarPermissoesUI();
+            atualizarResumoFinanceiro();
+            atualizarCombosLocacao();
+            atualizarTabelaCompras();
+            atualizarTabelaVeiculos();
+            atualizarTabelaClientes();
+            atualizarTabelaLocacoes();
+            atualizarTabelaLocEncerrada();
+            atualizarTabelaManutencao();
+            atualizarTabelaMecanico();
+            atualizarTabelaAlugueis();
+            atualizarTabelaBancos();
+            atualizarTabelaFluxoCaixa();
+            atualizarTabelaDoc();
+            atualizarTabelaAuditoria();
+            atualizarTabelaPendentes();
+            atualizarTabelaHistorico();
+            atualizarGaleriaGaragem();
+            atualizarGaleriaSOS();
+            atualizarGaleriaComprovantes();
+            atualizarPlacasComprovantes();
+            carregarDadosContratos();
+            carregarConfiguracoes();
+            limparSelfieCliente();
+            limparSelfieUsuario();
+            atualizarPlacasManutencao();
+            atualizarPlacasMecanico();
+            atualizarOficinasMecanico();
+            preencherPlacaUsuarioLogado();
+            atualizarVistoria();
+            atualizarSelectPlacasDoc();
+            atualizarSubAbasDoc();
         }
 
-        async function salvarDB() {
-            try {
-                if (!db) return;
-                const json = JSON.stringify(db);
-                const tamanho = new Blob([json]).size;
-                if (tamanho > 1048576) {
-                    console.warn('Aviso: Tamanho do documento excede 1MB. Comprimindo automaticamente...');
-                    await comprimirDB();
-                }
-                await DB_DOC_REF.set(db);
-            } catch (error) {
-                console.error('Erro ao salvar dados no Firebase:', error);
-                alert('Erro ao salvar dados no Firebase. Verifique sua conexão e o tamanho dos dados.');
-            }
-        }
-
+        // =============================================
+        // SELFIE
+        // =============================================
         let selfieStream = null;
         let selfieDataUrl = null;
         let selfieClienteTemp = null;
@@ -1414,12 +1584,8 @@
         let vistoriaStream = null;
         let vistoriaDataUrl = null;
         let vistoriaLocacaoIndex = null;
-
-        // ===== VARIÁVEIS DO RELATÓRIO MECÂNICO =====
         let relatorioMecFiltros = { dataInicio: '', dataFim: '', oficina: '', status: 'todos' };
         let relatorioMecResultados = [];
-
-        // ===== VARIÁVEIS PARA DOCUMENTOS POR PLACA =====
         let compDocumentosTemp = [];
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1433,19 +1599,15 @@
                         const index = Array.from(campos).indexOf(this);
                         if (index !== -1 && index < campos.length - 1) {
                             const proximo = campos[index + 1];
-                            if (proximo) {
-                                proximo.focus();
-                                if (proximo.tagName === 'SELECT') proximo.click();
-                            }
-                        } else if (index === campos.length - 1) {
-                            const botoes = form.querySelectorAll('.btn-primary, .btn-success, .btn-secondary');
-                            if (botoes.length > 0) botoes[0].focus();
+                            if (proximo) { proximo.focus(); if (proximo.tagName === 'SELECT') proximo.click(); }
                         }
                     }
                 });
             });
-            document.getElementById('compQuantidade').addEventListener('input', calcularValorTotal);
-            document.getElementById('compValorUnitario').addEventListener('input', calcularValorTotal);
+            const cq = document.getElementById('compQuantidade');
+            const cv = document.getElementById('compValorUnitario');
+            if (cq) cq.addEventListener('input', calcularValorTotal);
+            if (cv) cv.addEventListener('input', calcularValorTotal);
             document.querySelectorAll('input[type="text"], input[type="search"], textarea').forEach(input => {
                 input.addEventListener('input', function(e) { this.value = this.value.toUpperCase(); });
             });
@@ -1467,8 +1629,7 @@
             const qtd = parseFloat(document.getElementById('compQuantidade').value) || 0;
             const valorUnitarioStr = document.getElementById('compValorUnitario').value;
             const valorUnitario = parseFloat(valorUnitarioStr.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-            const total = qtd * valorUnitario;
-            document.getElementById('compValorTotal').value = formatarMoedaBR(total);
+            document.getElementById('compValorTotal').value = formatarMoedaBR(qtd * valorUnitario);
         }
 
         const todasAbas = [
@@ -1533,7 +1694,7 @@
                 { id: 'comprovantes_buscar', label: '📂 Buscar DOC' },
                 { id: 'comprovantes_salvar', label: '💾 Salvar' }
             ],
-            pagamentos: [{ id: 'pagamentos_acoes', label: 'Ações de Pagamento (Pago/Excluir)' }],
+            pagamentos: [{ id: 'pagamentos_acoes', label: 'Ações de Pagamento' }],
             banco: [
                 { id: 'banco_salvar', label: '💾 Salvar Banco' },
                 { id: 'banco_editar', label: '✏️ Editar Banco' },
@@ -1630,8 +1791,7 @@
                     atualizarPreviewSelfie();
                 })
                 .catch(function(err) {
-                    console.error('Erro ao acessar câmera:', err);
-                    alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
+                    alert('Não foi possível acessar a câmera. Verifique as permissões.');
                     fecharModalSelfie();
                 });
             } else {
@@ -1641,10 +1801,7 @@
         }
 
         function fecharModalSelfie() {
-            if (selfieStream) {
-                selfieStream.getTracks().forEach(track => track.stop());
-                selfieStream = null;
-            }
+            if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); selfieStream = null; }
             document.getElementById('selfieModal').classList.remove('active');
             document.getElementById('selfieVideo').srcObject = null;
             selfieDataUrl = null;
@@ -1683,10 +1840,7 @@
                 document.getElementById('selfiePhotoPreview').style.display = 'block';
                 document.getElementById('selfieCaptureBtn').style.display = 'none';
                 document.getElementById('selfieConfirmBtn').style.display = 'inline-block';
-                if (selfieStream) {
-                    selfieStream.getTracks().forEach(track => track.stop());
-                    selfieStream = null;
-                }
+                if (selfieStream) { selfieStream.getTracks().forEach(track => track.stop()); selfieStream = null; }
                 document.getElementById('selfieVideo').srcObject = null;
                 document.getElementById('selfiePreviewContainer').style.display = 'none';
             } else {
@@ -1723,7 +1877,8 @@
 
         function limparSelfieCliente() {
             selfieClienteTemp = null;
-            document.getElementById('selfiePreviewCliente').innerHTML = '';
+            const c = document.getElementById('selfiePreviewCliente');
+            if (c) c.innerHTML = '';
         }
 
         function mostrarPreviewSelfieUsuario() {
@@ -1744,33 +1899,10 @@
             if (container) container.innerHTML = '';
         }
 
-        function campoVazio(valor) {
-            return !valor || valor.trim() === '';
-        }
+        function campoVazio(valor) { return !valor || valor.trim() === ''; }
 
         function inicializarSistema() {
-            if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
-                db.usuarios.push({ nome: 'LOBÃO', senha: '18998211', tipo: 'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie: null });
-                salvarDB();
-            }
-            db.usuarios = db.usuarios.filter(u => {
-                const nomeUpper = (u.nome || '').toUpperCase();
-                return nomeUpper !== 'SERGIO' && nomeUpper !== 'SERGIO PEREIRA DA SILVA';
-            });
-            const lobao = db.usuarios.find(u => u.nome === 'LOBÃO');
-            if (lobao) {
-                lobao.permissoes = JSON.parse(JSON.stringify(permissoesPadrao.ADM));
-                lobao.tipo = 'ADM';
-                if (!lobao.senha) lobao.senha = '18998211';
-            }
-
-            if (!db.contratos) { db.contratos = { contratoLocacao: {}, termoResponsabilidade: {}, notaPromissoria: {} }; salvarDB(); }
-            if (!db.locacoesEncerradas) { db.locacoesEncerradas = []; salvarDB(); }
-            if (!db.pendentes) { db.pendentes = []; salvarDB(); }
-            if (!db.historico) { db.historico = []; salvarDB(); }
-            if (db.locacoes) { db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; }); }
-            db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
-
+            normalizarDB();
             const agora = new Date();
             const ultimaLimpeza = db.config.ultimaLimpezaAuditoria ? new Date(db.config.ultimaLimpezaAuditoria) : null;
             if (ultimaLimpeza) {
@@ -1779,106 +1911,57 @@
                     db.auditoria = [];
                     db.config.ultimaLimpezaAuditoria = agora.toISOString();
                     salvarDB();
-                    console.log("Auditoria limpa automaticamente (15 dias).");
                 }
             } else {
                 db.config.ultimaLimpezaAuditoria = agora.toISOString();
                 salvarDB();
             }
-
-            atualizarTabelaUsuario();
-            gerarPermissoesUI();
-            atualizarResumoFinanceiro();
-            atualizarCombosLocacao();
-            atualizarTabelaCompras();
-            atualizarTabelaVeiculos();
-            atualizarTabelaClientes();
-            atualizarTabelaLocacoes();
-            atualizarTabelaLocEncerrada();
-            atualizarTabelaManutencao();
-            atualizarTabelaMecanico();
-            atualizarTabelaAlugueis();
-            atualizarTabelaBancos();
-            atualizarTabelaFluxoCaixa();
-            atualizarTabelaDoc();
-            atualizarTabelaAuditoria();
-            atualizarTabelaPendentes();
-            atualizarTabelaHistorico();
-            atualizarGaleriaGaragem();
-            atualizarGaleriaSOS();
-            atualizarGaleriaComprovantes(); // Nova função
-            atualizarPlacasComprovantes(); // Nova função
-            carregarDadosContratos();
-            carregarConfiguracoes();
-            limparSelfieCliente();
-            limparSelfieUsuario();
-            atualizarPlacasManutencao();
-            atualizarPlacasMecanico();
-            atualizarOficinasMecanico();
-            preencherPlacaUsuarioLogado();
-            atualizarVistoria();
-            atualizarSelectPlacasDoc();
-            atualizarSubAbasDoc();
+            atualizarTodasTabelas();
         }
 
         // =============================================
-        // NOVAS FUNÇÕES PARA DOCUMENTOS POR PLACA
+        // DOCUMENTOS POR PLACA
         // =============================================
-
         function atualizarPlacasComprovantes() {
             const select = document.getElementById('compPlacaSelect');
             if (!select) return;
             const currentVal = select.value;
             select.innerHTML = '<option value="">Selecione uma placa</option>';
-            
-            // Adiciona veículos cadastrados
             db.veiculos.forEach(v => {
                 const opt = document.createElement('option');
                 opt.value = v.placa;
                 opt.textContent = v.placa + ' - ' + v.fabricante;
                 select.appendChild(opt);
             });
-
-            // Adiciona a opção "SEM PLACA" se existirem documentos legados
             if (db.imagens.comprovantes.placas && db.imagens.comprovantes.placas['SEM PLACA']) {
                 const opt = document.createElement('option');
                 opt.value = 'SEM PLACA';
                 opt.textContent = 'SEM PLACA (Documentos Antigos)';
                 select.appendChild(opt);
             }
-
-            if (currentVal && (Array.from(select.options).some(o => o.value === currentVal))) {
-                select.value = currentVal;
-            }
+            if (currentVal && (Array.from(select.options).some(o => o.value === currentVal))) select.value = currentVal;
         }
 
         async function previewCompDocumentos() {
             const files = document.getElementById('compDocumentosUpload').files;
             if (!files || files.length === 0) return;
-            
             compDocumentosTemp = [];
             let count = 0;
-            
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const extensao = file.name.split('.').pop().toLowerCase();
-                
                 if (['pdf', 'jpg', 'jpeg', 'png'].includes(extensao)) {
                     let dataUrl;
                     if (extensao === 'pdf') {
                         const reader = new FileReader();
-                        dataUrl = await new Promise(resolve => { 
-                            reader.onload = e => resolve(e.target.result); 
-                            reader.readAsDataURL(file); 
-                        });
+                        dataUrl = await new Promise(resolve => { reader.onload = e => resolve(e.target.result); reader.readAsDataURL(file); });
                     } else {
-                        dataUrl = await comprimirImagem(file, 800, 0.5); // Melhor qualidade para documentos
+                        dataUrl = await comprimirImagem(file, 800, 0.5);
                     }
                     compDocumentosTemp.push({ nome: file.name, data: dataUrl, tipo: extensao });
                     count++;
                 }
             }
-            
             document.getElementById('compDocumentosPreview').textContent = count + ' arquivo(s) selecionado(s)';
         }
 
@@ -1886,18 +1969,12 @@
             const placa = document.getElementById('compPlacaSelect').value;
             if (!placa) { alert('Selecione uma placa!'); return; }
             if (compDocumentosTemp.length === 0) { alert('Nenhum documento selecionado!'); return; }
-            
             if (!db.imagens.comprovantes.placas) db.imagens.comprovantes.placas = {};
             if (!db.imagens.comprovantes.placas[placa]) db.imagens.comprovantes.placas[placa] = [];
-            
-            // Adiciona os novos documentos à lista da placa
             db.imagens.comprovantes.placas[placa].push(...compDocumentosTemp);
-            
-            // Limpa o cache temporário
             compDocumentosTemp = [];
             document.getElementById('compDocumentosUpload').value = '';
             document.getElementById('compDocumentosPreview').textContent = 'Nenhum arquivo selecionado';
-            
             atualizarGaleriaComprovantes();
             salvarDB();
             alert('Documentos salvos com sucesso para a placa ' + placa + '!');
@@ -1908,33 +1985,25 @@
             const container = document.getElementById('comprovantesPorPlacaContainer');
             if (!container) return;
             container.innerHTML = '';
-            
             const placasObj = db.imagens.comprovantes.placas || {};
             const placas = Object.keys(placasObj);
-            
             if (placas.length === 0) {
                 container.innerHTML = '<p style="text-align: center; padding: 20px; color: #999;">Nenhum documento salvo.</p>';
                 return;
             }
-            
             placas.forEach(placa => {
                 const docs = placasObj[placa];
                 if (!docs || docs.length === 0) return;
-                
                 const subfolder = document.createElement('div');
                 subfolder.className = 'subfolder';
-                
                 let docsHtml = '';
                 docs.forEach((doc, index) => {
                     let thumbHtml = '';
                     if (doc.tipo === 'pdf') {
-                        thumbHtml = `<div style="width: 100%; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #eee; border-radius: 4px;">
-                            <span style="font-size: 40px;">📄</span>
-                        </div>`;
+                        thumbHtml = `<div style="width: 100%; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #eee; border-radius: 4px;"><span style="font-size: 40px;">📄</span></div>`;
                     } else {
                         thumbHtml = `<img src="${doc.data}" style="width: 100%; height: 120px; object-fit: cover;">`;
                     }
-                    
                     docsHtml += `
                         <div class="doc-placa-item" style="width: 150px; height: auto; display: flex; flex-direction: column; padding: 5px;">
                             <div style="flex: 1; cursor: pointer; width: 100%;" onclick="${doc.tipo === 'pdf' ? `abrirPdfComprovante('${placa}', ${index})` : `openImageModal('${doc.data}')`}">
@@ -1944,10 +2013,8 @@
                             <div style="padding: 5px; text-align: center; font-size: 11px; font-weight: bold; background: #f0f0f0; border-top: 1px solid #ddd; width: 100%; border-radius: 0 0 4px 4px;">
                                 ${doc.nome.length > 18 ? doc.nome.substring(0, 15) + '...' : doc.nome}
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
-                
                 subfolder.innerHTML = `
                     <div class="subfolder-header">
                         <h4>🚗 Placa: ${placa}</h4>
@@ -1955,8 +2022,7 @@
                     </div>
                     <div class="saved-images" style="display: flex; flex-wrap: wrap; gap: 10px;">
                         ${docsHtml}
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(subfolder);
             });
         }
@@ -1966,7 +2032,7 @@
             if (!doc) return;
             if (doc.data.startsWith('data:application/pdf')) {
                 const win = window.open();
-                win.document.write(`<iframe src="${doc.data}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+                win.document.write(`<iframe src="${doc.data}" frameborder="0" style="border:0; width:100%; height:100%;" allowfullscreen></iframe>`);
             } else {
                 window.open(doc.data, '_blank');
             }
@@ -1976,9 +2042,7 @@
             if (!verificarSenhaAdmin()) return;
             if (confirm('Excluir este documento?')) {
                 db.imagens.comprovantes.placas[placa].splice(index, 1);
-                if (db.imagens.comprovantes.placas[placa].length === 0) {
-                    delete db.imagens.comprovantes.placas[placa];
-                }
+                if (db.imagens.comprovantes.placas[placa].length === 0) delete db.imagens.comprovantes.placas[placa];
                 atualizarGaleriaComprovantes();
                 salvarDB();
                 registrarAuditoria('Exclusão', `Documento excluído da placa ${placa}`);
@@ -1986,13 +2050,8 @@
         }
 
         // =============================================
-        // FIM NOVAS FUNÇÕES
-        // =============================================
-
-        // =============================================
         // RELATÓRIO MECÂNICO
         // =============================================
-
         function atualizarOficinasMecanico() {
             const select = document.getElementById('mecRelOficina');
             if (!select || !db) return;
@@ -2001,8 +2060,7 @@
             select.innerHTML = '<option value="">Todas as Oficinas</option>';
             oficinas.forEach(o => {
                 const opt = document.createElement('option');
-                opt.value = o;
-                opt.textContent = o;
+                opt.value = o; opt.textContent = o;
                 select.appendChild(opt);
             });
             if (atual && oficinas.includes(atual)) select.value = atual;
@@ -2021,15 +2079,9 @@
             const dataFim = document.getElementById('mecRelDataFim').value;
             const oficina = document.getElementById('mecRelOficina').value;
             const status = document.getElementById('mecRelStatus').value;
-
-            if (dataInicio && dataFim && dataInicio > dataFim) {
-                alert('A Data Início não pode ser maior que a Data Fim!');
-                return;
-            }
-
+            if (dataInicio && dataFim && dataInicio > dataFim) { alert('A Data Início não pode ser maior que a Data Fim!'); return; }
             relatorioMecFiltros = { dataInicio, dataFim, oficina, status };
             relatorioMecResultados = [];
-
             db.mecanico.forEach((m, index) => {
                 if (dataInicio && m.data < dataInicio) return;
                 if (dataFim && m.data > dataFim) return;
@@ -2038,7 +2090,6 @@
                 if (status === 'pago' && !m.pago) return;
                 relatorioMecResultados.push({ ...m, _index: index });
             });
-
             renderizarRelatorioMecanico();
             document.getElementById('relatorioMecanicoModal').classList.add('active');
         }
@@ -2046,32 +2097,23 @@
         function renderizarRelatorioMecanico() {
             const body = document.getElementById('relatorioMecanicoBody');
             body.innerHTML = '';
-
             const infoEl = document.getElementById('relatorioMecInfo');
             const totalEl = document.getElementById('relatorioMecTotal');
-
             let periodoTexto = 'Período: Todos';
-            if (relatorioMecFiltros.dataInicio && relatorioMecFiltros.dataFim) {
-                periodoTexto = `Período: ${formatarDataBR(relatorioMecFiltros.dataInicio)} até ${formatarDataBR(relatorioMecFiltros.dataFim)}`;
-            } else if (relatorioMecFiltros.dataInicio) {
-                periodoTexto = `A partir de ${formatarDataBR(relatorioMecFiltros.dataInicio)}`;
-            } else if (relatorioMecFiltros.dataFim) {
-                periodoTexto = `Até ${formatarDataBR(relatorioMecFiltros.dataFim)}`;
-            }
+            if (relatorioMecFiltros.dataInicio && relatorioMecFiltros.dataFim) periodoTexto = `Período: ${formatarDataBR(relatorioMecFiltros.dataInicio)} até ${formatarDataBR(relatorioMecFiltros.dataFim)}`;
+            else if (relatorioMecFiltros.dataInicio) periodoTexto = `A partir de ${formatarDataBR(relatorioMecFiltros.dataInicio)}`;
+            else if (relatorioMecFiltros.dataFim) periodoTexto = `Até ${formatarDataBR(relatorioMecFiltros.dataFim)}`;
             const oficinaTexto = relatorioMecFiltros.oficina ? ` | Oficina: ${relatorioMecFiltros.oficina}` : ' | Todas as Oficinas';
-            infoEl.textContent = periodoTexto + oficinaTexto + ` | ${relatorioMecResultados.length} serviço(s) encontrado(s)`;
-
+            infoEl.textContent = periodoTexto + oficinaTexto + ` | ${relatorioMecResultados.length} serviço(s)`;
             if (relatorioMecResultados.length === 0) {
-                body.innerHTML = '<p style="text-align: center; padding: 30px; color: #999;">Nenhum serviço encontrado com os filtros informados.</p>';
+                body.innerHTML = '<p style="text-align: center; padding: 30px; color: #999;">Nenhum serviço encontrado.</p>';
                 totalEl.textContent = 'R$ 0,00';
                 return;
             }
-
             let html = '<table class="relatorio-mec-table"><thead><tr>' +
                 '<th style="width: 40px;"><input type="checkbox" id="relChkTodos" onclick="toggleTodosRelatorioMec(this.checked)"></th>' +
                 '<th>Data</th><th>Oficina</th><th>Serviço</th><th>Carro</th><th>Placa</th><th>Valor</th><th>Status</th>' +
                 '</tr></thead><tbody>';
-
             relatorioMecResultados.forEach((m, i) => {
                 const isPago = !!m.pago;
                 const valor = m.valor || 'R$ 0,00';
@@ -2080,40 +2122,28 @@
                 const checkChecked = isPago ? '' : 'checked';
                 html += `<tr class="${isPago ? 'pago' : ''}">
                     <td><input type="checkbox" class="relatorio-mec-checkbox" data-index="${m._index}" data-valor="${valor}" ${checkChecked} ${checkDisabled} onchange="atualizarTotalRelatorioMec()"></td>
-                    <td>${formatarDataBR(m.data)}</td>
-                    <td>${m.oficina || ''}</td>
-                    <td>${m.servico || ''}</td>
-                    <td>${m.carro || ''}</td>
-                    <td>${m.placa || ''}</td>
-                    <td>${valor}</td>
-                    <td>${statusLabel}</td>
+                    <td>${formatarDataBR(m.data)}</td><td>${m.oficina || ''}</td><td>${m.servico || ''}</td><td>${m.carro || ''}</td><td>${m.placa || ''}</td><td>${valor}</td><td>${statusLabel}</td>
                 </tr>`;
             });
-
             html += '</tbody></table>';
             body.innerHTML = html;
             atualizarTotalRelatorioMec();
         }
 
         function toggleTodosRelatorioMec(checked) {
-            document.querySelectorAll('.relatorio-mec-checkbox:not([disabled])').forEach(cb => {
-                cb.checked = checked;
-            });
+            document.querySelectorAll('.relatorio-mec-checkbox:not([disabled])').forEach(cb => { cb.checked = checked; });
             atualizarTotalRelatorioMec();
         }
 
         function atualizarTotalRelatorioMec() {
             let total = 0;
             document.querySelectorAll('.relatorio-mec-checkbox:checked').forEach(cb => {
-                const v = parseValorMonetario(cb.dataset.valor);
-                total += v;
+                total += parseValorMonetario(cb.dataset.valor);
             });
             document.getElementById('relatorioMecTotal').textContent = formatarMoedaBR(total);
         }
 
-        function fecharRelatorioMecanico() {
-            document.getElementById('relatorioMecanicoModal').classList.remove('active');
-        }
+        function fecharRelatorioMecanico() { document.getElementById('relatorioMecanicoModal').classList.remove('active'); }
 
         function obterSelecionadosRelatorioMec() {
             const selecionados = [];
@@ -2126,17 +2156,10 @@
 
         function pagarRelatorioMecanico() {
             const indices = obterSelecionadosRelatorioMec();
-            if (indices.length === 0) {
-                alert('Selecione pelo menos um serviço para pagar!');
-                return;
-            }
+            if (indices.length === 0) { alert('Selecione pelo menos um serviço para pagar!'); return; }
             const pendentes = indices.filter(i => !db.mecanico[i].pago);
-            if (pendentes.length === 0) {
-                alert('Todos os serviços selecionados já estão pagos!');
-                return;
-            }
+            if (pendentes.length === 0) { alert('Todos os serviços selecionados já estão pagos!'); return; }
             if (!verificarSenhaAdmin()) return;
-
             let total = 0;
             const oficinasSet = new Set();
             const detalhes = [];
@@ -2149,11 +2172,9 @@
                 m.pago = true;
                 m.dataPagamento = new Date().toISOString().split('T')[0];
             });
-
             const oficinasStr = Array.from(oficinasSet).join(', ');
             const hoje = new Date().toISOString().split('T')[0];
             const valorFormatado = formatarMoedaBR(total);
-
             let descricao = `Pagamento Oficina(s): ${oficinasStr} - ${pendentes.length} serviço(s)`;
             let descricaoFinal = descricao;
             let contador = 1;
@@ -2161,25 +2182,14 @@
                 contador++;
                 descricaoFinal = descricao + ` (${contador})`;
             }
-
-            db.fluxoCaixa.push({
-                data: hoje,
-                descricao: descricaoFinal,
-                categoria: 'Mecânico',
-                valor: valorFormatado,
-                tipo: 'saida'
-            });
-
+            db.fluxoCaixa.push({ data: hoje, descricao: descricaoFinal, categoria: 'Mecânico', valor: valorFormatado, tipo: 'saida' });
             atualizarTabelaMecanico();
             atualizarTabelaFluxoCaixa();
             atualizarResumoFinanceiro();
-            registrarAuditoria('Cadastro', `Pagamento oficina(s) ${oficinasStr} - ${valorFormatado} (${pendentes.length} serviço(s))`);
+            registrarAuditoria('Cadastro', `Pagamento oficina(s) ${oficinasStr} - ${valorFormatado}`);
             salvarDB();
-
             gerarRelatorioMecanico();
-
-            alert(`✅ Pagamento registrado com sucesso!\n\nOficina(s): ${oficinasStr}\nServiços pagos: ${pendentes.length}\nTotal: ${valorFormatado}\n\nLançamento adicionado ao Fluxo de Caixa.`);
-
+            alert(`✅ Pagamento registrado!\n\nOficina(s): ${oficinasStr}\nServiços pagos: ${pendentes.length}\nTotal: ${valorFormatado}`);
             gerarPdfPagamentoMecanico(detalhes, total, oficinasStr);
         }
 
@@ -2189,7 +2199,6 @@
             const lista = usarSelecionados
                 ? indices.map(i => ({ ...db.mecanico[i], _valorNum: parseValorMonetario(db.mecanico[i].valor) }))
                 : relatorioMecResultados.map(m => ({ ...m, _valorNum: parseValorMonetario(m.valor) }));
-
             if (lista.length === 0) { alert('Nenhum serviço para imprimir!'); return; }
             const total = lista.reduce((s, m) => s + m._valorNum, 0);
             const oficinasSet = new Set(lista.map(m => m.oficina).filter(Boolean));
@@ -2199,7 +2208,6 @@
 
         function gerarPdfPagamentoMecanico(servicos, total, oficinasStr, apenasRelatorio = false) {
             const printArea = document.getElementById('printArea');
-            // ===== NOME DO SISTEMA FIXO: LOBÃO =====
             const nomeSistema = 'LOBÃO';
             const subtituloSistema = 'SISTEMA DE LOCAÇÃO DE CARROS';
             const cnpj = (db.config && db.config.cnpj) ? db.config.cnpj : '';
@@ -2207,31 +2215,26 @@
             const endereco = (db.config && db.config.endereco) ? db.config.endereco : '';
             const dataEmissao = new Date().toLocaleString('pt-BR');
             const titulo = apenasRelatorio ? 'RELATÓRIO DE SERVIÇOS MECÂNICOS' : 'RECIBO DE PAGAMENTO - SERVIÇOS MECÂNICOS';
-
             let html = `<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
                 <div style="text-align: center; border-bottom: 3px solid #1a3c6e; padding-bottom: 15px; margin-bottom: 20px;">
                     <h1 style="margin: 0; color: #1a3c6e; font-size: 26px; letter-spacing: 2px;">🦁 ${nomeSistema}</h1>
-                    <p style="margin: 6px 0 0 0; font-size: 13px; font-weight: bold; color: #e63946; letter-spacing: 1px;">${subtituloSistema}</p>
+                    <p style="margin: 6px 0 0 0; font-size: 13px; font-weight: bold; color: #e63946;">${subtituloSistema}</p>
                     <p style="margin: 8px 0 0 0; font-size: 11px; color: #555;">${cnpj ? 'CNPJ: ' + cnpj : ''} ${telefone ? ' | Tel: ' + telefone : ''}</p>
                     <p style="margin: 4px 0 0 0; font-size: 11px; color: #555;">${endereco}</p>
                 </div>
                 <h2 style="text-align: center; font-size: 16px; margin: 15px 0;">${titulo}</h2>
                 <p style="font-size: 12px;"><strong>Data de Emissão:</strong> ${dataEmissao}</p>
                 <p style="font-size: 12px;"><strong>Oficina(s):</strong> ${oficinasStr}</p>
-                <p style="font-size: 12px;"><strong>Quantidade de Serviços:</strong> ${servicos.length}</p>
+                <p style="font-size: 12px;"><strong>Quantidade:</strong> ${servicos.length}</p>
                 <table style="width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px;">
-                    <thead>
-                        <tr style="background: #1a3c6e; color: white;">
-                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Data</th>
-                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Oficina</th>
-                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Serviço</th>
-                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Carro</th>
-                            <th style="border: 1px solid #999; padding: 8px; text-align: left;">Placa</th>
-                            <th style="border: 1px solid #999; padding: 8px; text-align: right;">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-
+                    <thead><tr style="background: #1a3c6e; color: white;">
+                        <th style="border: 1px solid #999; padding: 8px; text-align: left;">Data</th>
+                        <th style="border: 1px solid #999; padding: 8px; text-align: left;">Oficina</th>
+                        <th style="border: 1px solid #999; padding: 8px; text-align: left;">Serviço</th>
+                        <th style="border: 1px solid #999; padding: 8px; text-align: left;">Carro</th>
+                        <th style="border: 1px solid #999; padding: 8px; text-align: left;">Placa</th>
+                        <th style="border: 1px solid #999; padding: 8px; text-align: right;">Valor</th>
+                    </tr></thead><tbody>`;
             servicos.forEach(m => {
                 const valorFormatado = formatarMoedaBR(m._valorNum !== undefined ? m._valorNum : parseValorMonetario(m.valor));
                 html += `<tr>
@@ -2243,28 +2246,16 @@
                     <td style="border: 1px solid #999; padding: 8px; text-align: right;">${valorFormatado}</td>
                 </tr>`;
             });
-
-            html += `</tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="5" style="border: 1px solid #999; padding: 10px; text-align: right; font-weight: bold; background: #f0f0f0;">TOTAL:</td>
-                            <td style="border: 1px solid #999; padding: 10px; text-align: right; font-weight: bold; background: #f0f0f0;">${formatarMoedaBR(total)}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <div style="margin-top: 70px; display: flex; justify-content: space-between; gap: 40px;">
-                    <div style="flex: 1; text-align: center;">
-                        <div style="border-top: 1px solid #333; padding-top: 8px; font-weight: bold;">${nomeSistema}</div>
-                        <div style="font-size: 11px;">Responsável</div>
-                    </div>
-                    <div style="flex: 1; text-align: center;">
-                        <div style="border-top: 1px solid #333; padding-top: 8px; font-weight: bold;">&nbsp;</div>
-                        <div style="font-size: 11px;">Oficina / Recebedor</div>
-                    </div>
-                </div>
-                <p style="font-size: 10px; color: #666; text-align: center; margin-top: 30px;">Documento gerado automaticamente pelo Sistema ${nomeSistema}</p>
+            html += `</tbody><tfoot><tr>
+                <td colspan="5" style="border: 1px solid #999; padding: 10px; text-align: right; font-weight: bold; background: #f0f0f0;">TOTAL:</td>
+                <td style="border: 1px solid #999; padding: 10px; text-align: right; font-weight: bold; background: #f0f0f0;">${formatarMoedaBR(total)}</td>
+            </tr></tfoot></table>
+            <div style="margin-top: 70px; display: flex; justify-content: space-between; gap: 40px;">
+                <div style="flex: 1; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 8px; font-weight: bold;">${nomeSistema}</div><div style="font-size: 11px;">Responsável</div></div>
+                <div style="flex: 1; text-align: center;"><div style="border-top: 1px solid #333; padding-top: 8px; font-weight: bold;">&nbsp;</div><div style="font-size: 11px;">Oficina / Recebedor</div></div>
+            </div>
+            <p style="font-size: 10px; color: #666; text-align: center; margin-top: 30px;">Documento gerado pelo Sistema ${nomeSistema}</p>
             </div>`;
-
             printArea.innerHTML = html;
             printArea.classList.add('print-visible');
             setTimeout(function() {
@@ -2273,10 +2264,6 @@
                 printArea.innerHTML = '';
             }, 250);
         }
-
-        // =============================================
-        // FIM RELATÓRIO MECÂNICO
-        // =============================================
 
         function atualizarPlacasManutencao() {
             const select = document.getElementById('manPlaca');
@@ -2331,36 +2318,29 @@
             const placa = document.getElementById('mecPlaca').value;
             const valor = document.getElementById('mecValor').value;
             const obs = document.getElementById('mecObs').value;
-
             if (campoVazio(data) || campoVazio(oficina) || campoVazio(servico) || campoVazio(carro) || campoVazio(placa) || campoVazio(valor)) {
-                alert('Preencha todos os campos obrigatórios (Data, Oficina, Serviço, Carro, Placa, Valor)!');
+                alert('Preencha todos os campos obrigatórios!');
                 return;
             }
             if (db.mecanico.some(m => m.data === data && m.servico === servico && m.placa === placa)) {
                 alert('Já existe um serviço idêntico registrado!');
                 return;
             }
-
-            let pdfData = null;
-            let pdfTipo = null;
+            let pdfData = null, pdfTipo = null;
             if (document.getElementById('mecUpload').files.length > 0) {
                 const file = document.getElementById('mecUpload').files[0];
-                const dataUrl = await comprimirImagem(file, 400, 0.4);
-                pdfData = dataUrl;
+                pdfData = await comprimirImagem(file, 400, 0.4);
                 pdfTipo = file.name.split('.').pop().toLowerCase();
             }
-
             const novoServico = { data, oficina, servico, responsavel, carro, placa, valor, obs, pdfData: pdfData || null, pdfTipo: pdfTipo || null, pago: false };
             db.mecanico.push(novoServico);
-
-            const novoItemHistorico = { data, descricao: servico, placa, valor, fornecedor: responsavel, oficina, arquivo: pdfData || null, arquivoTipo: pdfTipo || null };
-            db.historico.push(novoItemHistorico);
+            db.historico.push({ data, descricao: servico, placa, valor, fornecedor: responsavel, oficina, arquivo: pdfData || null, arquivoTipo: pdfTipo || null });
             atualizarTabelaHistorico();
             atualizarTabelaMecanico();
             atualizarOficinasMecanico();
-            registrarAuditoria('Cadastro', `Serviço de mecânico: ${servico} - ${placa}`);
-            salvarDB();
-            alert('Serviço salvo com sucesso e lançado no histórico!');
+            registrarAuditoria('Cadastro', `Serviço: ${servico} - ${placa}`);
+            await salvarDB();
+            alert('Serviço salvo!');
             limparCamposMecanico();
         }
 
@@ -2369,26 +2349,20 @@
             if (!m) return;
             if (m.pago) { alert('Este serviço já foi pago!'); return; }
             if (!verificarSenhaAdmin()) return;
-
             const hoje = new Date().toISOString().split('T')[0];
             const descricao = `Pagamento serviço mecânico: ${m.servico} - ${m.placa}`;
-            const valorStr = (m.valor || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const valorNum = parseFloat(valorStr) || 0;
-            if (valorNum <= 0) { alert('Valor inválido para pagamento!'); return; }
-            const valorFormatado = formatarMoedaBR(valorNum);
-
+            const valorFormatado = formatarMoedaBR(parseValorMonetario(m.valor));
             const existeFluxo = db.fluxoCaixa.some(f => f.data === hoje && f.descricao === descricao && f.valor === valorFormatado && f.tipo === 'saida');
-            if (existeFluxo) { alert('Já existe um lançamento de saída para este serviço no fluxo de caixa!'); return; }
-
+            if (existeFluxo) { alert('Já existe este lançamento!'); return; }
             db.fluxoCaixa.push({ data: hoje, descricao, categoria: 'Mecânico', valor: valorFormatado, tipo: 'saida' });
             m.pago = true;
             m.dataPagamento = hoje;
             atualizarTabelaMecanico();
             atualizarTabelaFluxoCaixa();
             atualizarResumoFinanceiro();
-            registrarAuditoria('Cadastro', `Pagamento de serviço mecânico: ${m.servico} - ${m.placa} (${valorFormatado})`);
+            registrarAuditoria('Cadastro', `Pagamento: ${m.servico}`);
             salvarDB();
-            alert(`Pagamento registrado no fluxo de caixa!\nValor: ${valorFormatado}\nServiço: ${m.servico}`);
+            alert(`Pagamento registrado!\nValor: ${valorFormatado}`);
         }
 
         function gerarPermissoesUI() {
@@ -2407,7 +2381,6 @@
             });
             abasDiv.appendChild(abasGrid);
             container.appendChild(abasDiv);
-
             Object.keys(todosBotoes).forEach(abaId => {
                 const botoes = todosBotoes[abaId];
                 if (botoes.length > 0) {
@@ -2427,10 +2400,9 @@
                     container.appendChild(grupo);
                 }
             });
-
             const veiculosDiv = document.createElement('div');
             veiculosDiv.className = 'permissao-grupo';
-            veiculosDiv.innerHTML = '<h5>🚙 Veículos Permitidos (por placa)</h5>';
+            veiculosDiv.innerHTML = '<h5>🚙 Veículos Permitidos</h5>';
             const veiculosContainer = document.createElement('div');
             veiculosContainer.className = 'permissoes-veiculos';
             veiculosContainer.id = 'permissoesVeiculosContainer';
@@ -2501,12 +2473,8 @@
             });
             document.querySelectorAll('.tab-content').forEach(content => {
                 const contentId = content.id;
-                if (!permissoes.abas[contentId]) {
-                    content.classList.add('hidden-content');
-                    content.classList.remove('active');
-                } else {
-                    content.classList.remove('hidden-content');
-                }
+                if (!permissoes.abas[contentId]) { content.classList.add('hidden-content'); content.classList.remove('active'); }
+                else content.classList.remove('hidden-content');
             });
             document.querySelectorAll('[data-permissao]').forEach(btn => {
                 const permissao = btn.dataset.permissao;
@@ -2517,7 +2485,7 @@
             atualizarPlacasManutencao();
             atualizarPlacasMecanico();
             atualizarVistoria();
-            atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
+            atualizarPlacasComprovantes();
             const activeTab = document.querySelector('.tab.active');
             if (activeTab && activeTab.classList.contains('hidden-tab')) {
                 const firstAllowedTab = document.querySelector('.tab[data-tab]:not(.hidden-tab)');
@@ -2529,8 +2497,7 @@
         function temPermissaoVeiculo(placa) {
             if (!usuarioLogado) return true;
             if (usuarioLogado.tipo === 'ADM') return true;
-            const permissoes = usuarioLogado.permissoes;
-            return permissoes.veiculos[placa] === true;
+            return usuarioLogado.permissoes.veiculos[placa] === true;
         }
 
         function formatarDataBR(data) {
@@ -2554,7 +2521,6 @@
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
                     alert('PIX copiado!');
-                    registrarAuditoria('Cadastro', `PIX copiado: ${banco.pix}`);
                 });
             }
         }
@@ -2575,18 +2541,18 @@
                 document.getElementById('mainContainer').style.display = 'block';
                 aplicarPermissoes(usuarioEncontrado);
                 enterFullscreen();
-                registrarAuditoria('Login', `Login realizado com sucesso por ${user}`);
+                registrarAuditoria('Login', `Login: ${user}`);
                 document.getElementById('loginError').style.display = 'none';
                 salvarDB();
             } else {
                 document.getElementById('loginError').style.display = 'block';
-                registrarAuditoria('Login', 'Tentativa de login falhou');
+                registrarAuditoria('Login', 'Tentativa falhou');
                 salvarDB();
             }
         });
 
         function sairSistema() {
-            if (confirm('Tem certeza que deseja sair do sistema?')) {
+            if (confirm('Tem certeza que deseja sair?')) {
                 if (document.fullscreenElement) document.exitFullscreen();
                 document.getElementById('mainContainer').style.display = 'none';
                 document.getElementById('loginContainer').style.display = 'flex';
@@ -2594,7 +2560,7 @@
                 document.getElementById('loginPassword').value = '';
                 document.getElementById('loginError').style.display = 'none';
                 document.getElementById('loginUser').focus();
-                registrarAuditoria('Login', 'Logout do sistema');
+                registrarAuditoria('Login', 'Logout');
                 salvarDB();
                 usuarioLogado = null;
             }
@@ -2626,7 +2592,7 @@
                 if (tabId === 'pendente') atualizarTabelaPendentes();
                 if (tabId === 'historico') atualizarTabelaHistorico();
                 if (tabId === 'vistoria') atualizarVistoria();
-                if (tabId === 'comprovantes') { atualizarPlacasComprovantes(); atualizarGaleriaComprovantes(); } // Atualiza a nova aba
+                if (tabId === 'comprovantes') { atualizarPlacasComprovantes(); atualizarGaleriaComprovantes(); }
                 setTimeout(function() {
                     const primeiroCampo = document.querySelector('.tab-content.active .campo-enter, .tab-content.active input:not([readonly]), .tab-content.active select, .tab-content.active textarea');
                     if (primeiroCampo) primeiroCampo.focus();
@@ -2655,7 +2621,7 @@
         }
 
         function enterFullscreen() {
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
         }
         document.getElementById('fullscreenBtn').addEventListener('click', function() {
             if (document.fullscreenElement) {
@@ -2674,8 +2640,7 @@
                     const filter = this.value.toLowerCase();
                     const rows = document.querySelectorAll(`#${tableId} tbody tr`);
                     rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(filter) ? '' : 'none';
+                        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
                     });
                 });
             }
@@ -2713,19 +2678,15 @@
         }
 
         function selecionarClienteCombo() {
-            const select = document.getElementById('locLocatario');
-            const nome = select.value;
+            const nome = document.getElementById('locLocatario').value;
             if (nome) {
                 const cliente = db.clientes.find(c => c.nome === nome);
                 if (cliente) document.getElementById('locCpfPropr').value = cliente.cpf;
-            } else {
-                document.getElementById('locCpfPropr').value = '';
-            }
+            } else document.getElementById('locCpfPropr').value = '';
         }
 
         function selecionarVeiculoCombo() {
-            const select = document.getElementById('locVeiculo');
-            const fabricante = select.value;
+            const fabricante = document.getElementById('locVeiculo').value;
             if (fabricante) {
                 const veiculo = db.veiculos.find(v => v.fabricante === fabricante);
                 if (veiculo) {
@@ -2739,14 +2700,11 @@
                     document.getElementById('locProprietario').value = veiculo.proprietario || '';
                     document.getElementById('locCpfPropr').value = veiculo.cpfPropr || '';
                 }
-            } else {
-                limparCamposVeiculoLocacao();
-            }
+            } else limparCamposVeiculoLocacao();
         }
 
         function selecionarPlacaCombo() {
-            const select = document.getElementById('locPlaca');
-            const placa = select.value;
+            const placa = document.getElementById('locPlaca').value;
             if (placa) {
                 const veiculo = db.veiculos.find(v => v.placa === placa);
                 if (veiculo) {
@@ -2760,9 +2718,7 @@
                     document.getElementById('locProprietario').value = veiculo.proprietario || '';
                     document.getElementById('locCpfPropr').value = veiculo.cpfPropr || '';
                 }
-            } else {
-                limparCamposVeiculoLocacao();
-            }
+            } else limparCamposVeiculoLocacao();
         }
 
         function limparCamposVeiculoLocacao() {
@@ -2775,9 +2731,7 @@
                 const data = new Date(dataInicio);
                 data.setMonth(data.getMonth() + 6);
                 document.getElementById('locDataFim').value = data.toISOString().split('T')[0];
-            } else {
-                document.getElementById('locDataFim').value = '';
-            }
+            } else document.getElementById('locDataFim').value = '';
         }
 
         async function salvarCliente() {
@@ -2788,30 +2742,13 @@
             const endereco = document.getElementById('cliEndereco').value.trim();
             const cidade = document.getElementById('cliCidade').value.trim();
             const estado = document.getElementById('cliEstado').value.trim();
-            if (!nome || !cpf || !rg || !telefone || !endereco || !cidade || !estado) { alert('Preencha todos os campos obrigatórios do cliente!'); return; }
+            if (!nome || !cpf || !rg || !telefone || !endereco || !cidade || !estado) { alert('Preencha todos os campos obrigatórios!'); return; }
             const cpfLimpo = cpf.replace(/\D/g, '');
-            const cpfDuplicado = db.clientes.some(c => (c.cpf || '').replace(/\D/g, '') === cpfLimpo);
-            if (cpfDuplicado) { alert('Já existe um cliente com esse CPF!'); return; }
-
+            if (db.clientes.some(c => (c.cpf || '').replace(/\D/g, '') === cpfLimpo)) { alert('Já existe um cliente com esse CPF!'); return; }
             let selfieFinal = selfieClienteTemp;
             if (selfieFinal && selfieFinal.startsWith('data:image') && selfieFinal.length > 200000) {
-                const img = new Image();
-                img.src = selfieFinal;
-                await new Promise(resolve => { img.onload = resolve; });
-                const canvas = document.createElement('canvas');
-                const maxWidth = 200;
-                let width = img.width, height = img.height;
-                if (width > maxWidth) {
-                    height = Math.round((height * maxWidth) / width);
-                    width = maxWidth;
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                selfieFinal = canvas.toDataURL('image/jpeg', 0.3);
+                selfieFinal = await comprimirBase64(selfieFinal, 200, 0.3);
             }
-
             const cliente = {
                 dataCadastro: document.getElementById('cliDataCadastro').value,
                 nome, cpf, rg,
@@ -2827,8 +2764,8 @@
             atualizarTabelaClientes();
             atualizarCombosLocacao();
             registrarAuditoria('Cadastro', `Novo cliente: ${cliente.nome}`);
-            salvarDB();
-            alert('Cliente salvo com sucesso! Usuário criado automaticamente.');
+            await salvarDB();
+            alert('Cliente salvo! Usuário criado automaticamente.');
             limparCamposCliente();
             limparSelfieCliente();
         }
@@ -2841,17 +2778,14 @@
             let senha = telefoneLimpo;
             if (telefoneLimpo.length >= 10) senha = telefoneLimpo.substring(2);
             if (!senha) senha = '';
-            const usuarioExistente = db.usuarios.find(u => u.nome === primeiroNome);
-            if (usuarioExistente) return;
+            if (db.usuarios.find(u => u.nome === primeiroNome)) return;
             db.usuarios.push({
-                nome: primeiroNome,
-                senha,
-                tipo: 'MOTORISTA',
+                nome: primeiroNome, senha, tipo: 'MOTORISTA',
                 permissoes: JSON.parse(JSON.stringify(permissoesPadrao.MOTORISTA)),
                 selfie: cliente.selfie || null
             });
             atualizarTabelaUsuario();
-            registrarAuditoria('Cadastro', `Usuário criado automaticamente: ${primeiroNome} (MOTORISTA)`);
+            registrarAuditoria('Cadastro', `Usuário criado: ${primeiroNome}`);
         }
 
         function salvarVeiculo() {
@@ -2865,8 +2799,7 @@
             const proprietario = document.getElementById('veicProprietario').value;
             const cpfPropr = document.getElementById('veicCpfPropr').value;
             if (campoVazio(fabricante) || campoVazio(cor) || campoVazio(placa) || campoVazio(anoFabr) || campoVazio(anoModel) || campoVazio(aluguel) || campoVazio(caucao) || campoVazio(proprietario) || campoVazio(cpfPropr)) {
-                alert('Preencha todos os campos obrigatórios do veículo!');
-                return;
+                alert('Preencha todos os campos obrigatórios!'); return;
             }
             if (db.veiculos.some(v => v.placa.toLowerCase() === placa.toLowerCase())) { alert('Já existe um veículo com essa placa!'); return; }
             const veiculo = {
@@ -2884,7 +2817,7 @@
             atualizarTabelaVeiculos();
             atualizarPermissoesVeiculos();
             atualizarCombosLocacao();
-            atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
+            atualizarPlacasComprovantes();
             registrarAuditoria('Cadastro', `Novo veículo: ${veiculo.fabricante} - ${veiculo.placa}`);
             salvarDB();
             alert('Veículo salvo!');
@@ -2905,16 +2838,10 @@
             const valorAluguel = document.getElementById('locValorAluguel').value;
             const aluguelMensal = document.getElementById('locAluguelMensal').value;
             const caucaoPago = document.getElementById('locCaucaoPago').value;
-            if (campoVazio(locatario)) { alert('Selecione o locatário!'); return; }
-            if (campoVazio(veiculo)) { alert('Selecione o veículo!'); return; }
-            if (campoVazio(placa)) { alert('Selecione a placa!'); return; }
-            if (campoVazio(dataInicio)) { alert('A Data de Início é obrigatória!'); return; }
-            if (campoVazio(dataFim)) { alert('A Data de Fim é obrigatória!'); return; }
-            if (campoVazio(caucao)) { alert('Informe o valor da caução!'); return; }
-            if (campoVazio(valorAluguel)) { alert('Informe o valor do aluguel!'); return; }
-            if (campoVazio(aluguelMensal)) { alert('Informe o valor do aluguel mensal!'); return; }
-            if (db.locacoes.some(l => l.placa === placa)) { alert('Esta placa já está alugada em uma locação ativa!'); return; }
-
+            if (campoVazio(locatario) || campoVazio(veiculo) || campoVazio(placa) || campoVazio(dataInicio) || campoVazio(dataFim) || campoVazio(caucao) || campoVazio(valorAluguel) || campoVazio(aluguelMensal)) {
+                alert('Preencha todos os campos obrigatórios!'); return;
+            }
+            if (db.locacoes.some(l => l.placa === placa)) { alert('Esta placa já está alugada!'); return; }
             const locacao = {
                 locatario, veiculo, placa, dataInicio, dataFim,
                 fabModelo: document.getElementById('locFabModelo').value,
@@ -2935,17 +2862,16 @@
             atualizarTabelaAlugueis();
             registrarAuditoria('Cadastro', `Locação: ${locatario} - ${placa}`);
             salvarDB();
-            alert('Locação salva com sucesso!');
+            alert('Locação salva!');
             atualizarVistoria();
-
             const primeiroNome = locatario.split(/\s+/)[0].toUpperCase();
             let usuarioMotorista = db.usuarios.find(u => u.nome === primeiroNome && u.tipo === 'MOTORISTA');
             if (!usuarioMotorista) {
                 const cliente = db.clientes.find(c => c.nome === locatario);
                 let senha = '';
                 if (cliente) {
-                    const telefoneLimpo = cliente.telefone.replace(/\D/g, '');
-                    if (telefoneLimpo.length >= 10) senha = telefoneLimpo.substring(2);
+                    const tl = cliente.telefone.replace(/\D/g, '');
+                    if (tl.length >= 10) senha = tl.substring(2);
                 }
                 usuarioMotorista = { nome: primeiroNome, senha, tipo: 'MOTORISTA', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.MOTORISTA)), selfie: cliente ? (cliente.selfie || null) : null };
                 db.usuarios.push(usuarioMotorista);
@@ -2959,38 +2885,27 @@
         function criarAlugueisParaLocacao(locacao) {
             db.alugueis = db.alugueis.filter(a => !(a.locatario === locacao.locatario && a.placa === locacao.placa && a.dataContrato === locacao.dataInicio));
             const dataInicio = new Date(locacao.dataInicio);
-            const dataFim = new Date(locacao.dataFim);
-            const valorAluguelStr = (locacao.valorAluguel || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const valorAluguelNum = parseFloat(valorAluguelStr) || 0;
-            const valorMensalStr = (locacao.aluguelMensal || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const valorMensalNum = parseFloat(valorMensalStr) || 0;
-            let valorBase = 0, tipo = '', intervaloDias = 0;
-            if (valorAluguelNum > 0) { valorBase = valorAluguelNum; tipo = 'semanal'; intervaloDias = 7; }
-            else if (valorMensalNum > 0) { valorBase = valorMensalNum; tipo = 'mensal'; intervaloDias = 30; }
-            else { return; }
-
-            const caucaoStr = (locacao.caucao || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const caucaoNum = parseFloat(caucaoStr) || 0;
-            const caucaoPagoStr = (locacao.caucaoPago || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const caucaoPagoNum = parseFloat(caucaoPagoStr) || 0;
+            const valorAluguelNum = parseValorMonetario(locacao.valorAluguel);
+            const valorMensalNum = parseValorMonetario(locacao.aluguelMensal);
+            let valorBase = 0, tipo = '';
+            if (valorAluguelNum > 0) { valorBase = valorAluguelNum; tipo = 'semanal'; }
+            else if (valorMensalNum > 0) { valorBase = valorMensalNum; tipo = 'mensal'; }
+            else return;
+            const caucaoNum = parseValorMonetario(locacao.caucao);
+            const caucaoPagoNum = parseValorMonetario(locacao.caucaoPago);
             const pagCaucao = locacao.pagCaucao;
-
             let valorAluguelFinal = valorBase;
             if (caucaoNum > 0) {
                 if (pagCaucao === 'avista') valorAluguelFinal += caucaoNum;
-                else if (pagCaucao === 'parcelado') {
-                    if (tipo === 'mensal') valorAluguelFinal += (caucaoNum / 6);
-                    else valorAluguelFinal += (caucaoNum / 10);
-                } else if (pagCaucao === 'entrada') valorAluguelFinal += caucaoPagoNum;
+                else if (pagCaucao === 'parcelado') valorAluguelFinal += (tipo === 'mensal' ? caucaoNum / 6 : caucaoNum / 10);
+                else if (pagCaucao === 'entrada') valorAluguelFinal += caucaoPagoNum;
             }
-            const valorFormatado = formatarMoedaBR(valorAluguelFinal);
-            const vencISO = dataInicio.toISOString().split('T')[0];
             db.alugueis.push({
                 locatario: locacao.locatario,
                 dataContrato: locacao.dataInicio,
                 placa: locacao.placa,
-                valorAluguel: valorFormatado,
-                dataVencimento: vencISO,
+                valorAluguel: formatarMoedaBR(valorAluguelFinal),
+                dataVencimento: dataInicio.toISOString().split('T')[0],
                 status: 'Pendente',
                 tipo, numeroParcela: 1
             });
@@ -3002,11 +2917,9 @@
             aluguel.status = 'Pago';
             const hoje = new Date().toISOString().split('T')[0];
             const descricao = `Pagamento Aluguel - ${aluguel.locatario} - ${aluguel.placa} - Venc. ${formatarDataBR(aluguel.dataVencimento)}`;
-            const valorStr = aluguel.valorAluguel.replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const valorNum = parseFloat(valorStr) || 0;
+            const valorNum = parseValorMonetario(aluguel.valorAluguel);
             if (valorNum > 0) {
-                const existeLancamento = db.fluxoCaixa.some(f => f.data === hoje && f.descricao === descricao && f.valor === aluguel.valorAluguel && f.tipo === 'entrada');
-                if (!existeLancamento) {
+                if (!db.fluxoCaixa.some(f => f.data === hoje && f.descricao === descricao && f.valor === aluguel.valorAluguel && f.tipo === 'entrada')) {
                     db.fluxoCaixa.push({ data: hoje, descricao, categoria: 'Locação de Veículos', valor: aluguel.valorAluguel, tipo: 'entrada' });
                 }
             }
@@ -3018,14 +2931,9 @@
                 const dataFim = new Date(locacao.dataFim);
                 const proximoExistente = db.alugueis.find(a => a.locatario === aluguel.locatario && a.placa === aluguel.placa && a.dataVencimento === novaDataVencimento.toISOString().split('T')[0]);
                 if (!proximoExistente && novaDataVencimento <= dataFim) {
-                    let valorBaseNum = 0;
-                    if (aluguel.tipo === 'semanal') {
-                        valorBaseNum = parseFloat((locacao.valorAluguel || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-                    } else {
-                        valorBaseNum = parseFloat((locacao.aluguelMensal || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-                    }
-                    const caucaoNum = parseFloat((locacao.caucao || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-                    const caucaoPagoNum = parseFloat((locacao.caucaoPago || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
+                    let valorBaseNum = aluguel.tipo === 'semanal' ? parseValorMonetario(locacao.valorAluguel) : parseValorMonetario(locacao.aluguelMensal);
+                    const caucaoNum = parseValorMonetario(locacao.caucao);
+                    const caucaoPagoNum = parseValorMonetario(locacao.caucaoPago);
                     const pagCaucao = locacao.pagCaucao;
                     const proximaParcela = (aluguel.numeroParcela || 1) + 1;
                     let valorAluguelFinal = valorBaseNum;
@@ -3036,15 +2944,14 @@
                         } else {
                             if (pagCaucao === 'parcelado') { if (proximaParcela <= 10) valorAluguelFinal += (caucaoNum / 10); }
                             else if (pagCaucao === 'entrada') {
-                                if (proximaParcela === 2) valorAluguelFinal += ((caucaoNum - caucaoPagoNum) / 9);
-                                else if (proximaParcela >= 3 && proximaParcela <= 10) valorAluguelFinal += ((caucaoNum - caucaoPagoNum) / 9);
+                                if (proximaParcela >= 2 && proximaParcela <= 10) valorAluguelFinal += ((caucaoNum - caucaoPagoNum) / 9);
                             }
                         }
                     }
-                    const valorFormatado = formatarMoedaBR(valorAluguelFinal);
                     db.alugueis.push({
                         locatario: aluguel.locatario, dataContrato: aluguel.dataContrato, placa: aluguel.placa,
-                        valorAluguel: valorFormatado, dataVencimento: novaDataVencimento.toISOString().split('T')[0],
+                        valorAluguel: formatarMoedaBR(valorAluguelFinal),
+                        dataVencimento: novaDataVencimento.toISOString().split('T')[0],
                         status: 'Pendente', tipo: aluguel.tipo, numeroParcela: proximaParcela
                     });
                 }
@@ -3064,8 +2971,7 @@
             document.getElementById('ctVeiculoCor').value = locacao.cor;
             document.getElementById('ctAnoFabr').value = locacao.anoFabr;
             document.getElementById('ctAnoModel').value = locacao.anoModel;
-            const valorMensalStr = (locacao.aluguelMensal || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.');
-            const valorMensalNum = parseFloat(valorMensalStr) || 0;
+            const valorMensalNum = parseValorMonetario(locacao.aluguelMensal);
             if (valorMensalNum > 0) document.getElementById('ctValorAluguel').value = locacao.aluguelMensal;
             else document.getElementById('ctValorAluguel').value = locacao.valorAluguel;
             document.getElementById('ctValorCaucao').value = locacao.caucao;
@@ -3114,12 +3020,11 @@
             const km = document.getElementById('manKm').value;
             const tipo = document.getElementById('manTipo').value;
             const obs = document.getElementById('manObs').value;
-            if (campoVazio(veiculo) || campoVazio(placa) || campoVazio(km) || campoVazio(tipo)) { alert('Preencha todos os campos obrigatórios da manutenção!'); return; }
-            if (db.manutencao.some(m => m.veiculo === veiculo && m.placa === placa && m.tipo === tipo && m.km === km)) { alert('Já existe uma manutenção idêntica registrada!'); return; }
-            const m = { veiculo, placa, km, tipo, obs };
-            db.manutencao.push(m);
+            if (campoVazio(veiculo) || campoVazio(placa) || campoVazio(km) || campoVazio(tipo)) { alert('Preencha todos os campos!'); return; }
+            if (db.manutencao.some(m => m.veiculo === veiculo && m.placa === placa && m.tipo === tipo && m.km === km)) { alert('Manutenção idêntica já existe!'); return; }
+            db.manutencao.push({ veiculo, placa, km, tipo, obs });
             atualizarTabelaManutencao();
-            registrarAuditoria('Cadastro', `Manutenção: ${m.veiculo}`);
+            registrarAuditoria('Cadastro', `Manutenção: ${veiculo}`);
             salvarDB();
             alert('Manutenção salva!');
             limparCamposManutencao();
@@ -3132,13 +3037,13 @@
             const senha = document.getElementById('userSenha').value;
             const tipo = document.getElementById('userTipo').value;
             const permissoes = coletarPermissoes();
-            if (campoVazio(nome) || campoVazio(senha)) { alert('Preencha nome e senha do usuário!'); return; }
+            if (campoVazio(nome) || campoVazio(senha)) { alert('Preencha nome e senha!'); return; }
             if (usuarioEditandoIndex !== null) {
                 db.usuarios[usuarioEditandoIndex] = { nome, senha, tipo, permissoes, selfie: selfieUsuarioTemp || null };
                 usuarioEditandoIndex = null;
-                registrarAuditoria('Edição', `Usuário atualizado: ${nome}`);
+                registrarAuditoria('Edição', `Usuário: ${nome}`);
             } else {
-                if (db.usuarios.some(u => u.nome === nome)) { alert('Já existe um usuário com esse nome!'); return; }
+                if (db.usuarios.some(u => u.nome === nome)) { alert('Já existe este usuário!'); return; }
                 db.usuarios.push({ nome, senha, tipo, permissoes, selfie: selfieUsuarioTemp || null });
                 registrarAuditoria('Cadastro', `Usuário ${nome} (${tipo})`);
             }
@@ -3154,8 +3059,8 @@
             const conta = document.getElementById('bancoConta').value;
             const pix = document.getElementById('bancoPix').value;
             const titular = document.getElementById('bancoTitular').value;
-            if (campoVazio(nome) || campoVazio(agencia) || campoVazio(conta) || campoVazio(titular)) { alert('Preencha todos os campos obrigatórios do banco!'); return; }
-            if (db.bancos.some(b => b.nome.toLowerCase() === nome.toLowerCase() && b.agencia === agencia && b.conta === conta)) { alert('Já existe um banco com essa agência e conta!'); return; }
+            if (campoVazio(nome) || campoVazio(agencia) || campoVazio(conta) || campoVazio(titular)) { alert('Preencha todos os campos!'); return; }
+            if (db.bancos.some(b => b.nome.toLowerCase() === nome.toLowerCase() && b.agencia === agencia && b.conta === conta)) { alert('Banco já cadastrado!'); return; }
             db.bancos.push({ nome, agencia, conta, pix, titular });
             atualizarTabelaBancos();
             limparCamposBanco();
@@ -3170,8 +3075,8 @@
             const categoria = document.getElementById('fcCategoria').value;
             const valor = document.getElementById('fcValor').value;
             const tipo = document.getElementById('fcTipo').value;
-            if (campoVazio(data) || campoVazio(descricao) || campoVazio(categoria) || campoVazio(valor)) { alert('Preencha todos os campos obrigatórios do lançamento!'); return; }
-            if (db.fluxoCaixa.some(f => f.data === data && f.descricao === descricao && f.valor === valor && f.tipo === tipo)) { alert('Já existe um lançamento idêntico no fluxo de caixa!'); return; }
+            if (campoVazio(data) || campoVazio(descricao) || campoVazio(categoria) || campoVazio(valor)) { alert('Preencha todos os campos!'); return; }
+            if (db.fluxoCaixa.some(f => f.data === data && f.descricao === descricao && f.valor === valor && f.tipo === tipo)) { alert('Lançamento idêntico já existe!'); return; }
             db.fluxoCaixa.push({ data, descricao, categoria, valor, tipo });
             atualizarTabelaFluxoCaixa();
             atualizarResumoFinanceiro();
@@ -3184,11 +3089,9 @@
         async function processarDocumentoComprovante(file) {
             if (!file) return;
             const extensao = file.name.split('.').pop().toLowerCase();
-            const tiposPermitidos = ['pdf', 'jpg', 'jpeg', 'png'];
-            if (!tiposPermitidos.includes(extensao)) { alert('Formato não suportado! Aceitos: PDF, JPG, JPEG, PNG.'); document.getElementById('docUpload').value = ''; return; }
+            if (!['pdf', 'jpg', 'jpeg', 'png'].includes(extensao)) { alert('Formato não suportado!'); document.getElementById('docUpload').value = ''; return; }
             if (extensao !== 'pdf') {
-                const dataUrl = await comprimirImagem(file, 400, 0.4);
-                docUploadDataUrl = dataUrl;
+                docUploadDataUrl = await comprimirImagem(file, 400, 0.4);
                 docUploadFileType = extensao;
             } else {
                 const reader = new FileReader();
@@ -3196,14 +3099,13 @@
                 reader.readAsDataURL(file);
             }
             atualizarPreviewDoc();
-            let textoExtraido = '';
             try {
+                let textoExtraido = '';
                 if (extensao === 'pdf') textoExtraido = await extrairTextoPDF(file);
                 else textoExtraido = await extrairTextoImagem(file);
                 preencherCamposComprovante(textoExtraido);
             } catch (erro) {
                 console.error('Erro ao extrair texto:', erro);
-                alert('Não foi possível extrair o texto do arquivo. Preencha os campos manualmente.');
             }
         }
 
@@ -3221,7 +3123,7 @@
 
         async function extrairTextoImagem(file) {
             const imageUrl = URL.createObjectURL(file);
-            const resultado = await Tesseract.recognize(imageUrl, 'por', { logger: m => console.log(m) });
+            const resultado = await Tesseract.recognize(imageUrl, 'por', { logger: () => {} });
             URL.revokeObjectURL(imageUrl);
             return resultado.data.text;
         }
@@ -3256,12 +3158,10 @@
 
         function preencherPlacaUsuarioLogado() {
             if (!usuarioLogado) return;
-            const nomeUsuario = usuarioLogado.nome;
-            const locacoesUsuario = db.locacoes.filter(l => l.locatario === nomeUsuario);
+            const locacoesUsuario = db.locacoes.filter(l => l.locatario === usuarioLogado.nome);
             if (locacoesUsuario.length > 0) {
                 locacoesUsuario.sort((a, b) => new Date(b.dataInicio) - new Date(a.dataInicio));
-                const placa = locacoesUsuario[0].placa;
-                if (placa) document.getElementById('docReferencia').value = placa;
+                if (locacoesUsuario[0].placa) document.getElementById('docReferencia').value = locacoesUsuario[0].placa;
             }
         }
 
@@ -3303,8 +3203,8 @@
             const data = document.getElementById('docData').value;
             const referencia = document.getElementById('docReferencia').value;
             const obs = document.getElementById('docObs').value;
-            if (campoVazio(nome) || campoVazio(tipo) || campoVazio(data) || campoVazio(referencia)) { alert('Preencha todos os campos obrigatórios do documento!'); return; }
-            if (db.documentos.some(d => d.nome.toLowerCase() === nome.toLowerCase())) { alert('Já existe um documento com esse nome!'); return; }
+            if (campoVazio(nome) || campoVazio(tipo) || campoVazio(data) || campoVazio(referencia)) { alert('Preencha todos os campos!'); return; }
+            if (db.documentos.some(d => d.nome.toLowerCase() === nome.toLowerCase())) { alert('Documento já existe!'); return; }
             db.documentos.push({ nome, tipo, data, referencia, obs, imagem: docUploadDataUrl || null, fileType: docUploadFileType || null });
             atualizarTabelaDoc();
             atualizarSubAbasDoc();
@@ -3346,6 +3246,7 @@
 
         function atualizarTabelaVeiculos() {
             const tbody = document.querySelector('#tabelaVeiculos tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             const veiculosFiltrados = db.veiculos.filter(v => temPermissaoVeiculo(v.placa));
             veiculosFiltrados.forEach((v, index) => {
@@ -3357,6 +3258,7 @@
 
         function atualizarTabelaClientes() {
             const tbody = document.querySelector('#tabelaClientes tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.clientes.forEach((c, index) => {
                 const row = tbody.insertRow();
@@ -3368,6 +3270,7 @@
 
         function atualizarTabelaUsuario() {
             const tbody = document.querySelector('#tabelaUsuario tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.usuarios.forEach((u, index) => {
                 const row = tbody.insertRow();
@@ -3379,14 +3282,13 @@
 
         function atualizarTabelaLocacoes() {
             const tbody = document.querySelector('#tabelaLocacoes tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.locacoes.forEach((l, index) => {
                 const row = tbody.insertRow();
                 let valorExibido = l.valorAluguel || 'R$ 0,00';
-                if (l.aluguelMensal) {
-                    const valorMensalNum = parseFloat(l.aluguelMensal.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
-                    if (!isNaN(valorMensalNum) && valorMensalNum > 0) valorExibido = l.aluguelMensal;
-                }
+                const vM = parseValorMonetario(l.aluguelMensal);
+                if (vM > 0) valorExibido = l.aluguelMensal;
                 row.innerHTML = `<td>${l.locatario}</td><td>${l.veiculo}</td><td>${l.placa}</td><td>${formatarDataBR(l.dataInicio)}</td><td>${formatarDataBR(l.dataFim)}</td><td>${valorExibido}</td>
                     <td>
                         <button class="btn-warning" onclick="editarLocacao(${index})">✏️</button>
@@ -3404,16 +3306,15 @@
             const dataEncerramento = new Date();
             const dias = Math.ceil((dataEncerramento - dataInicio) / (1000 * 60 * 60 * 24)) + 1;
             let valorDiario = 0;
-            const valorAluguelNum = parseFloat((locacao.valorAluguel || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-            const aluguelMensalNum = parseFloat((locacao.aluguelMensal || '').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-            if (aluguelMensalNum > 0) valorDiario = aluguelMensalNum / 30;
-            else if (valorAluguelNum > 0) valorDiario = valorAluguelNum / 7;
+            const vA = parseValorMonetario(locacao.valorAluguel);
+            const vM = parseValorMonetario(locacao.aluguelMensal);
+            if (vM > 0) valorDiario = vM / 30;
+            else if (vA > 0) valorDiario = vA / 7;
             const totalGerado = valorDiario * dias;
             locacao.totalGerado = formatarMoedaBR(totalGerado);
             locacao.dataEncerramento = new Date().toISOString().split('T')[0];
             const despesasTotaisNumero = calcularDespesasLocacaoNumero(locacao);
-            const receitaNumero = parseFloat((locacao.totalGerado || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-            const lucroNumero = receitaNumero - despesasTotaisNumero;
+            const lucroNumero = totalGerado - despesasTotaisNumero;
             locacao.despesas = formatarMoedaBR(despesasTotaisNumero);
             locacao.lucro = formatarMoedaBR(lucroNumero);
             db.locacoesEncerradas.push(locacao);
@@ -3425,18 +3326,20 @@
             registrarAuditoria('Edição', `Locação encerrada: ${locacao.locatario} - ${locacao.placa}`);
             salvarDB();
             atualizarVistoria();
-            alert('Locação encerrada com sucesso!');
+            alert('Locação encerrada!');
         }
 
         function atualizarTabelaLocEncerrada() {
             const tbody = document.querySelector('#tabelaLocEncerrada tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.locacoesEncerradas.forEach((l, index) => {
                 const row = tbody.insertRow();
                 const totalGerado = l.totalGerado || 'R$ 0,00';
                 const despesas = l.despesas || calcularDespesasLocacao(l);
                 const lucro = l.lucro || formatarMoedaBR(calcularLucroLocacao(l));
-                const lucroClass = (parseFloat(lucro.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0) >= 0 ? 'lucro-positivo' : 'lucro-negativo';
+                const lucroNum = parseValorMonetario(lucro);
+                const lucroClass = lucroNum >= 0 ? 'lucro-positivo' : 'lucro-negativo';
                 row.innerHTML = `<td>${l.locatario}</td><td>${l.veiculo}</td><td>${l.placa}</td><td>${formatarDataBR(l.dataInicio)}</td><td>${formatarDataBR(l.dataFim)}</td><td>${formatarDataBR(l.dataEncerramento)}</td><td>${totalGerado}</td><td>${despesas}</td><td class="${lucroClass}">${lucro}</td>
                     <td>
                         <button class="btn-warning" data-permissao="locEncerrada_reativar" onclick="reativarLocacao(${index})">🔄 Reativar</button>
@@ -3447,9 +3350,7 @@
             atualizarDashboardEncerradas();
         }
 
-        function calcularDespesasLocacao(locacao) {
-            return formatarMoedaBR(calcularDespesasLocacaoNumero(locacao));
-        }
+        function calcularDespesasLocacao(locacao) { return formatarMoedaBR(calcularDespesasLocacaoNumero(locacao)); }
 
         function calcularDespesasLocacaoNumero(locacao) {
             if (!locacao || !locacao.placa) return 0;
@@ -3462,19 +3363,19 @@
                 return itemDate >= inicio && itemDate <= fim;
             });
             let total = 0;
-            despesas.forEach(item => { total += parseFloat((item.valor || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0; });
+            despesas.forEach(item => { total += parseValorMonetario(item.valor); });
             return total;
         }
 
         function calcularLucroLocacao(locacao) {
-            const receita = parseFloat((locacao.totalGerado || '0').replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
+            const receita = parseValorMonetario(locacao.totalGerado);
             return receita - calcularDespesasLocacaoNumero(locacao);
         }
 
         function reativarLocacao(index) {
             const locacao = db.locacoesEncerradas[index];
             if (!locacao) return;
-            if (!confirm(`Reativar a locação de ${locacao.locatario} - ${locacao.placa}?`)) return;
+            if (!confirm(`Reativar a locação?`)) return;
             delete locacao.dataEncerramento;
             delete locacao.totalGerado;
             delete locacao.despesas;
@@ -3485,21 +3386,21 @@
             atualizarTabelaLocEncerrada();
             atualizarTabelaLocacoes();
             atualizarTabelaAlugueis();
-            registrarAuditoria('Edição', `Locação reativada: ${locacao.locatario} - ${locacao.placa}`);
+            registrarAuditoria('Edição', `Locação reativada`);
             salvarDB();
             atualizarVistoria();
-            alert('Locação reativada com sucesso!');
+            alert('Locação reativada!');
         }
 
         function excluirLocEncerrada(index) {
             const locacao = db.locacoesEncerradas[index];
             if (!locacao) return;
-            if (!confirm(`Excluir permanentemente a locação de ${locacao.locatario} - ${locacao.placa}?`)) return;
+            if (!confirm(`Excluir permanentemente?`)) return;
             db.locacoesEncerradas.splice(index, 1);
             atualizarTabelaLocEncerrada();
-            registrarAuditoria('Exclusão', `Locação encerrada excluída: ${locacao.locatario} - ${locacao.placa}`);
+            registrarAuditoria('Exclusão', `Locação encerrada excluída`);
             salvarDB();
-            alert('Locação excluída permanentemente.');
+            alert('Excluída!');
         }
 
         function verDespesasLocacao(index) {
@@ -3518,7 +3419,7 @@
             const body = document.getElementById('despesasModalBody');
             body.innerHTML = '';
             if (despesas.length === 0) {
-                body.innerHTML = '<p style="text-align: center; padding: 20px;">Nenhuma despesa encontrada para esta locação.</p>';
+                body.innerHTML = '<p style="text-align: center; padding: 20px;">Nenhuma despesa encontrada.</p>';
             } else {
                 let html = '<table style="width:100%; border-collapse:collapse;"><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Fornecedor</th><th>Oficina</th></tr></thead><tbody>';
                 despesas.forEach(item => {
@@ -3534,6 +3435,7 @@
 
         function atualizarTabelaManutencao() {
             const tbody = document.querySelector('#tabelaManutencao tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.manutencao.forEach((m, index) => {
                 const row = tbody.insertRow();
@@ -3544,10 +3446,11 @@
 
         function atualizarTabelaMecanico() {
             const tbody = document.querySelector('#tabelaMecanico tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.mecanico.forEach((m, index) => {
                 const row = tbody.insertRow();
-                const pagamentoBtn = m.pago ? '<button class="btn-success" disabled style="opacity: 0.6; cursor: not-allowed;">💰 Pago</button>' : '<button class="btn-success" onclick="pagamentoMecanico(' + index + ')">💰 Pagamento</button>';
+                const pagamentoBtn = m.pago ? '<button class="btn-success" disabled style="opacity: 0.6;">💰 Pago</button>' : '<button class="btn-success" onclick="pagamentoMecanico(' + index + ')">💰 Pagamento</button>';
                 row.innerHTML = `<td>${formatarDataBR(m.data)}</td><td>${m.oficina}</td><td>${m.servico}</td><td>${m.carro}</td><td>${m.valor}</td>
                     <td>${pagamentoBtn}<button class="btn-warning" onclick="editarMecanico(${index})">✏️</button><button class="btn-danger" onclick="excluirMecanico(${index})">🗑️</button></td>`;
             });
@@ -3555,10 +3458,11 @@
 
         function atualizarTabelaAlugueis() {
             const tbody = document.querySelector('#tabelaPagamentos tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.alugueis.forEach((a, index) => {
                 const row = tbody.insertRow();
-                let statusClass = a.status === 'Pendente' ? 'status-pendente' : a.status === 'Pago' ? 'status-pago' : 'status-atrasado';
+                let statusClass = a.status === 'Pendente' ? 'status-pendente' : 'status-pago';
                 const hoje = new Date();
                 const vencimento = new Date(a.dataVencimento);
                 if (a.status === 'Pendente' && vencimento < hoje) statusClass = 'status-atrasado';
@@ -3577,6 +3481,7 @@
 
         function atualizarTabelaBancos() {
             const tbody = document.querySelector('#tabelaBancos tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.bancos.forEach((b, index) => {
                 const row = tbody.insertRow();
@@ -3587,6 +3492,7 @@
 
         function atualizarTabelaFluxoCaixa() {
             const tbody = document.querySelector('#tabelaFluxoCaixa tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.fluxoCaixa.forEach((f, index) => {
                 const row = tbody.insertRow();
@@ -3597,6 +3503,7 @@
 
         function atualizarTabelaDoc() {
             const tbody = document.querySelector('#tabelaDoc tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             let docs = db.documentos;
             if (docPlacaSelecionada) docs = docs.filter(d => d.referencia === docPlacaSelecionada);
@@ -3610,6 +3517,7 @@
 
         function atualizarTabelaCompras() {
             const tbody = document.querySelector('#tabelaCompras tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.compras.forEach((c, index) => {
                 const row = tbody.insertRow();
@@ -3622,10 +3530,12 @@
 
         function atualizarTabelaAuditoria() {
             const tbody = document.querySelector('#tabelaAuditoria tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.auditoria.forEach(a => {
                 const row = tbody.insertRow();
-                row.innerHTML = `<td>${a.data.toLocaleString('pt-BR')}</td><td>${a.usuario}</td><td>${a.acao}</td><td>${a.descricao}</td><td>${a.ip}</td>`;
+                const dt = a.data instanceof Date ? a.data : new Date(a.data);
+                row.innerHTML = `<td>${dt.toLocaleString('pt-BR')}</td><td>${a.usuario}</td><td>${a.acao}</td><td>${a.descricao}</td><td>${a.ip}</td>`;
             });
         }
 
@@ -3653,8 +3563,8 @@
                 db.historico.splice(index, 1);
                 atualizarTabelaHistorico();
                 salvarDB();
-                registrarAuditoria('Exclusão', `Lançamento do histórico excluído: ${item.descricao}`);
-                alert('Lançamento excluído!');
+                registrarAuditoria('Exclusão', `Histórico: ${item.descricao}`);
+                alert('Excluído!');
             }
         }
 
@@ -3669,8 +3579,7 @@
                 reader.onload = function(e) { compPdfDataUrl = e.target.result; compPdfFileType = extensao; document.getElementById('compPdfPreview').textContent = '📄 PDF carregado'; };
                 reader.readAsDataURL(file);
             } else {
-                const dataUrl = await comprimirImagem(file, 400, 0.4);
-                compPdfDataUrl = dataUrl;
+                compPdfDataUrl = await comprimirImagem(file, 400, 0.4);
                 compPdfFileType = extensao;
                 document.getElementById('compPdfPreview').textContent = '🖼️ Imagem carregada';
             }
@@ -3685,8 +3594,7 @@
                 reader.onload = function(e) { mecPdfDataUrl = e.target.result; mecPdfFileType = extensao; document.getElementById('mecPdfPreview').textContent = '📄 PDF carregado'; };
                 reader.readAsDataURL(file);
             } else {
-                const dataUrl = await comprimirImagem(file, 400, 0.4);
-                mecPdfDataUrl = dataUrl;
+                mecPdfDataUrl = await comprimirImagem(file, 400, 0.4);
                 mecPdfFileType = extensao;
                 document.getElementById('mecPdfPreview').textContent = '🖼️ Imagem carregada';
             }
@@ -3724,8 +3632,8 @@
             if (originalIndex > -1) db.veiculos.splice(originalIndex, 1);
             atualizarTabelaVeiculos();
             atualizarCombosLocacao();
-            atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
-            registrarAuditoria('Edição', `Veículo editado: ${v.fabricante} - ${v.placa}`);
+            atualizarPlacasComprovantes();
+            registrarAuditoria('Edição', `Veículo editado: ${v.placa}`);
             salvarDB();
             atualizarPlacasManutencao();
             atualizarPlacasMecanico();
@@ -3744,8 +3652,8 @@
                 atualizarTabelaVeiculos();
                 atualizarPermissoesVeiculos();
                 atualizarCombosLocacao();
-                atualizarPlacasComprovantes(); // Atualiza o select de placas de documentos
-                registrarAuditoria('Exclusão', `Veículo excluído: ${v.fabricante} - ${v.placa}`);
+                atualizarPlacasComprovantes();
+                registrarAuditoria('Exclusão', `Veículo excluído: ${v.placa}`);
                 salvarDB();
                 atualizarPlacasManutencao();
                 atualizarPlacasMecanico();
@@ -3790,15 +3698,13 @@
                 db.clientes.splice(index, 1);
                 atualizarTabelaClientes();
                 atualizarCombosLocacao();
-                registrarAuditoria('Exclusão', `Cliente excluído: ${c.nome}`);
+                registrarAuditoria('Exclusão', `Cliente: ${c.nome}`);
                 salvarDB();
             }
         }
 
         function limparCamposCliente() {
-            ['cliDataCadastro', 'cliNome', 'cliCpf', 'cliRg', 'cliCnh', 'cliDataCnh', 'cliTelefone', 'cliEndereco',
-                'cliCep', 'cliCidade', 'cliEstado'
-            ].forEach(id => document.getElementById(id).value = '');
+            ['cliDataCadastro', 'cliNome', 'cliCpf', 'cliRg', 'cliCnh', 'cliDataCnh', 'cliTelefone', 'cliEndereco', 'cliCep', 'cliCidade', 'cliEstado'].forEach(id => document.getElementById(id).value = '');
             limparSelfieCliente();
         }
 
@@ -3837,7 +3743,7 @@
             if (confirm(`Excluir usuário ${u.nome}?`)) {
                 db.usuarios.splice(index, 1);
                 atualizarTabelaUsuario();
-                registrarAuditoria('Exclusão', `Usuário excluído: ${u.nome}`);
+                registrarAuditoria('Exclusão', `Usuário: ${u.nome}`);
                 salvarDB();
             }
         }
@@ -3872,7 +3778,7 @@
             document.getElementById('locCaucaoPago').value = l.caucaoPago || '';
             db.locacoes.splice(index, 1);
             atualizarTabelaLocacoes();
-            registrarAuditoria('Edição', `Locação editada: ${l.locatario}`);
+            registrarAuditoria('Edição', `Locação editada`);
             salvarDB();
         }
 
@@ -3884,7 +3790,7 @@
                 db.alugueis = db.alugueis.filter(a => !(a.locatario === l.locatario && a.placa === l.placa && a.dataContrato === l.dataInicio));
                 atualizarTabelaLocacoes();
                 atualizarTabelaAlugueis();
-                registrarAuditoria('Exclusão', `Locação excluída: ${l.locatario}`);
+                registrarAuditoria('Exclusão', `Locação: ${l.locatario}`);
                 salvarDB();
                 atualizarVistoria();
             }
@@ -3907,7 +3813,7 @@
             document.getElementById('manObs').value = m.obs;
             db.manutencao.splice(index, 1);
             atualizarTabelaManutencao();
-            registrarAuditoria('Edição', `Manutenção editada: ${m.veiculo}`);
+            registrarAuditoria('Edição', `Manutenção`);
             salvarDB();
         }
 
@@ -3917,7 +3823,7 @@
                 const m = db.manutencao[index];
                 db.manutencao.splice(index, 1);
                 atualizarTabelaManutencao();
-                registrarAuditoria('Exclusão', `Manutenção excluída: ${m.veiculo}`);
+                registrarAuditoria('Exclusão', `Manutenção: ${m.veiculo}`);
                 salvarDB();
             }
         }
@@ -3940,7 +3846,7 @@
             db.mecanico.splice(index, 1);
             atualizarTabelaMecanico();
             atualizarOficinasMecanico();
-            registrarAuditoria('Edição', `Serviço editado: ${m.servico}`);
+            registrarAuditoria('Edição', `Serviço: ${m.servico}`);
             salvarDB();
         }
 
@@ -3951,7 +3857,7 @@
                 db.mecanico.splice(index, 1);
                 atualizarTabelaMecanico();
                 atualizarOficinasMecanico();
-                registrarAuditoria('Exclusão', `Serviço excluído: ${m.servico}`);
+                registrarAuditoria('Exclusão', `Serviço: ${m.servico}`);
                 salvarDB();
             }
         }
@@ -3967,7 +3873,7 @@
             document.getElementById('bancoTitular').value = b.titular;
             db.bancos.splice(index, 1);
             atualizarTabelaBancos();
-            registrarAuditoria('Edição', `Banco editado: ${b.nome}`);
+            registrarAuditoria('Edição', `Banco: ${b.nome}`);
             salvarDB();
         }
 
@@ -3977,7 +3883,7 @@
                 const b = db.bancos[index];
                 db.bancos.splice(index, 1);
                 atualizarTabelaBancos();
-                registrarAuditoria('Exclusão', `Banco excluído: ${b.nome}`);
+                registrarAuditoria('Exclusão', `Banco: ${b.nome}`);
                 salvarDB();
             }
         }
@@ -3997,7 +3903,7 @@
             db.fluxoCaixa.splice(index, 1);
             atualizarTabelaFluxoCaixa();
             atualizarResumoFinanceiro();
-            registrarAuditoria('Edição', `Lançamento editado: ${f.descricao}`);
+            registrarAuditoria('Edição', `Lançamento`);
             salvarDB();
         }
 
@@ -4008,7 +3914,7 @@
                 db.fluxoCaixa.splice(index, 1);
                 atualizarTabelaFluxoCaixa();
                 atualizarResumoFinanceiro();
-                registrarAuditoria('Exclusão', `Lançamento excluído: ${f.descricao}`);
+                registrarAuditoria('Exclusão', `Lançamento`);
                 salvarDB();
             }
         }
@@ -4034,7 +3940,7 @@
             db.documentos.splice(index, 1);
             atualizarTabelaDoc();
             atualizarSubAbasDoc();
-            registrarAuditoria('Edição', `Doc editado: ${d.nome}`);
+            registrarAuditoria('Edição', `Doc: ${d.nome}`);
             salvarDB();
         }
 
@@ -4045,7 +3951,7 @@
                 db.documentos.splice(index, 1);
                 atualizarTabelaDoc();
                 atualizarSubAbasDoc();
-                registrarAuditoria('Exclusão', `Doc excluído: ${d.nome}`);
+                registrarAuditoria('Exclusão', `Doc: ${d.nome}`);
                 salvarDB();
             }
         }
@@ -4063,10 +3969,9 @@
             const status = document.getElementById('compStatus').value;
             const categoria = document.getElementById('compCategoria').value;
             const obs = document.getElementById('compObs').value;
-            if (campoVazio(data) || campoVazio(produto) || campoVazio(fornecedor) || campoVazio(valorTotal)) { alert('Preencha os campos obrigatórios da compra!'); return; }
-            if (db.compras.some(c => c.data === data && c.produto === produto && c.fornecedor === fornecedor)) { alert('Já existe uma compra idêntica registrada!'); return; }
-            let arquivoData = null;
-            let arquivoTipo = null;
+            if (campoVazio(data) || campoVazio(produto) || campoVazio(fornecedor) || campoVazio(valorTotal)) { alert('Preencha os campos obrigatórios!'); return; }
+            if (db.compras.some(c => c.data === data && c.produto === produto && c.fornecedor === fornecedor)) { alert('Compra idêntica já existe!'); return; }
+            let arquivoData = null, arquivoTipo = null;
             if (document.getElementById('compUpload').files.length > 0) {
                 const file = document.getElementById('compUpload').files[0];
                 if (file.name.split('.').pop().toLowerCase() === 'pdf') {
@@ -4081,8 +3986,7 @@
             db.compras.push({ data, produto, fornecedor, cnpjFornecedor, placa, quantidade, valorUnitario, valorTotal, formaPagamento, status, categoria, obs, arquivo: arquivoData, arquivoTipo });
             db.historico.push({ data, descricao: produto, placa, valor: valorTotal, fornecedor, oficina: '', arquivo: arquivoData || null, arquivoTipo: arquivoTipo || null });
             const descricaoFluxo = `Compra: ${produto}`;
-            const existeFluxo = db.fluxoCaixa.some(f => f.data === data && f.descricao === descricaoFluxo && f.valor === valorTotal && f.tipo === 'saida');
-            if (!existeFluxo) {
+            if (!db.fluxoCaixa.some(f => f.data === data && f.descricao === descricaoFluxo && f.valor === valorTotal && f.tipo === 'saida')) {
                 db.fluxoCaixa.push({ data, descricao: descricaoFluxo, categoria: 'Compras', valor: valorTotal, tipo: 'saida' });
             }
             atualizarTabelaCompras();
@@ -4091,7 +3995,7 @@
             atualizarResumoFinanceiro();
             registrarAuditoria('Cadastro', `Compra: ${produto}`);
             salvarDB();
-            alert('Compra salva e lançada no Fluxo de Caixa e Histórico!');
+            alert('Compra salva!');
             limparCamposCompra();
         }
 
@@ -4121,7 +4025,7 @@
                 db.compras.splice(index, 1);
                 if (compraEditandoIndex === index) compraEditandoIndex = null;
                 atualizarTabelaCompras();
-                registrarAuditoria('Exclusão', `Compra excluída: ${compra.produto}`);
+                registrarAuditoria('Exclusão', `Compra: ${compra.produto}`);
                 salvarDB();
                 alert('Compra excluída!');
             }
@@ -4154,7 +4058,7 @@
                 compraEditandoIndex = null;
                 atualizarTabelaCompras();
                 limparCamposCompra();
-                registrarAuditoria('Exclusão', `Compra excluída: ${compra.produto}`);
+                registrarAuditoria('Exclusão', `Compra: ${compra.produto}`);
                 salvarDB();
                 alert('Compra excluída!');
             }
@@ -4258,7 +4162,7 @@
                 db.config.ultimaLimpezaAuditoria = new Date().toISOString();
                 atualizarTabelaAuditoria();
                 salvarDB();
-                registrarAuditoria('Exclusão', 'Auditoria limpa manualmente');
+                registrarAuditoria('Exclusão', 'Auditoria limpa');
                 alert('Auditoria limpa!');
             }
         }
@@ -4311,6 +4215,7 @@
 
         function atualizarGaleriaGaragem() {
             const container = document.getElementById('garagemSavedImages');
+            if (!container) return;
             container.innerHTML = '';
             if (!db.imagens.garagem.fotos || db.imagens.garagem.fotos.length === 0) return;
             db.imagens.garagem.fotos.forEach((foto, i) => {
@@ -4328,11 +4233,9 @@
                     statusBtn.classList.add('piscando');
                     statusBtn.textContent = 'DISPONÍVEL';
                 } else if (foto.estado === 'alugado') {
-                    div.classList.remove('piscando');
                     statusBtn.classList.add('alugado');
                     statusBtn.textContent = 'ALUGADO';
                 } else {
-                    div.classList.remove('piscando');
                     statusBtn.classList.add('disponivel');
                     statusBtn.textContent = 'DISPONÍVEL';
                 }
@@ -4361,7 +4264,6 @@
                 db.imagens.garagem.fotos[index].estado = 'alugado';
             } else if (estadoAtual === 'alugado') {
                 div.dataset.estado = 'disponivel';
-                div.classList.remove('piscando');
                 statusBtn.classList.remove('alugado');
                 statusBtn.classList.add('disponivel');
                 statusBtn.textContent = 'DISPONÍVEL';
@@ -4397,6 +4299,7 @@
 
         function atualizarGaleriaSOS() {
             const container = document.getElementById('sosSavedImages');
+            if (!container) return;
             container.innerHTML = '';
             db.imagens.sos.fotos.forEach((foto, i) => {
                 const div = document.createElement('div');
@@ -4424,8 +4327,6 @@
                 a.click();
             } else alert('Nenhuma imagem SOS salva!');
         }
-
-        // Funções antigas de comprovante foram substituídas pelas novas funções de Documentos por Placa
 
         function openImageModal(src) {
             document.getElementById('modalImage').src = src;
@@ -4501,84 +4402,58 @@
         }
 
         // ============================================================
-        // NOVA FUNÇÃO: GERA PDF E ABRE EM NOVA ABA (TELA CHEIA)
+        // GERA PDF E ABRE EM NOVA ABA
         // ============================================================
         async function abrirHtmlComoPdfNovaAba(htmlContent, nomeArquivo) {
-            if (!htmlContent || !htmlContent.trim()) {
-                alert('Nenhum conteúdo para gerar PDF.');
-                return;
-            }
+            if (!htmlContent || !htmlContent.trim()) { alert('Nenhum conteúdo para gerar PDF.'); return; }
             if (typeof html2canvas === 'undefined' || !window.jspdf || !window.jspdf.jsPDF) {
-                // Fallback: abre HTML em nova aba e dispara impressão
                 const win = window.open('', '_blank');
-                if (!win) { alert('Pop-up bloqueado! Permita pop-ups para este site.'); return; }
+                if (!win) { alert('Pop-up bloqueado! Permita pop-ups.'); return; }
                 win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + (nomeArquivo || 'Documento') + '</title></head><body>' + htmlContent + '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},400);}<\/scr'+'ipt></body></html>');
                 win.document.close();
                 return;
             }
-
-            // Cria um container temporário fora da tela
             const tempContainer = document.createElement('div');
             tempContainer.style.position = 'fixed';
             tempContainer.style.left = '-10000px';
             tempContainer.style.top = '0';
-            tempContainer.style.width = '794px'; // ~A4 a 96dpi
+            tempContainer.style.width = '794px';
             tempContainer.style.background = '#ffffff';
             tempContainer.style.padding = '30px';
             tempContainer.style.boxSizing = 'border-box';
             tempContainer.style.color = '#000';
             tempContainer.innerHTML = htmlContent;
             document.body.appendChild(tempContainer);
-
             try {
-                const canvas = await html2canvas(tempContainer, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                    windowWidth: 794
-                });
-
+                const canvas = await html2canvas(tempContainer, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', windowWidth: 794 });
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
-
-                const pageWidth = 210;
-                const pageHeight = 297;
+                const pageWidth = 210, pageHeight = 297;
                 const imgWidth = pageWidth;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
                 let heightLeft = imgHeight;
                 let position = 0;
-
                 pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
-
                 while (heightLeft > 0) {
                     position = heightLeft - imgHeight;
                     pdf.addPage();
                     pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
                     heightLeft -= pageHeight;
                 }
-
                 const blob = pdf.output('blob');
                 const url = URL.createObjectURL(blob);
-
                 const win = window.open(url, '_blank');
                 if (!win) {
-                    // Fallback: baixa o PDF
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = (nomeArquivo || 'documento') + '.pdf';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                    alert('O navegador bloqueou o pop-up.\nO PDF foi baixado automaticamente.');
-                } else {
-                    win.focus();
-                }
-
-                // Libera a URL do objeto após algum tempo
+                    alert('Pop-up bloqueado. PDF baixado automaticamente.');
+                } else win.focus();
                 setTimeout(() => { try { URL.revokeObjectURL(url); } catch(e) {} }, 60000);
             } catch (err) {
                 console.error('Erro ao gerar PDF:', err);
@@ -4589,44 +4464,36 @@
                     win.document.close();
                 }
             } finally {
-                if (tempContainer && tempContainer.parentNode) {
-                    tempContainer.parentNode.removeChild(tempContainer);
-                }
+                if (tempContainer && tempContainer.parentNode) tempContainer.parentNode.removeChild(tempContainer);
             }
         }
 
         function imprimirDocumento(tipo) {
             salvarDadosContratos();
-            let html = '';
-            let nome = 'documento';
+            let html = '', nome = 'documento';
             if (tipo === 'contratoLocacao') { html = gerarHtmlContratoLocacao(); nome = 'Contrato_Locacao'; }
             else if (tipo === 'termoResponsabilidade') { html = gerarHtmlTermoResponsabilidade(); nome = 'Termo_Responsabilidade'; }
             else if (tipo === 'notaPromissoria') { html = gerarHtmlNotaPromissoria(); nome = 'Nota_Promissoria'; }
-            if (!html) { alert('Tipo de documento inválido!'); return; }
+            if (!html) { alert('Tipo inválido!'); return; }
             abrirHtmlComoPdfNovaAba(html, nome);
         }
 
-        // ===== IMPRIMIR TODOS OS DOCUMENTOS EM UM ÚNICO PDF =====
         function imprimirTodosDocumentos() {
             salvarDadosContratos();
-
             const htmlContrato = gerarHtmlContratoLocacao();
             const htmlTermo = gerarHtmlTermoResponsabilidade();
             const htmlNota = gerarHtmlNotaPromissoria();
-
             const htmlCompleto = `
                 <div style="page-break-after: always;">${htmlContrato}</div>
                 <div style="page-break-after: always;">${htmlTermo}</div>
                 <div>${htmlNota}</div>
             `;
-
             abrirHtmlComoPdfNovaAba(htmlCompleto, 'Documentos_Completos');
         }
 
         // =============================================
-        // GERAÇÃO DOS HTMLs DOS CONTRATOS (TEXTOS EXATOS)
+        // HTMLs DOS CONTRATOS (TEXTOS EXATOS)
         // =============================================
-
         function gerarHtmlContratoLocacao() {
             const d = {};
             document.querySelectorAll('#contratoLocacao input').forEach(input => { d[input.id] = input.value; });
@@ -4744,7 +4611,7 @@
             const debito = document.getElementById('pendDebito').value;
             const vencimento = document.getElementById('pendVencimento').value;
             if (!data || !descricao || !vencimento) { alert('Preencha Data, Descrição e Vencimento!'); return; }
-            if (!credito && !debito) { alert('Preencha pelo menos um valor (Crédito ou Débito)!'); return; }
+            if (!credito && !debito) { alert('Preencha pelo menos um valor!'); return; }
             let docData = null, docTipo = null;
             if (document.getElementById('pendUpload').files.length > 0) {
                 const file = document.getElementById('pendUpload').files[0];
@@ -4762,21 +4629,21 @@
             if (pendenciaEditandoIndex !== null) {
                 db.pendentes[pendenciaEditandoIndex] = pendencia;
                 pendenciaEditandoIndex = null;
-                registrarAuditoria('Edição', `Pendência editada: ${pendencia.descricao}`);
+                registrarAuditoria('Edição', `Pendência: ${pendencia.descricao}`);
             } else {
-                if (db.pendentes.some(p => p.data === data && p.descricao === descricao && p.vencimento === vencimento)) { alert('Já existe uma pendência com esses dados!'); return; }
+                if (db.pendentes.some(p => p.data === data && p.descricao === descricao && p.vencimento === vencimento)) { alert('Pendência já existe!'); return; }
                 db.pendentes.push(pendencia);
-                registrarAuditoria('Cadastro', `Pendência salva: ${pendencia.descricao}`);
+                registrarAuditoria('Cadastro', `Pendência: ${pendencia.descricao}`);
             }
             atualizarTabelaPendentes();
             salvarDB();
             limparCamposPendencia();
-            alert('Pendência salva com sucesso!');
+            alert('Pendência salva!');
         }
 
         function editarPendencia() {
             const index = pendenciaEditandoIndex;
-            if (index === null) { alert('Selecione uma pendência na tabela para editar!'); return; }
+            if (index === null) { alert('Selecione uma pendência!'); return; }
             if (!verificarSenhaAdmin()) return;
             const p = db.pendentes[index];
             document.getElementById('pendData').value = p.data;
@@ -4792,15 +4659,15 @@
 
         function excluirPendencia() {
             const index = pendenciaEditandoIndex;
-            if (index === null) { alert('Selecione uma pendência na tabela para excluir!'); return; }
+            if (index === null) { alert('Selecione uma pendência!'); return; }
             if (!verificarSenhaAdmin()) return;
-            if (confirm(`Excluir a pendência "${db.pendentes[index].descricao}"?`)) {
+            if (confirm(`Excluir a pendência?`)) {
                 const p = db.pendentes[index];
                 db.pendentes.splice(index, 1);
                 pendenciaEditandoIndex = null;
                 atualizarTabelaPendentes();
                 limparCamposPendencia();
-                registrarAuditoria('Exclusão', `Pendência excluída: ${p.descricao}`);
+                registrarAuditoria('Exclusão', `Pendência: ${p.descricao}`);
                 salvarDB();
                 alert('Pendência excluída!');
             }
@@ -4818,24 +4685,22 @@
         async function processarPendenciaPDF(file) {
             if (!file) return;
             const extensao = file.name.split('.').pop().toLowerCase();
-            const tiposPermitidos = ['pdf', 'jpg', 'jpeg', 'png'];
-            if (!tiposPermitidos.includes(extensao)) { alert('Formato não suportado! Aceitos: PDF, JPG, JPEG, PNG.'); document.getElementById('pendUpload').value = ''; return; }
+            if (!['pdf', 'jpg', 'jpeg', 'png'].includes(extensao)) { alert('Formato não suportado!'); document.getElementById('pendUpload').value = ''; return; }
             if (extensao === 'pdf') {
                 const reader = new FileReader();
                 reader.onload = function(e) { pendDocDataUrl = e.target.result; pendDocFileType = extensao; document.getElementById('pendDocPreview').textContent = '📄 PDF carregado'; };
                 reader.readAsDataURL(file);
             } else {
-                const dataUrl = await comprimirImagem(file, 400, 0.4);
-                pendDocDataUrl = dataUrl;
+                pendDocDataUrl = await comprimirImagem(file, 400, 0.4);
                 pendDocFileType = extensao;
                 document.getElementById('pendDocPreview').textContent = '📄 Imagem carregada';
             }
-            let textoExtraido = '';
             try {
+                let textoExtraido = '';
                 if (extensao === 'pdf') textoExtraido = await extrairTextoPDF(file);
                 else textoExtraido = await extrairTextoImagem(file);
                 preencherCamposPendencia(textoExtraido);
-            } catch (erro) { console.error('Erro ao extrair texto:', erro); }
+            } catch (erro) { console.error('Erro:', erro); }
         }
 
         function preencherCamposPendencia(texto) {
@@ -4846,9 +4711,7 @@
                 if (dataStr.includes('/')) {
                     const partes = dataStr.split('/');
                     document.getElementById('pendData').value = `${partes[2]}-${partes[1]}-${partes[0]}`;
-                } else {
-                    document.getElementById('pendData').value = dataStr;
-                }
+                } else document.getElementById('pendData').value = dataStr;
             }
             const linhas = texto.split('\n').filter(l => l.trim().length > 5);
             if (linhas.length > 0 && !document.getElementById('pendDescricao').value) document.getElementById('pendDescricao').value = linhas[0].trim().toUpperCase();
@@ -4864,7 +4727,7 @@
         }
 
         function marcarPendenciaComoPago(index) {
-            if (!confirm('Confirmar pagamento da pendência? Isso irá lançar no Fluxo de Caixa e gerar a próxima cobrança em 30 dias.')) return;
+            if (!confirm('Confirmar pagamento?')) return;
             const pend = db.pendentes[index];
             if (!pend || pend.status === 'Pago') return;
             const hoje = new Date().toISOString().split('T')[0];
@@ -4887,13 +4750,14 @@
             atualizarTabelaPendentes();
             atualizarTabelaFluxoCaixa();
             atualizarResumoFinanceiro();
-            registrarAuditoria('Edição', `Pendência marcada como paga: ${pend.descricao}`);
+            registrarAuditoria('Edição', `Pendência paga`);
             salvarDB();
             alert('Pagamento registrado! Próxima pendência criada para ' + formatarDataBR(novaDataVenc.toISOString().split('T')[0]));
         }
 
         function atualizarTabelaPendentes() {
             const tbody = document.querySelector('#tabelaPendentes tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             db.pendentes.forEach((p, index) => {
                 const row = tbody.insertRow();
@@ -4915,7 +4779,7 @@
         function atualizarResumoFinanceiro() {
             let entradas = 0, saidas = 0;
             db.fluxoCaixa.forEach(f => {
-                const val = parseFloat(f.valor.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
+                const val = parseValorMonetario(f.valor);
                 if (f.tipo === 'entrada') entradas += val;
                 else saidas += val;
             });
@@ -4984,12 +4848,11 @@
                     video.play();
                 })
                 .catch(function(err) {
-                    console.error('Erro ao acessar câmera:', err);
                     alert('Não foi possível acessar a câmera.');
                     fecharCameraVistoria();
                 });
             } else {
-                alert('Seu navegador não suporta acesso à câmera.');
+                alert('Navegador não suporta acesso à câmera.');
                 fecharCameraVistoria();
             }
         }
@@ -5016,7 +4879,7 @@
                 document.getElementById('vistoriaConfirmBtn').style.display = 'inline-block';
                 if (vistoriaStream) { vistoriaStream.getTracks().forEach(track => track.stop()); vistoriaStream = null; }
                 document.getElementById('vistoriaVideo').srcObject = null;
-            } else { alert('Câmera não está pronta. Aguarde um momento.'); }
+            } else { alert('Câmera não está pronta.'); }
         }
 
         function confirmarVistoria() {
@@ -5027,20 +4890,20 @@
             loc.vistoria.push(vistoriaDataUrl);
             atualizarVistoria();
             salvarDB();
-            registrarAuditoria('Cadastro', `Foto de vistoria adicionada para ${loc.locatario} - ${loc.placa}`);
+            registrarAuditoria('Cadastro', `Foto de vistoria: ${loc.locatario} - ${loc.placa}`);
             fecharCameraVistoria();
-            alert('Foto salva com sucesso!');
+            alert('Foto salva!');
         }
 
         function excluirFotoVistoria(index) {
             if (!verificarSenhaAdmin()) return;
-            if (confirm('Excluir esta foto de vistoria?')) {
+            if (confirm('Excluir esta foto?')) {
                 const loc = db.locacoes[vistoriaLocacaoIndex];
                 if (loc && loc.vistoria) {
                     loc.vistoria.splice(index, 1);
                     atualizarVistoria();
                     salvarDB();
-                    registrarAuditoria('Exclusão', `Foto de vistoria excluída para ${loc.locatario} - ${loc.placa}`);
+                    registrarAuditoria('Exclusão', `Foto de vistoria: ${loc.locatario}`);
                 }
             }
         }
@@ -5055,6 +4918,7 @@
 
         function parseValorMonetario(valorStr) {
             if (!valorStr) return 0;
+            if (typeof valorStr === 'number') return valorStr;
             return parseFloat(valorStr.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
         }
 
@@ -5078,9 +4942,10 @@
             const receitas = locs.map(l => calcularReceitaLocacao(l));
             const despesas = locs.map(l => calcularDespesasLocacaoNumero(l));
             const lucros = locs.map(l => calcularLucroLocacao(l));
-            const ctx = document.getElementById('chartLocEncerradas').getContext('2d');
+            const ctx = document.getElementById('chartLocEncerradas');
+            if (!ctx) return;
             if (encerradasChart) encerradasChart.destroy();
-            encerradasChart = new Chart(ctx, {
+            encerradasChart = new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels,
@@ -5098,8 +4963,12 @@
             });
         }
 
+        // =============================================
         // INICIALIZAÇÃO FINAL
-        carregarDadosFirestore();
+        // =============================================
+        window.addEventListener('load', function() {
+            carregarDadosFirestore();
+        });
     </script>
 </body>
 </html>
