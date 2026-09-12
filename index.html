@@ -1090,6 +1090,7 @@
         let _carregandoContratos = false;
         let _carregandoConfig = false;
         let _autoSaveTimers = {};
+        let _autoSaveEstadoCamposAtivo = false;
 
         function debounceAutoSave(key, fn, delay = 1500) {
             if (_autoSaveTimers[key]) clearTimeout(_autoSaveTimers[key]);
@@ -1127,23 +1128,23 @@
         async function salvarDB() {
             // Adiciona marcador na fila
             _filaSalvamento.push(Date.now());
-            
+
             // Se já está processando, sai - o processador vai pegar nossa alteração
             if (_processandoFila) return;
-            
+
             _processandoFila = true;
             _salvandoAgora = true;
             mostrarIndicadorSalvando();
-            
+
             let houveErro = false;
-            
+
             while (_filaSalvamento.length > 0) {
                 // Limpa a fila - vamos salvar o estado ATUAL mesmo
                 _filaSalvamento = [];
-                
+
                 try {
                     if (!db) { continue; }
-                    
+
                     // 1. SEMPRE salva backup local primeiro (instantâneo e seguro)
                     try {
                         localStorage.setItem('lobao_db_backup', JSON.stringify(db));
@@ -1152,7 +1153,7 @@
                     } catch (e) {
                         console.warn('Backup local falhou (provavelmente localStorage cheio):', e);
                     }
-                    
+
                     // 2. Verifica tamanho
                     const json = JSON.stringify(db);
                     const tamanho = new Blob([json]).size;
@@ -1160,10 +1161,10 @@
                         console.warn('DB > 1MB, comprimindo automaticamente...');
                         await comprimirDB();
                     }
-                    
+
                     // 3. Snapshot imutável para evitar inconsistência durante envio
                     const snapshot = JSON.parse(JSON.stringify(db));
-                    
+
                     // 4. Tenta salvar no Firebase com retry
                     let tentativas = 0;
                     let sucesso = false;
@@ -1181,7 +1182,7 @@
                             }
                         }
                     }
-                    
+
                     if (sucesso) {
                         houveErro = false;
                         _ultimoSalvamentoOk = new Date();
@@ -1199,7 +1200,7 @@
                     mostrarErroSalvamento();
                 }
             }
-            
+
             _processandoFila = false;
             _salvandoAgora = false;
         }
@@ -1256,12 +1257,12 @@
                 const backupStr = localStorage.getItem('lobao_db_backup');
                 const synced = localStorage.getItem('lobao_db_synced');
                 const backupTime = localStorage.getItem('lobao_db_backup_time');
-                
+
                 if (!backupStr || !backupTime) return;
-                
+
                 const backupDate = new Date(backupTime);
                 const idadeHoras = (Date.now() - backupDate.getTime()) / (1000 * 60 * 60);
-                
+
                 // Backup muito antigo: descartar
                 if (idadeHoras > 48) {
                     localStorage.removeItem('lobao_db_backup');
@@ -1269,7 +1270,7 @@
                     localStorage.removeItem('lobao_db_synced');
                     return;
                 }
-                
+
                 // Se está marcado como sincronizado, não precisa restaurar
                 if (synced === 'true') {
                     localStorage.removeItem('lobao_db_backup');
@@ -1277,14 +1278,14 @@
                     localStorage.removeItem('lobao_db_synced');
                     return;
                 }
-                
+
                 // Backup não sincronizado: comparar
                 const backup = JSON.parse(backupStr);
                 const totalBackup = contarItensDB(backup);
                 const totalFirebase = contarItensDB(db);
-                
+
                 console.log(`Backup local: ${totalBackup} itens | Servidor: ${totalFirebase} itens`);
-                
+
                 if (totalBackup > totalFirebase) {
                     const restaurar = confirm(
                         `⚠️ BACKUP LOCAL DETECTADO!\n\n` +
@@ -1314,6 +1315,103 @@
             } catch (e) {
                 console.warn('Erro ao verificar backup:', e);
             }
+        }
+
+        // =============================================
+        // AUTO-SAVE DE ESTADO DOS CAMPOS (RASCUNHOS)
+        // =============================================
+        // Coleta o valor de todos os campos editáveis que ainda não foram
+        // submetidos via botão, para não perder dados digitados.
+        function coletarEstadoCampos() {
+            const estado = {};
+            const ignorarIds = new Set([
+                'loginUser', 'loginPassword',
+                'docUpload', 'mecUpload', 'compUpload', 'pendUpload',
+                'compDocumentosUpload', 'garagemImagem', 'sosImagem'
+            ]);
+            document.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
+                if (el.type === 'file') return;
+                if (el.type === 'password') return;
+                if (ignorarIds.has(el.id)) return;
+                if (el.id.startsWith('perm_')) return;
+                if (el.id.startsWith('filter')) return;
+                if (el.id.startsWith('aud')) return;
+                if (el.id.startsWith('mecRel')) return;
+                if (el.readOnly) return;
+                if (el.closest('.selfie-modal')) return;
+                if (el.closest('.modal-overlay')) return;
+                if (el.closest('.contrato-modal')) return;
+                if (el.closest('#configuracao')) return;
+                estado[el.id] = el.value;
+            });
+            return estado;
+        }
+
+        // Restaura valores somente em campos vazios (não sobrescreve
+        // valores calculados/populados pelo sistema).
+        function restaurarEstadoCampos(estado) {
+            if (!estado || typeof estado !== 'object') return;
+            const ignorarIds = new Set([
+                'loginUser', 'loginPassword'
+            ]);
+            Object.keys(estado).forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (ignorarIds.has(el.id)) return;
+                if (el.type === 'file' || el.type === 'password') return;
+                if (el.id.startsWith('perm_')) return;
+                if (el.readOnly) return;
+                if (el.closest('.selfie-modal')) return;
+                if (el.closest('.modal-overlay')) return;
+                if (el.closest('.contrato-modal')) return;
+                if (el.closest('#configuracao')) return;
+                if (el.value === undefined || el.value === null || String(el.value).trim() === '') {
+                    el.value = estado[id];
+                }
+            });
+        }
+
+        // Ativa auto-save dos campos do sistema (debounced)
+        function ativarAutoSaveEstadoCampos() {
+            if (_autoSaveEstadoCamposAtivo) return;
+            _autoSaveEstadoCamposAtivo = true;
+
+            const salvarEstado = () => {
+                if (!db) return;
+                if (!db.estadoCampos) db.estadoCampos = {};
+                const estado = coletarEstadoCampos();
+                // Só atualiza chaves (não remove chaves antigas vazias)
+                Object.assign(db.estadoCampos, estado);
+                salvarDB();
+            };
+
+            document.addEventListener('input', function(e) {
+                const el = e.target;
+                if (!el || !el.id) return;
+                if (el.type === 'file' || el.type === 'password') return;
+                if (el.id.startsWith('perm_')) return;
+                if (el.id.startsWith('filter')) return;
+                if (el.id.startsWith('aud')) return;
+                if (el.id.startsWith('mecRel')) return;
+                if (el.closest('.selfie-modal')) return;
+                if (el.closest('.modal-overlay')) return;
+                if (el.closest('.contrato-modal')) return;
+                if (el.closest('#configuracao')) return;
+                debounceAutoSave('estadoCampos', salvarEstado, 2000);
+            }, true);
+
+            document.addEventListener('change', function(e) {
+                const el = e.target;
+                if (!el || !el.id) return;
+                if (el.tagName !== 'SELECT') return;
+                if (el.id.startsWith('perm_')) return;
+                if (el.id.startsWith('filter')) return;
+                if (el.id.startsWith('aud')) return;
+                if (el.id.startsWith('mecRel')) return;
+                if (el.closest('.contrato-modal')) return;
+                if (el.closest('#configuracao')) return;
+                debounceAutoSave('estadoCampos', salvarEstado, 2000);
+            }, true);
         }
 
         // =============================================
@@ -1390,6 +1488,7 @@
                 bancos: [],
                 pendentes: [],
                 historico: [],
+                estadoCampos: {},
                 contratos: { contratoLocacao: {}, termoResponsabilidade: {}, notaPromissoria: {} },
                 imagens: {
                     garagem: { subpasta: 'Fotos da Garagem', fotos: [] },
@@ -1557,6 +1656,7 @@
                     if (!db.pendentes) db.pendentes = [];
                     if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
                     if (!db.historico) db.historico = [];
+                    if (!db.estadoCampos) db.estadoCampos = {};
                     if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
                     if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', placas:{}} };
                     if (!db.imagens.comprovantes) db.imagens.comprovantes = { subpasta: 'Comprovantes', placas: {} };
@@ -1580,6 +1680,10 @@
                 dbCarregado = true;
                 document.getElementById('loginButton').disabled = false;
                 inicializarSistema();
+                // Ativa auto-save dos campos do sistema
+                ativarAutoSaveEstadoCampos();
+                // Restaura rascunhos de campos (não submetidos)
+                restaurarEstadoCampos(db.estadoCampos);
                 // Verificar backup local após inicializar
                 setTimeout(() => verificarBackupLocal(), 500);
             } catch (error) {
@@ -1954,6 +2058,7 @@
             if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
             if (!db.pendentes) db.pendentes = [];
             if (!db.historico) db.historico = [];
+            if (!db.estadoCampos) db.estadoCampos = {};
             if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
             db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
             const agora = new Date();
