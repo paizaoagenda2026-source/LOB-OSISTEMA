@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LOBÃO - SISTEMA DE LOCAÇÃO DE CARROS</title>
-
-    <!-- ===== PWA / INSTALAÇÃO NO CELULAR ===== -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a3c6e">
     <link rel="icon" type="image/jpeg" href="lobao.jpg">
@@ -14,14 +12,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LOBÃO">
-    <!-- ===== FIM PWA ===== -->
-
-    <!-- Firebase SDKs (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html2pdf.js para gerar PDF diretamente -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --primary: #1a3c6e; --secondary: #e63946; --accent: #f4a261; --bg: #f8f9fa; --text: #333; --white: #fff; --shadow: 0 4px 6px rgba(0,0,0,0.1); --radius: 8px; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --info: #17a2b8; }
@@ -223,10 +216,8 @@
 </head>
 <body>
 
-    <!-- INDICADOR DE AUTO-SAVE -->
     <div class="auto-save-indicator" id="autoSaveIndicator">✅ Salvo</div>
 
-    <!-- LOGIN -->
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h1>🦁 LOBÃO</h1>
@@ -242,7 +233,6 @@
         </div>
     </div>
 
-    <!-- MAIN SYSTEM -->
     <div class="main-container" id="mainContainer">
         <div class="tabs-container" id="tabsContainer">
             <button class="tab active" data-tab="veiculos">🚗 Veículos</button>
@@ -270,7 +260,6 @@
             <button class="logout-btn" onclick="sairSistema()">🚪 Sair</button>
         </div>
 
-        <!-- ABA: VEICULOS -->
         <div class="tab-content active" id="veiculos">
             <h2>🚗 Cadastro de Veículos</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar veículos..." id="filterVeiculos">
@@ -302,7 +291,6 @@
             </div>
         </div>
 
-        <!-- ABA: CLIENTES -->
         <div class="tab-content" id="clientes">
             <h2>👤 Cadastro de Clientes</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar clientes..." id="filterClientes">
@@ -334,22 +322,17 @@
             </div>
         </div>
 
-        <!-- ABA: LOCAÇÕES -->
         <div class="tab-content" id="locacoes">
             <h2>📋 Locações Ativas</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar locações..." id="filterLocacoes">
             <div class="form-grid" id="formLocacoes">
                 <div class="form-group">
                     <label>Locatário</label>
-                    <select id="locLocatario" class="campo-enter" onchange="selecionarClienteCombo()">
-                        <option value="">Selecione um cliente</option>
-                    </select>
+                    <select id="locLocatario" class="campo-enter" onchange="selecionarClienteCombo()"><option value="">Selecione um cliente</option></select>
                 </div>
                 <div class="form-group">
                     <label>Veículo</label>
-                    <select id="locVeiculo" class="campo-enter" onchange="selecionarVeiculoCombo()">
-                        <option value="">Selecione um veículo</option>
-                    </select>
+                    <select id="locVeiculo" class="campo-enter" onchange="selecionarVeiculoCombo()"><option value="">Selecione um veículo</option></select>
                 </div>
                 <div class="form-group"><label>Data Início</label><input type="date" id="locDataInicio" class="campo-enter" onchange="calcularDataFim()"></div>
                 <div class="form-group"><label>Data Fim</label><input type="date" id="locDataFim" readonly></div>
@@ -357,9 +340,7 @@
                 <div class="form-group"><label>Cor</label><input type="text" id="locCor" readonly></div>
                 <div class="form-group">
                     <label>Placa</label>
-                    <select id="locPlaca" class="campo-enter" onchange="selecionarPlacaCombo()">
-                        <option value="">Selecione uma placa</option>
-                    </select>
+                    <select id="locPlaca" class="campo-enter" onchange="selecionarPlacaCombo()"><option value="">Selecione uma placa</option></select>
                 </div>
                 <div class="form-group"><label>Ano Fabr</label><input type="text" id="locAnoFabr" readonly></div>
                 <div class="form-group"><label>Ano Model</label><input type="text" id="locAnoModel" readonly></div>
@@ -388,7 +369,6 @@
             </div>
         </div>
 
-        <!-- ABA: LOCAÇÕES ENCERRADAS -->
         <div class="tab-content" id="locEncerrada">
             <h2>🏁 Locações Encerradas</h2>
             <div class="dashboard-encerradas" id="dashboardEncerradas">
@@ -409,7 +389,6 @@
             </div>
         </div>
 
-        <!-- ABA: MANUTENÇÃO -->
         <div class="tab-content" id="manutencao">
             <h2>🔧 Manutenção</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar manutenções..." id="filterManutencao">
@@ -431,7 +410,6 @@
             </div>
         </div>
 
-        <!-- ABA: MECÂNICO -->
         <div class="tab-content" id="mecanico">
             <h2>👨‍🔧 Mecânico</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar serviços..." id="filterMecanico">
@@ -483,7 +461,6 @@
             </div>
         </div>
 
-        <!-- ABA: USUÁRIO -->
         <div class="tab-content" id="usuario">
             <h2>👥 Usuários</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar usuários..." id="filterUsuario">
@@ -522,7 +499,6 @@
             </div>
         </div>
 
-        <!-- ABA: GARAGEM -->
         <div class="tab-content" id="garagem">
             <h2>🏠 Garagem</h2>
             <div class="subfolder">
@@ -542,7 +518,6 @@
             </div>
         </div>
 
-        <!-- ABA: SOS -->
         <div class="tab-content" id="sos">
             <h2>🆘 SOS</h2>
             <div class="subfolder">
@@ -563,7 +538,6 @@
             </div>
         </div>
 
-        <!-- ABA: DOCUMENTOS -->
         <div class="tab-content" id="comprovantes">
             <h2>📄 Documentos</h2>
             <div class="sub-tabs">
@@ -573,9 +547,7 @@
             <div class="sub-tab-content active" id="subTabNovo">
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label>Selecione a Placa do Veículo:</label>
-                    <select id="compPlacaSelect" class="campo-enter" style="max-width: 400px;">
-                        <option value="">Selecione uma placa</option>
-                    </select>
+                    <select id="compPlacaSelect" class="campo-enter" style="max-width: 400px;"><option value="">Selecione uma placa</option></select>
                 </div>
                 <div class="form-group" style="margin-bottom: 15px;">
                     <label>Documentos (PDF, JPG, JPEG, PNG) - Anexar Múltiplos:</label>
@@ -592,7 +564,6 @@
             </div>
         </div>
 
-        <!-- ABA: SUB PAGAMENTOS -->
         <div class="tab-content" id="pagamentos">
             <h2>💰 Sub Pagamentos</h2>
             <div class="sub-tabs"><button class="sub-tab active" onclick="switchSubTabPagamentos('aluguel')">🚗 Aluguel</button></div>
@@ -600,16 +571,13 @@
                 <input type="text" class="filter-input" placeholder="🔍 Filtrar aluguéis..." id="filterPagamentos">
                 <div class="table-container">
                     <table id="tabelaPagamentos">
-                        <thead>
-                            <tr><th>Locatário</th><th>Data Contrato</th><th>Placa</th><th>R$ Aluguel</th><th>Data Vencimento</th><th>Status</th><th>Ação</th></tr>
-                        </thead>
+                        <thead><tr><th>Locatário</th><th>Data Contrato</th><th>Placa</th><th>R$ Aluguel</th><th>Data Vencimento</th><th>Status</th><th>Ação</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ABA: BANCO -->
         <div class="tab-content" id="banco">
             <h2>🏦 Banco</h2>
             <div class="form-grid" id="formBanco">
@@ -630,7 +598,6 @@
             </div>
         </div>
 
-        <!-- ABA: FLUXO DE CAIXA -->
         <div class="tab-content" id="fluxocaixa">
             <h2>💵 Fluxo de Caixa</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar transações..." id="filterFluxoCaixa">
@@ -657,7 +624,6 @@
             </div>
         </div>
 
-        <!-- ABA: COMPROVANTE -->
         <div class="tab-content" id="doc">
             <h2>📁 Comprovante</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar comprovantes..." id="filterDoc">
@@ -688,7 +654,6 @@
             </div>
         </div>
 
-        <!-- ABA: COMPRAS -->
         <div class="tab-content" id="compras">
             <h2>🛒 Compras</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar compras..." id="filterCompras">
@@ -741,7 +706,6 @@
             </div>
         </div>
 
-        <!-- ABA: CONFIGURAÇÃO -->
         <div class="tab-content" id="configuracao">
             <h2>⚙️ Configurações do Sistema</h2>
             <div class="config-section">
@@ -777,7 +741,6 @@
             <button class="btn-secondary" data-permissao="config_restaurar" onclick="restaurarPadroes()">🔄 Restaurar Padrões</button>
         </div>
 
-        <!-- ABA: AUDITORIA -->
         <div class="tab-content" id="auditoria">
             <h2>🔍 Auditoria do Sistema</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar registros..." id="filterAuditoria">
@@ -805,7 +768,6 @@
             </div>
         </div>
 
-        <!-- ABA: PENDENTE -->
         <div class="tab-content" id="pendente">
             <h2>⏳ Pendências</h2>
             <input type="text" class="filter-input" placeholder="🔍 Filtrar pendências..." id="filterPendentes">
@@ -830,29 +792,23 @@
             </div>
             <div class="table-container">
                 <table id="tabelaPendentes">
-                    <thead>
-                        <tr><th>Data</th><th>Descrição</th><th>Crédito</th><th>Débito</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr>
-                    </thead>
+                    <thead><tr><th>Data</th><th>Descrição</th><th>Crédito</th><th>Débito</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ABA: HISTÓRICO -->
         <div class="tab-content" id="historico">
             <h2>📜 Histórico de Lançamentos (Compras & Mecânico)</h2>
             <input type="text" class="filter-input" placeholder="🔍 Pesquisar por texto ou placa..." id="filterHistorico">
             <div class="table-container">
                 <table id="tabelaHistorico">
-                    <thead>
-                        <tr><th>Data</th><th>Descrição</th><th>Placa</th><th>Valor</th><th>Fornecedor</th><th>Oficina</th><th>Arquivo (NF/Orçamento)</th><th>Ações</th></tr>
-                    </thead>
+                    <thead><tr><th>Data</th><th>Descrição</th><th>Placa</th><th>Valor</th><th>Fornecedor</th><th>Oficina</th><th>Arquivo (NF/Orçamento)</th><th>Ações</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ABA: VISTORIA -->
         <div class="tab-content" id="vistoria">
             <h2>📸 Vistoria de Veículos</h2>
             <p style="margin-bottom: 20px; color: #666;">Selecione uma locação ativa para gerenciar as fotos da vistoria.</p>
@@ -865,14 +821,11 @@
                     <button class="btn-secondary" onclick="limparVistoriaSelecionada()">🔄 Limpar</button>
                 </div>
             </div>
-            <div id="vistoriaNenhuma" style="display: none; text-align: center; padding: 30px; color: #999;">
-                Nenhuma locação ativa encontrada. Crie uma locação primeiro.
-            </div>
+            <div id="vistoriaNenhuma" style="display: none; text-align: center; padding: 30px; color: #999;">Nenhuma locação ativa encontrada. Crie uma locação primeiro.</div>
         </div>
 
     </div>
 
-    <!-- MODAL PARA AMPLIAR IMAGENS -->
     <div class="modal-overlay" id="imageModal" onclick="closeImageModal()">
         <div class="modal-content">
             <button class="modal-close" onclick="closeImageModal()">×</button>
@@ -880,7 +833,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE SELFIE -->
     <div class="selfie-modal" id="selfieModal">
         <div class="selfie-title">📸 Tire sua Selfie</div>
         <div class="selfie-instructions">Posicione seu rosto na frente da câmera e clique em "Capturar"</div>
@@ -900,7 +852,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CÂMERA VISTORIA -->
     <div class="selfie-modal" id="vistoriaCameraModal">
         <div class="selfie-title">📷 Foto de Vistoria</div>
         <div class="selfie-instructions">Aponte a câmera para o veículo e clique em "Capturar"</div>
@@ -919,7 +870,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONTRATOS -->
     <div class="contrato-modal" id="contratoModal">
         <div class="contrato-modal-content">
             <div class="contrato-modal-header">
@@ -1025,7 +975,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE DESPESAS -->
     <div class="despesas-modal" id="despesasModal">
         <div class="despesas-modal-content">
             <div class="despesas-modal-header">
@@ -1036,7 +985,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE RELATÓRIO MECÂNICO -->
     <div class="despesas-modal" id="relatorioMecanicoModal">
         <div class="despesas-modal-content" style="max-width: 1000px;">
             <div class="despesas-modal-header">
@@ -1075,13 +1023,25 @@
         };
         firebase.initializeApp(firebaseConfig);
         const firestoreDB = firebase.firestore();
-        const DB_DOC_REF = firestoreDB.collection('sistema').doc('dados');
+
+        // Coleção principal dividida em documentos (resolve limite de 1 MiB por doc)
+        const FS_COL = 'lobao_sistema';
+        const COLECOES = [
+            'veiculos','clientes','locacoes','locacoesEncerradas','manutencao',
+            'mecanico','usuarios','alugueis','fluxoCaixa','documentos','compras',
+            'auditoria','bancos','pendentes','historico'
+        ];
+        const REF_META    = firestoreDB.collection(FS_COL).doc('meta');
+        const REF_IMAGENS = firestoreDB.collection(FS_COL).doc('imagens');
+        const refCol = (nome) => firestoreDB.collection(FS_COL).doc(nome);
+        // Compatibilidade com dados legados em sistema/dados (migração automática)
+        const DB_DOC_REF_LEGADO = firestoreDB.collection('sistema').doc('dados');
 
         let db = null;
         let dbCarregado = false;
 
         // =============================================
-        // SISTEMA DE SALVAMENTO ROBUSTO
+        // SALVAMENTO ROBUSTO (batch multi-doc atômico)
         // =============================================
         let _filaSalvamento = [];
         let _processandoFila = false;
@@ -1101,127 +1061,128 @@
             const el = document.getElementById('autoSaveIndicator');
             if (!el) return;
             el.classList.remove('erro');
-            el.classList.add('salvando');
-            el.classList.add('ativo');
+            el.classList.add('salvando','ativo');
             el.textContent = '💾 Salvando...';
         }
-
         function mostrarIndicadorSalvo() {
             const el = document.getElementById('autoSaveIndicator');
             if (!el) return;
-            el.classList.remove('salvando');
-            el.classList.remove('erro');
+            el.classList.remove('salvando','erro');
             el.classList.add('ativo');
             el.textContent = '✅ Salvo automaticamente';
-            setTimeout(() => { el.classList.remove('ativo'); }, 1500);
+            setTimeout(() => el.classList.remove('ativo'), 1500);
         }
-
         function mostrarErroSalvamento(msg) {
             const el = document.getElementById('autoSaveIndicator');
             if (!el) return;
             el.classList.remove('salvando');
-            el.classList.add('erro');
-            el.classList.add('ativo');
+            el.classList.add('erro','ativo');
             el.textContent = '⚠️ ' + (msg || 'ERRO AO SALVAR - Verifique a conexão!');
         }
 
-        async function salvarDB() {
-            // Adiciona marcador na fila
-            _filaSalvamento.push(Date.now());
+        async function enviarParaFirestore(database) {
+            // Comprime se o JSON total ultrapassar ~900KB (evita estourar cada doc)
+            const json = JSON.stringify(database);
+            const tamanho = new Blob([json]).size;
+            if (tamanho > 900000) {
+                console.warn('DB > ~900 KB — comprimindo imagens antes de salvar...');
+                await comprimirDB();
+            }
 
-            // Se já está processando, sai - o processador vai pegar nossa alteração
+            let tentativas = 0;
+            let ultimoErro = null;
+            while (tentativas < 3) {
+                try {
+                    const batch = firestoreDB.batch();
+                    const agora = firebase.firestore.FieldValue.serverTimestamp();
+
+                    batch.set(REF_META, {
+                        config: database.config || {},
+                        contratos: database.contratos || { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} },
+                        estadoCampos: database.estadoCampos || {},
+                        versao: 2,
+                        atualizadoEm: agora
+                    });
+
+                    batch.set(REF_IMAGENS, {
+                        garagem: database.imagens?.garagem || { subpasta:'Fotos da Garagem', fotos:[] },
+                        sos: database.imagens?.sos || { subpasta:'Imagens SOS', fotos:[] },
+                        comprovantes: database.imagens?.comprovantes || { subpasta:'Comprovantes', placas:{} }
+                    });
+
+                    COLECOES.forEach(nome => {
+                        batch.set(refCol(nome), {
+                            itens: database[nome] || [],
+                            atualizadoEm: agora
+                        });
+                    });
+
+                    await batch.commit();
+                    return;
+                } catch (err) {
+                    tentativas++;
+                    ultimoErro = err;
+                    console.warn(`Tentativa ${tentativas}/3 de salvar falhou:`, err);
+                    if (tentativas < 3) await new Promise(r => setTimeout(r, 1200 * tentativas));
+                }
+            }
+            throw ultimoErro;
+        }
+
+        async function salvarDB() {
+            _filaSalvamento.push(Date.now());
             if (_processandoFila) return;
 
             _processandoFila = true;
             _salvandoAgora = true;
             mostrarIndicadorSalvando();
 
-            let houveErro = false;
-
             while (_filaSalvamento.length > 0) {
-                // Limpa a fila - vamos salvar o estado ATUAL mesmo
                 _filaSalvamento = [];
-
                 try {
-                    if (!db) { continue; }
+                    if (!db) continue;
 
-                    // 1. SEMPRE salva backup local primeiro (instantâneo e seguro)
                     try {
                         localStorage.setItem('lobao_db_backup', JSON.stringify(db));
                         localStorage.setItem('lobao_db_backup_time', new Date().toISOString());
                         localStorage.setItem('lobao_db_synced', 'false');
                     } catch (e) {
-                        console.warn('Backup local falhou (provavelmente localStorage cheio):', e);
+                        console.warn('Backup local falhou (localStorage cheio):', e);
                     }
 
-                    // 2. Verifica tamanho
-                    const json = JSON.stringify(db);
-                    const tamanho = new Blob([json]).size;
-                    if (tamanho > 1048576) {
-                        console.warn('DB > 1MB, comprimindo automaticamente...');
-                        await comprimirDB();
-                    }
-
-                    // 3. Snapshot imutável para evitar inconsistência durante envio
                     const snapshot = JSON.parse(JSON.stringify(db));
+                    await enviarParaFirestore(snapshot);
 
-                    // 4. Tenta salvar no Firebase com retry
-                    let tentativas = 0;
-                    let sucesso = false;
-                    let ultimoErro = null;
-                    while (tentativas < 3 && !sucesso) {
-                        try {
-                            await DB_DOC_REF.set(snapshot);
-                            sucesso = true;
-                        } catch (err) {
-                            tentativas++;
-                            ultimoErro = err;
-                            console.warn(`Tentativa ${tentativas}/3 de salvar falhou:`, err);
-                            if (tentativas < 3) {
-                                await new Promise(r => setTimeout(r, 1500 * tentativas));
-                            }
-                        }
-                    }
-
-                    if (sucesso) {
-                        houveErro = false;
-                        _ultimoSalvamentoOk = new Date();
-                        try { localStorage.setItem('lobao_db_synced', 'true'); } catch (e) {}
-                        mostrarIndicadorSalvo();
-                    } else {
-                        houveErro = true;
-                        mostrarErroSalvamento('Falha ao salvar. Tentando novamente...');
-                        // Re-enfileira para retry
-                        setTimeout(() => { salvarDB(); }, 5000);
-                    }
+                    _ultimoSalvamentoOk = new Date();
+                    try { localStorage.setItem('lobao_db_synced','true'); } catch(e){}
+                    mostrarIndicadorSalvo();
                 } catch (error) {
                     console.error('Erro crítico no salvamento:', error);
-                    houveErro = true;
-                    mostrarErroSalvamento();
+                    mostrarErroSalvamento('Falha ao salvar. Reconectando em 5s...');
+                    setTimeout(() => { salvarDB(); }, 5000);
                 }
             }
-
             _processandoFila = false;
             _salvandoAgora = false;
         }
 
-        // Botão manual de sincronização
         async function forcarSalvamentoManual() {
             if (_processandoFila || _salvandoAgora) {
                 alert('Salvamento já em andamento. Aguarde...');
                 return;
             }
             try {
-                await DB_DOC_REF.set(JSON.parse(JSON.stringify(db)));
-                try { localStorage.setItem('lobao_db_synced', 'true'); } catch (e) {}
+                mostrarIndicadorSalvando();
+                await enviarParaFirestore(JSON.parse(JSON.stringify(db)));
+                try { localStorage.setItem('lobao_db_synced','true'); } catch(e){}
                 mostrarIndicadorSalvo();
                 alert('✅ Sincronizado com o servidor com sucesso!');
             } catch (err) {
+                mostrarErroSalvamento(err.message);
                 alert('❌ Erro ao sincronizar: ' + err.message);
             }
         }
 
-        // Avisa antes de fechar/atualizar se houver salvamento pendente
         window.addEventListener('beforeunload', (e) => {
             if (_salvandoAgora || _filaSalvamento.length > 0) {
                 e.preventDefault();
@@ -1230,60 +1191,32 @@
             }
         });
 
-        // Conta total de itens no db
         function contarItensDB(database) {
             if (!database) return 0;
             let total = 0;
-            if (database.veiculos) total += database.veiculos.length;
-            if (database.clientes) total += database.clientes.length;
-            if (database.locacoes) total += database.locacoes.length;
-            if (database.locacoesEncerradas) total += database.locacoesEncerradas.length;
-            if (database.manutencao) total += database.manutencao.length;
-            if (database.mecanico) total += database.mecanico.length;
-            if (database.alugueis) total += database.alugueis.length;
-            if (database.fluxoCaixa) total += database.fluxoCaixa.length;
-            if (database.documentos) total += database.documentos.length;
-            if (database.compras) total += database.compras.length;
-            if (database.bancos) total += database.bancos.length;
-            if (database.pendentes) total += database.pendentes.length;
-            if (database.historico) total += database.historico.length;
-            if (database.usuarios) total += database.usuarios.length;
+            COLECOES.forEach(nome => { if (Array.isArray(database[nome])) total += database[nome].length; });
             return total;
         }
 
-        // Verifica se há backup local não sincronizado ao carregar
         async function verificarBackupLocal() {
             try {
                 const backupStr = localStorage.getItem('lobao_db_backup');
                 const synced = localStorage.getItem('lobao_db_synced');
                 const backupTime = localStorage.getItem('lobao_db_backup_time');
-
                 if (!backupStr || !backupTime) return;
 
-                const backupDate = new Date(backupTime);
-                const idadeHoras = (Date.now() - backupDate.getTime()) / (1000 * 60 * 60);
-
-                // Backup muito antigo: descartar
+                const idadeHoras = (Date.now() - new Date(backupTime).getTime()) / 3600000;
                 if (idadeHoras > 48) {
-                    localStorage.removeItem('lobao_db_backup');
-                    localStorage.removeItem('lobao_db_backup_time');
-                    localStorage.removeItem('lobao_db_synced');
+                    ['lobao_db_backup','lobao_db_backup_time','lobao_db_synced'].forEach(k=>localStorage.removeItem(k));
                     return;
                 }
-
-                // Se está marcado como sincronizado, não precisa restaurar
                 if (synced === 'true') {
-                    localStorage.removeItem('lobao_db_backup');
-                    localStorage.removeItem('lobao_db_backup_time');
-                    localStorage.removeItem('lobao_db_synced');
+                    ['lobao_db_backup','lobao_db_backup_time','lobao_db_synced'].forEach(k=>localStorage.removeItem(k));
                     return;
                 }
-
-                // Backup não sincronizado: comparar
                 const backup = JSON.parse(backupStr);
                 const totalBackup = contarItensDB(backup);
                 const totalFirebase = contarItensDB(db);
-
                 console.log(`Backup local: ${totalBackup} itens | Servidor: ${totalFirebase} itens`);
 
                 if (totalBackup > totalFirebase) {
@@ -1295,83 +1228,53 @@
                     );
                     if (restaurar) {
                         db = backup;
-                        await DB_DOC_REF.set(db);
-                        try { localStorage.setItem('lobao_db_synced', 'true'); } catch (e) {}
-                        alert('✅ Backup restaurado com sucesso! A página vai recarregar.');
+                        await enviarParaFirestore(db);
+                        try { localStorage.setItem('lobao_db_synced','true'); } catch(e){}
+                        alert('✅ Backup restaurado! A página vai recarregar.');
                         location.reload();
                         return;
-                    } else {
-                        // Não restaurar: limpar backup
-                        localStorage.removeItem('lobao_db_backup');
-                        localStorage.removeItem('lobao_db_backup_time');
-                        localStorage.removeItem('lobao_db_synced');
                     }
-                } else {
-                    // Backup tem mesmo tanto ou menos: limpar
-                    localStorage.removeItem('lobao_db_backup');
-                    localStorage.removeItem('lobao_db_backup_time');
-                    localStorage.removeItem('lobao_db_synced');
                 }
-            } catch (e) {
-                console.warn('Erro ao verificar backup:', e);
-            }
+                ['lobao_db_backup','lobao_db_backup_time','lobao_db_synced'].forEach(k=>localStorage.removeItem(k));
+            } catch (e) { console.warn('Erro ao verificar backup:', e); }
         }
 
         // =============================================
         // AUTO-SAVE DE ESTADO DOS CAMPOS (RASCUNHOS)
         // =============================================
-        // Coleta o valor de todos os campos editáveis que ainda não foram
-        // submetidos via botão, para não perder dados digitados.
         function coletarEstadoCampos() {
             const estado = {};
             const ignorarIds = new Set([
-                'loginUser', 'loginPassword',
-                'docUpload', 'mecUpload', 'compUpload', 'pendUpload',
-                'compDocumentosUpload', 'garagemImagem', 'sosImagem'
+                'loginUser','loginPassword','docUpload','mecUpload','compUpload','pendUpload',
+                'compDocumentosUpload','garagemImagem','sosImagem'
             ]);
             document.querySelectorAll('input[id], select[id], textarea[id]').forEach(el => {
-                if (el.type === 'file') return;
-                if (el.type === 'password') return;
+                if (el.type === 'file' || el.type === 'password') return;
                 if (ignorarIds.has(el.id)) return;
-                if (el.id.startsWith('perm_')) return;
-                if (el.id.startsWith('filter')) return;
-                if (el.id.startsWith('aud')) return;
-                if (el.id.startsWith('mecRel')) return;
+                if (el.id.startsWith('perm_') || el.id.startsWith('filter') || el.id.startsWith('aud') || el.id.startsWith('mecRel')) return;
                 if (el.readOnly) return;
-                if (el.closest('.selfie-modal')) return;
-                if (el.closest('.modal-overlay')) return;
-                if (el.closest('.contrato-modal')) return;
-                if (el.closest('#configuracao')) return;
+                if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal, #configuracao')) return;
                 estado[el.id] = el.value;
             });
             return estado;
         }
 
-        // Restaura valores somente em campos vazios (não sobrescreve
-        // valores calculados/populados pelo sistema).
         function restaurarEstadoCampos(estado) {
             if (!estado || typeof estado !== 'object') return;
-            const ignorarIds = new Set([
-                'loginUser', 'loginPassword'
-            ]);
+            const ignorar = new Set(['loginUser','loginPassword']);
             Object.keys(estado).forEach(id => {
                 const el = document.getElementById(id);
-                if (!el) return;
-                if (ignorarIds.has(el.id)) return;
+                if (!el || ignorar.has(id)) return;
                 if (el.type === 'file' || el.type === 'password') return;
                 if (el.id.startsWith('perm_')) return;
                 if (el.readOnly) return;
-                if (el.closest('.selfie-modal')) return;
-                if (el.closest('.modal-overlay')) return;
-                if (el.closest('.contrato-modal')) return;
-                if (el.closest('#configuracao')) return;
+                if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal, #configuracao')) return;
                 if (el.value === undefined || el.value === null || String(el.value).trim() === '') {
                     el.value = estado[id];
                 }
             });
         }
 
-        // Ativa auto-save dos campos do sistema (debounced)
         function ativarAutoSaveEstadoCampos() {
             if (_autoSaveEstadoCamposAtivo) return;
             _autoSaveEstadoCamposAtivo = true;
@@ -1379,126 +1282,86 @@
             const salvarEstado = () => {
                 if (!db) return;
                 if (!db.estadoCampos) db.estadoCampos = {};
-                const estado = coletarEstadoCampos();
-                // Só atualiza chaves (não remove chaves antigas vazias)
-                Object.assign(db.estadoCampos, estado);
+                Object.assign(db.estadoCampos, coletarEstadoCampos());
                 salvarDB();
             };
-
             document.addEventListener('input', function(e) {
                 const el = e.target;
-                if (!el || !el.id) return;
-                if (el.type === 'file' || el.type === 'password') return;
-                if (el.id.startsWith('perm_')) return;
-                if (el.id.startsWith('filter')) return;
-                if (el.id.startsWith('aud')) return;
-                if (el.id.startsWith('mecRel')) return;
-                if (el.closest('.selfie-modal')) return;
-                if (el.closest('.modal-overlay')) return;
-                if (el.closest('.contrato-modal')) return;
-                if (el.closest('#configuracao')) return;
+                if (!el || !el.id || el.type === 'file' || el.type === 'password') return;
+                if (el.id.startsWith('perm_') || el.id.startsWith('filter') || el.id.startsWith('aud') || el.id.startsWith('mecRel')) return;
+                if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal, #configuracao')) return;
                 debounceAutoSave('estadoCampos', salvarEstado, 2000);
             }, true);
-
             document.addEventListener('change', function(e) {
                 const el = e.target;
-                if (!el || !el.id) return;
-                if (el.tagName !== 'SELECT') return;
-                if (el.id.startsWith('perm_')) return;
-                if (el.id.startsWith('filter')) return;
-                if (el.id.startsWith('aud')) return;
-                if (el.id.startsWith('mecRel')) return;
-                if (el.closest('.contrato-modal')) return;
-                if (el.closest('#configuracao')) return;
+                if (!el || el.tagName !== 'SELECT' || !el.id) return;
+                if (el.id.startsWith('perm_') || el.id.startsWith('filter') || el.id.startsWith('aud') || el.id.startsWith('mecRel')) return;
+                if (el.closest('.contrato-modal, #configuracao')) return;
                 debounceAutoSave('estadoCampos', salvarEstado, 2000);
             }, true);
         }
 
         // =============================================
-        // PWA - INSTALAÇÃO DO APP NO CELULAR
+        // PWA
         // =============================================
         let deferredPrompt = null;
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             const btn = document.getElementById('installBtn');
             if (btn) btn.style.display = 'block';
         });
-
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
             const btn = document.getElementById('installBtn');
             if (btn) btn.style.display = 'none';
             alert('✅ Aplicativo LOBÃO instalado com sucesso!');
         });
-
         function instalarApp() {
             if (!deferredPrompt) { mostrarAjudaInstalacao(); return; }
             deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                deferredPrompt = null;
-            });
+            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
         }
-
         function mostrarAjudaInstalacao() {
             const ua = navigator.userAgent.toLowerCase();
-            let mensagem = '';
-            if (/iphone|ipad|ipod/.test(ua)) {
-                mensagem = '📱 Para instalar no iPhone/iPad:\n\n1. Abra este site no Safari\n2. Toque no ícone "Compartilhar"\n3. Role para baixo e toque em "Adicionar à Tela de Início"\n4. Confirme tocando em "Adicionar"';
-            } else if (/android/.test(ua)) {
-                mensagem = '📱 Para instalar no Android:\n\n1. Abra este site no Chrome\n2. Toque no menu (3 pontos)\n3. Toque em "Instalar aplicativo"\n4. Confirme tocando em "Instalar"';
-            } else {
-                mensagem = '💻 Para instalar no computador:\n\n1. Procure o ícone de instalação na barra de endereço\n2. Ou acesse o menu do navegador (3 pontos)\n3. Selecione "Instalar LOBÃO"\n4. Confirme a instalação';
-            }
-            alert(mensagem);
+            let msg = '';
+            if (/iphone|ipad|ipod/.test(ua)) msg = '📱 Para instalar no iPhone/iPad:\n\n1. Abra este site no Safari\n2. Toque no ícone "Compartilhar"\n3. Role para baixo e toque em "Adicionar à Tela de Início"\n4. Confirme tocando em "Adicionar"';
+            else if (/android/.test(ua)) msg = '📱 Para instalar no Android:\n\n1. Abra este site no Chrome\n2. Toque no menu (3 pontos)\n3. Toque em "Instalar aplicativo"\n4. Confirme tocando em "Instalar"';
+            else msg = '💻 Para instalar no computador:\n\n1. Procure o ícone de instalação na barra de endereço\n2. Ou acesse o menu do navegador (3 pontos)\n3. Selecione "Instalar LOBÃO"\n4. Confirme a instalação';
+            alert(msg);
         }
-
         window.addEventListener('load', () => {
             if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
                 const btn = document.getElementById('installBtn');
                 if (btn) btn.style.display = 'none';
             }
         });
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then((registration) => { console.log('Service Worker registrado:', registration.scope); })
-                    .catch((error) => { console.warn('Falha ao registrar Service Worker:', error); });
+                    .then(r => console.log('Service Worker registrado:', r.scope))
+                    .catch(e => console.warn('Falha ao registrar Service Worker:', e));
             });
         }
 
         function criarDBPadrao() {
             return {
-                veiculos: [],
-                clientes: [],
-                locacoes: [],
-                locacoesEncerradas: [],
-                manutencao: [],
-                mecanico: [],
-                usuarios: [
-                    { nome: 'LOBÃO', senha: '18998211', tipo: 'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie: null }
-                ],
-                alugueis: [],
-                fluxoCaixa: [],
-                documentos: [],
-                compras: [],
-                auditoria: [],
-                bancos: [],
-                pendentes: [],
-                historico: [],
-                estadoCampos: {},
-                contratos: { contratoLocacao: {}, termoResponsabilidade: {}, notaPromissoria: {} },
+                veiculos: [], clientes: [], locacoes: [], locacoesEncerradas: [],
+                manutencao: [], mecanico: [],
+                usuarios: [{ nome:'LOBÃO', senha:'18998211', tipo:'ADM',
+                             permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null }],
+                alugueis: [], fluxoCaixa: [], documentos: [], compras: [], auditoria: [],
+                bancos: [], pendentes: [], historico: [], estadoCampos: {},
+                contratos: { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} },
                 imagens: {
-                    garagem: { subpasta: 'Fotos da Garagem', fotos: [] },
-                    sos: { subpasta: 'Imagens SOS', fotos: [] },
-                    comprovantes: { subpasta: 'Comprovantes', placas: {} }
+                    garagem: { subpasta:'Fotos da Garagem', fotos:[] },
+                    sos: { subpasta:'Imagens SOS', fotos:[] },
+                    comprovantes: { subpasta:'Comprovantes', placas:{} }
                 },
                 config: {
-                    empresa: 'LOBÃO', cnpj: '', telefone: '', email: '', endereco: '',
-                    juros: '', multa: '', minAluguel: '', prazoMax: '',
-                    senhaMin: '', sessao: '', backup: 'sim', ultimaLimpezaAuditoria: null
+                    empresa:'LOBÃO', cnpj:'', telefone:'', email:'', endereco:'',
+                    juros:'', multa:'', minAluguel:'', prazoMax:'',
+                    senhaMin:'', sessao:'', backup:'sim', ultimaLimpezaAuditoria: null
                 }
             };
         }
@@ -1515,22 +1378,13 @@
                         const img = new Image();
                         img.onload = function() {
                             const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            if (width > maxWidth) {
-                                height = Math.round((height * maxWidth) / width);
-                                width = maxWidth;
-                            }
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
+                            let width = img.width, height = img.height;
+                            if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                            canvas.width = width; canvas.height = height;
+                            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                             let q = qualidade;
                             let dataUrl = canvas.toDataURL('image/jpeg', q);
-                            while (dataUrl.length > 100000 && q > 0.1) {
-                                q -= 0.1;
-                                dataUrl = canvas.toDataURL('image/jpeg', q);
-                            }
+                            while (dataUrl.length > 100000 && q > 0.1) { q -= 0.1; dataUrl = canvas.toDataURL('image/jpeg', q); }
                             resolve(dataUrl);
                         };
                         img.onerror = reject;
@@ -1550,28 +1404,17 @@
         function comprimirBase64(dataUrl, maxWidth = 400, qualidade = 0.4) {
             return new Promise((resolve) => {
                 if (!dataUrl) return resolve(null);
-                if (dataUrl.startsWith('data:application/pdf') || dataUrl.startsWith('data:application/octet-stream') || dataUrl.startsWith('data:image/svg')) {
-                    return resolve(dataUrl);
-                }
+                if (dataUrl.startsWith('data:application/pdf') || dataUrl.startsWith('data:application/octet-stream') || dataUrl.startsWith('data:image/svg')) return resolve(dataUrl);
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                    let width = img.width, height = img.height;
+                    if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                     let q = qualidade;
                     let result = canvas.toDataURL('image/jpeg', q);
-                    while (result.length > 100000 && q > 0.1) {
-                        q -= 0.1;
-                        result = canvas.toDataURL('image/jpeg', q);
-                    }
+                    while (result.length > 100000 && q > 0.1) { q -= 0.1; result = canvas.toDataURL('image/jpeg', q); }
                     resolve(result);
                 };
                 img.onerror = () => resolve(null);
@@ -1581,110 +1424,98 @@
 
         async function comprimirDB() {
             console.log("Comprimindo banco de dados...");
-            if (db.clientes) {
-                for (let i = 0; i < db.clientes.length; i++) {
-                    if (db.clientes[i].selfie) db.clientes[i].selfie = await comprimirBase64(db.clientes[i].selfie, 200, 0.3);
-                }
-            }
-            if (db.usuarios) {
-                for (let i = 0; i < db.usuarios.length; i++) {
-                    if (db.usuarios[i].selfie) db.usuarios[i].selfie = await comprimirBase64(db.usuarios[i].selfie, 200, 0.3);
-                }
-            }
-            if (db.imagens && db.imagens.garagem && db.imagens.garagem.fotos) {
-                for (let i = 0; i < db.imagens.garagem.fotos.length; i++) {
-                    if (db.imagens.garagem.fotos[i].data) db.imagens.garagem.fotos[i].data = await comprimirBase64(db.imagens.garagem.fotos[i].data, 300, 0.3);
-                }
-            }
-            if (db.imagens && db.imagens.sos && db.imagens.sos.fotos) {
-                for (let i = 0; i < db.imagens.sos.fotos.length; i++) {
-                    if (db.imagens.sos.fotos[i].data) db.imagens.sos.fotos[i].data = await comprimirBase64(db.imagens.sos.fotos[i].data, 300, 0.3);
-                }
-            }
-            if (db.imagens && db.imagens.comprovantes && db.imagens.comprovantes.placas) {
-                for (const placa in db.imagens.comprovantes.placas) {
-                    for (let i = 0; i < db.imagens.comprovantes.placas[placa].length; i++) {
-                        if (db.imagens.comprovantes.placas[placa][i].data) {
-                            db.imagens.comprovantes.placas[placa][i].data = await comprimirBase64(db.imagens.comprovantes.placas[placa][i].data, 500, 0.4);
-                        }
-                    }
-                }
-            }
-            if (db.documentos) {
-                for (let i = 0; i < db.documentos.length; i++) {
-                    if (db.documentos[i].imagem) db.documentos[i].imagem = await comprimirBase64(db.documentos[i].imagem, 300, 0.3);
-                }
-            }
-            if (db.mecanico) {
-                for (let i = 0; i < db.mecanico.length; i++) {
-                    if (db.mecanico[i].pdfData) db.mecanico[i].pdfData = await comprimirBase64(db.mecanico[i].pdfData, 300, 0.3);
-                }
-            }
-            if (db.compras) {
-                for (let i = 0; i < db.compras.length; i++) {
-                    if (db.compras[i].arquivo) db.compras[i].arquivo = await comprimirBase64(db.compras[i].arquivo, 300, 0.3);
-                }
-            }
-            if (db.pendentes) {
-                for (let i = 0; i < db.pendentes.length; i++) {
-                    if (db.pendentes[i].docDataUrl) db.pendentes[i].docDataUrl = await comprimirBase64(db.pendentes[i].docDataUrl, 300, 0.3);
-                }
-            }
-            if (db.historico) {
-                for (let i = 0; i < db.historico.length; i++) {
-                    if (db.historico[i].arquivo) db.historico[i].arquivo = await comprimirBase64(db.historico[i].arquivo, 300, 0.3);
-                }
-            }
-            if (db.locacoes) {
-                for (let i = 0; i < db.locacoes.length; i++) {
-                    if (db.locacoes[i].vistoria) {
-                        for (let j = 0; j < db.locacoes[i].vistoria.length; j++) {
-                            db.locacoes[i].vistoria[j] = await comprimirBase64(db.locacoes[i].vistoria[j], 300, 0.3);
-                        }
-                    }
-                }
-            }
+            if (db.clientes) for (let i = 0; i < db.clientes.length; i++) if (db.clientes[i].selfie) db.clientes[i].selfie = await comprimirBase64(db.clientes[i].selfie, 200, 0.3);
+            if (db.usuarios) for (let i = 0; i < db.usuarios.length; i++) if (db.usuarios[i].selfie) db.usuarios[i].selfie = await comprimirBase64(db.usuarios[i].selfie, 200, 0.3);
+            if (db.imagens?.garagem?.fotos) for (let i = 0; i < db.imagens.garagem.fotos.length; i++) if (db.imagens.garagem.fotos[i].data) db.imagens.garagem.fotos[i].data = await comprimirBase64(db.imagens.garagem.fotos[i].data, 300, 0.3);
+            if (db.imagens?.sos?.fotos) for (let i = 0; i < db.imagens.sos.fotos.length; i++) if (db.imagens.sos.fotos[i].data) db.imagens.sos.fotos[i].data = await comprimirBase64(db.imagens.sos.fotos[i].data, 300, 0.3);
+            if (db.imagens?.comprovantes?.placas) for (const placa in db.imagens.comprovantes.placas) for (let i = 0; i < db.imagens.comprovantes.placas[placa].length; i++) if (db.imagens.comprovantes.placas[placa][i].data) db.imagens.comprovantes.placas[placa][i].data = await comprimirBase64(db.imagens.comprovantes.placas[placa][i].data, 500, 0.4);
+            if (db.documentos) for (let i = 0; i < db.documentos.length; i++) if (db.documentos[i].imagem) db.documentos[i].imagem = await comprimirBase64(db.documentos[i].imagem, 300, 0.3);
+            if (db.mecanico) for (let i = 0; i < db.mecanico.length; i++) if (db.mecanico[i].pdfData) db.mecanico[i].pdfData = await comprimirBase64(db.mecanico[i].pdfData, 300, 0.3);
+            if (db.compras) for (let i = 0; i < db.compras.length; i++) if (db.compras[i].arquivo) db.compras[i].arquivo = await comprimirBase64(db.compras[i].arquivo, 300, 0.3);
+            if (db.pendentes) for (let i = 0; i < db.pendentes.length; i++) if (db.pendentes[i].docDataUrl) db.pendentes[i].docDataUrl = await comprimirBase64(db.pendentes[i].docDataUrl, 300, 0.3);
+            if (db.historico) for (let i = 0; i < db.historico.length; i++) if (db.historico[i].arquivo) db.historico[i].arquivo = await comprimirBase64(db.historico[i].arquivo, 300, 0.3);
+            if (db.locacoes) for (let i = 0; i < db.locacoes.length; i++) if (db.locacoes[i].vistoria) for (let j = 0; j < db.locacoes[i].vistoria.length; j++) db.locacoes[i].vistoria[j] = await comprimirBase64(db.locacoes[i].vistoria[j], 300, 0.3);
             console.log("Compressão concluída.");
         }
 
         async function carregarDadosFirestore() {
             try {
                 document.getElementById('loginButton').disabled = true;
-                const doc = await DB_DOC_REF.get();
-                if (doc.exists) {
-                    db = doc.data();
-                    if (!db.pendentes) db.pendentes = [];
-                    if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
-                    if (!db.historico) db.historico = [];
-                    if (!db.estadoCampos) db.estadoCampos = {};
-                    if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
-                    if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', placas:{}} };
-                    if (!db.imagens.comprovantes) db.imagens.comprovantes = { subpasta: 'Comprovantes', placas: {} };
-                    if (!db.imagens.comprovantes.placas) {
-                        db.imagens.comprovantes.placas = {};
-                        if (db.imagens.comprovantes.fotos && Array.isArray(db.imagens.comprovantes.fotos)) {
-                            db.imagens.comprovantes.placas['SEM PLACA'] = db.imagens.comprovantes.fotos;
-                            delete db.imagens.comprovantes.fotos;
-                        }
-                    }
-                    if (!db.config) db.config = criarDBPadrao().config;
-                    if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
-                    db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
-                    if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
-                        db.usuarios.push({ nome: 'LOBÃO', senha: '18998211', tipo: 'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie: null });
-                    }
-                } else {
-                    db = criarDBPadrao();
-                    await DB_DOC_REF.set(db);
+
+                const [metaDoc, imagensDoc, legado] = await Promise.all([
+                    REF_META.get(),
+                    REF_IMAGENS.get(),
+                    DB_DOC_REF_LEGADO.get().catch(() => null)
+                ]);
+                const docsColecoes = await Promise.all(COLECOES.map(nome => refCol(nome).get()));
+
+                const novoDB = criarDBPadrao();
+
+                if (metaDoc.exists) {
+                    const m = metaDoc.data() || {};
+                    if (m.config) novoDB.config = m.config;
+                    if (m.contratos) novoDB.contratos = m.contratos;
+                    if (m.estadoCampos) novoDB.estadoCampos = m.estadoCampos;
                 }
+                if (imagensDoc.exists) {
+                    const im = imagensDoc.data() || {};
+                    if (im.garagem) novoDB.imagens.garagem = im.garagem;
+                    if (im.sos) novoDB.imagens.sos = im.sos;
+                    if (im.comprovantes) novoDB.imagens.comprovantes = im.comprovantes;
+                }
+                docsColecoes.forEach((doc, i) => {
+                    if (doc.exists) {
+                        const data = doc.data() || {};
+                        if (Array.isArray(data.itens)) novoDB[COLECOES[i]] = data.itens;
+                    }
+                });
+
+                const bancoVazio = contarItensDB(novoDB) === 0;
+                if (bancoVazio && legado && legado.exists) {
+                    console.log('Migrando dados do formato antigo (sistema/dados)...');
+                    const old = legado.data() || {};
+                    COLECOES.forEach(nome => { if (Array.isArray(old[nome])) novoDB[nome] = old[nome]; });
+                    if (old.config) novoDB.config = old.config;
+                    if (old.contratos) novoDB.contratos = old.contratos;
+                    if (old.estadoCampos) novoDB.estadoCampos = old.estadoCampos;
+                    if (old.imagens) novoDB.imagens = old.imagens;
+                }
+
+                db = novoDB;
+
+                // Saneamentos
+                if (!db.pendentes) db.pendentes = [];
+                if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
+                if (!db.historico) db.historico = [];
+                if (!db.estadoCampos) db.estadoCampos = {};
+                if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
+                if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem', fotos:[]}, sos:{subpasta:'Imagens SOS', fotos:[]}, comprovantes:{subpasta:'Comprovantes', placas:{}} };
+                if (!db.imagens.comprovantes) db.imagens.comprovantes = { subpasta: 'Comprovantes', placas: {} };
+                if (!db.imagens.comprovantes.placas) {
+                    db.imagens.comprovantes.placas = {};
+                    if (db.imagens.comprovantes.fotos && Array.isArray(db.imagens.comprovantes.fotos)) {
+                        db.imagens.comprovantes.placas['SEM PLACA'] = db.imagens.comprovantes.fotos;
+                        delete db.imagens.comprovantes.fotos;
+                    }
+                }
+                if (!db.config) db.config = criarDBPadrao().config;
+                if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
+                db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
+                if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
+                    db.usuarios.push({ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null });
+                }
+
                 dbCarregado = true;
                 document.getElementById('loginButton').disabled = false;
                 inicializarSistema();
-                // Ativa auto-save dos campos do sistema
                 ativarAutoSaveEstadoCampos();
-                // Restaura rascunhos de campos (não submetidos)
                 restaurarEstadoCampos(db.estadoCampos);
-                // Verificar backup local após inicializar
+
+                // Se migrou do legado, grava no novo formato
+                if (bancoVazio && legado && legado.exists) {
+                    await enviarParaFirestore(db).catch(e => console.warn('Falha ao migrar legado:', e));
+                }
+
                 setTimeout(() => verificarBackupLocal(), 500);
             } catch (error) {
                 console.error('Erro ao carregar dados do Firebase:', error);
@@ -1692,25 +1523,14 @@
             }
         }
 
-        let selfieStream = null;
-        let selfieDataUrl = null;
-        let selfieClienteTemp = null;
-        let selfieUsuarioTemp = null;
-        let selfieDestino = 'cliente';
-        let usuarioEditandoIndex = null;
-        let docUploadDataUrl = null;
-        let docUploadFileType = null;
-        let compPdfDataUrl = null;
-        let compPdfFileType = null;
-        let mecPdfDataUrl = null;
-        let mecPdfFileType = null;
-        let compraEditandoIndex = null;
-        let pendenciaEditandoIndex = null;
-        let pendDocDataUrl = null;
-        let pendDocFileType = null;
-        let vistoriaStream = null;
-        let vistoriaDataUrl = null;
-        let vistoriaLocacaoIndex = null;
+        let selfieStream = null, selfieDataUrl = null, selfieClienteTemp = null, selfieUsuarioTemp = null;
+        let selfieDestino = 'cliente', usuarioEditandoIndex = null;
+        let docUploadDataUrl = null, docUploadFileType = null;
+        let compPdfDataUrl = null, compPdfFileType = null;
+        let mecPdfDataUrl = null, mecPdfFileType = null;
+        let compraEditandoIndex = null, pendenciaEditandoIndex = null;
+        let pendDocDataUrl = null, pendDocFileType = null;
+        let vistoriaStream = null, vistoriaDataUrl = null, vistoriaLocacaoIndex = null;
         let relatorioMecFiltros = { dataInicio: '', dataFim: '', oficina: '', status: 'todos' };
         let relatorioMecResultados = [];
         let compDocumentosTemp = [];
@@ -1726,10 +1546,7 @@
                         const index = Array.from(campos).indexOf(this);
                         if (index !== -1 && index < campos.length - 1) {
                             const proximo = campos[index + 1];
-                            if (proximo) {
-                                proximo.focus();
-                                if (proximo.tagName === 'SELECT') proximo.click();
-                            }
+                            if (proximo) { proximo.focus(); if (proximo.tagName === 'SELECT') proximo.click(); }
                         } else if (index === campos.length - 1) {
                             const botoes = form.querySelectorAll('.btn-primary, .btn-success, .btn-secondary');
                             if (botoes.length > 0) botoes[0].focus();
@@ -1737,60 +1554,49 @@
                     }
                 });
             });
-            document.getElementById('compQuantidade').addEventListener('input', calcularValorTotal);
-            document.getElementById('compValorUnitario').addEventListener('input', calcularValorTotal);
+            const qEl = document.getElementById('compQuantidade');
+            const vEl = document.getElementById('compValorUnitario');
+            if (qEl) qEl.addEventListener('input', calcularValorTotal);
+            if (vEl) vEl.addEventListener('input', calcularValorTotal);
             document.querySelectorAll('input[type="text"], input[type="search"], textarea').forEach(input => {
-                input.addEventListener('input', function(e) { this.value = this.value.toUpperCase(); });
+                input.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
             });
-
-            // AUTO-SAVE NOS CONTRATOS
-            ['contratoLocacao', 'termoResponsabilidade', 'notaPromissoria'].forEach(sectionId => {
+            ['contratoLocacao','termoResponsabilidade','notaPromissoria'].forEach(sectionId => {
                 const section = document.getElementById(sectionId);
                 if (!section) return;
                 section.querySelectorAll('input').forEach(input => {
                     input.addEventListener('input', function() {
                         if (_carregandoContratos) return;
-                        debounceAutoSave('contrato_' + sectionId, function() {
-                            salvarDadosContratos();
-                        }, 1500);
+                        debounceAutoSave('contrato_' + sectionId, salvarDadosContratos, 1500);
                     });
                 });
             });
-
-            // AUTO-SAVE NAS CONFIGURAÇÕES
             const configSection = document.getElementById('configuracao');
             if (configSection) {
                 configSection.querySelectorAll('input, select').forEach(input => {
-                    input.addEventListener('input', function() {
-                        if (_carregandoConfig) return;
-                        debounceAutoSave('config', function() { salvarConfiguracaoSilencioso(); }, 1500);
-                    });
-                    input.addEventListener('change', function() {
-                        if (_carregandoConfig) return;
-                        debounceAutoSave('config', function() { salvarConfiguracaoSilencioso(); }, 1500);
-                    });
+                    const h = function() { if (_carregandoConfig) return; debounceAutoSave('config', salvarConfiguracaoSilencioso, 1500); };
+                    input.addEventListener('input', h);
+                    input.addEventListener('change', h);
                 });
             }
         });
 
         document.querySelectorAll('.money').forEach(input => {
-            input.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value) {
-                    value = (parseInt(value) / 100).toFixed(2);
-                    let [intPart, decPart] = value.split('.');
-                    intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-                    e.target.value = 'R$ ' + intPart + ',' + decPart;
+            input.addEventListener('input', function() {
+                let v = this.value.replace(/\D/g, '');
+                if (v) {
+                    v = (parseInt(v) / 100).toFixed(2);
+                    let [i, d] = v.split('.');
+                    i = i.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    this.value = 'R$ ' + i + ',' + d;
                 }
             });
         });
 
         function calcularValorTotal() {
             const qtd = parseFloat(document.getElementById('compQuantidade').value) || 0;
-            const valorUnitarioStr = document.getElementById('compValorUnitario').value;
-            const valorUnitario = parseFloat(valorUnitarioStr.replace('R$ ', '').replace(/\./g, '').replace(',', '.')) || 0;
-            const total = qtd * valorUnitario;
-            document.getElementById('compValorTotal').value = formatarMoedaBR(total);
+            const vu = parseValorMonetario(document.getElementById('compValorUnitario').value);
+            document.getElementById('compValorTotal').value = formatarMoedaBR(qtd * vu);
         }
 
         const todasAbas = [
@@ -1887,18 +1693,18 @@
                 veiculos: {}
             },
             MOTORISTA: {
-                abas: { veiculos: false, clientes: false, locacoes: false, locEncerrada: false, manutencao: true, mecanico: false, usuario: false, garagem: true, sos: true, comprovantes: true, pagamentos: false, banco: true, fluxocaixa: false, doc: true, compras: false, configuracao: false, auditoria: false, pendente: false, historico: true, vistoria: true },
-                botoes: { garagem_salvar: true, sos_salvar: true, sos_baixar: true, banco_copiar: true, doc_salvar: true, doc_limpar: true, doc_selecionar: true },
+                abas: { veiculos:false, clientes:false, locacoes:false, locEncerrada:false, manutencao:true, mecanico:false, usuario:false, garagem:true, sos:true, comprovantes:true, pagamentos:false, banco:true, fluxocaixa:false, doc:true, compras:false, configuracao:false, auditoria:false, pendente:false, historico:true, vistoria:true },
+                botoes: { garagem_salvar:true, sos_salvar:true, sos_baixar:true, banco_copiar:true, doc_salvar:true, doc_limpar:true, doc_selecionar:true },
                 veiculos: {}
             },
             OFICINA: {
-                abas: { veiculos: true, clientes: false, locacoes: false, locEncerrada: false, manutencao: true, mecanico: true, usuario: false, garagem: false, sos: false, comprovantes: false, pagamentos: false, banco: false, fluxocaixa: false, doc: false, compras: false, configuracao: false, auditoria: false, pendente: false, historico: false, vistoria: true },
-                botoes: { veiculos_salvar: true, veiculos_rastreador: false, veiculos_multas: false, manutencao_salvar: true, mecanico_salvar: true, vistoria_camera: true },
+                abas: { veiculos:true, clientes:false, locacoes:false, locEncerrada:false, manutencao:true, mecanico:true, usuario:false, garagem:false, sos:false, comprovantes:false, pagamentos:false, banco:false, fluxocaixa:false, doc:false, compras:false, configuracao:false, auditoria:false, pendente:false, historico:false, vistoria:true },
+                botoes: { veiculos_salvar:true, veiculos_rastreador:false, veiculos_multas:false, manutencao_salvar:true, mecanico_salvar:true, vistoria_camera:true },
                 veiculos: {}
             },
             VISITANTE: {
-                abas: { veiculos: false, clientes: false, locacoes: false, locEncerrada: false, manutencao: false, mecanico: false, usuario: false, garagem: true, sos: false, comprovantes: false, pagamentos: false, banco: false, fluxocaixa: false, doc: false, compras: false, configuracao: false, auditoria: false, pendente: false, historico: false, vistoria: false },
-                botoes: { garagem_buscar: true, garagem_salvar: true },
+                abas: { veiculos:false, clientes:false, locacoes:false, locEncerrada:false, manutencao:false, mecanico:false, usuario:false, garagem:true, sos:false, comprovantes:false, pagamentos:false, banco:false, fluxocaixa:false, doc:false, compras:false, configuracao:false, auditoria:false, pendente:false, historico:false, vistoria:false },
+                botoes: { garagem_buscar:true, garagem_salvar:true },
                 veiculos: {}
             }
         };
@@ -2013,12 +1819,10 @@
                 container.appendChild(img);
             }
         }
-
         function limparSelfieCliente() {
             selfieClienteTemp = null;
             document.getElementById('selfiePreviewCliente').innerHTML = '';
         }
-
         function mostrarPreviewSelfieUsuario() {
             const container = document.getElementById('selfiePreviewUsuario');
             container.innerHTML = '';
@@ -2030,7 +1834,6 @@
                 container.appendChild(img);
             }
         }
-
         function limparSelfieUsuario() {
             selfieUsuarioTemp = null;
             const container = document.getElementById('selfiePreviewUsuario');
@@ -2853,10 +2656,8 @@
                 const maxWidth = 200;
                 let width = img.width, height = img.height;
                 if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
+                canvas.width = width; canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                 selfieFinal = canvas.toDataURL('image/jpeg', 0.3);
             }
             const cliente = {
