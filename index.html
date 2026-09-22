@@ -16,6 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root { --primary: #1a3c6e; --secondary: #e63946; --accent: #f4a261; --bg: #f8f9fa; --text: #333; --white: #fff; --shadow: 0 4px 6px rgba(0,0,0,0.1); --radius: 8px; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --info: #17a2b8; }
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -30,6 +31,8 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; }
 .login-box button[type="submit"]:hover { background: #0d1b2a; }
 .btn-install { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: var(--radius); font-size: 15px; cursor: pointer; font-weight: bold; margin-top: 12px; }
 .btn-install-help { width: 100%; padding: 10px; background: transparent; color: var(--primary); border: 2px solid var(--primary); border-radius: var(--radius); font-size: 13px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+.btn-face-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 15px; cursor: pointer; font-weight: bold; margin-top: 12px; }
+.btn-face-login:hover { background: #0d1b2a; }
 .main-container { display: none; min-height: 100vh; }
 .tabs-container { display: flex; flex-wrap: wrap; background: var(--primary); padding: 10px; gap: 5px; position: sticky; top: 0; z-index: 100; align-items: center; }
 .tab { padding: 10px 15px; background: transparent; color: var(--white); border: none; cursor: pointer; border-radius: 5px; font-size: 13px; font-weight: 500; white-space: nowrap; }
@@ -176,6 +179,8 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
 .auto-save-indicator.ativo { opacity: 1; }
 .auto-save-indicator.salvando { background: #ffc107 !important; color: #000 !important; opacity: 1; }
 .auto-save-indicator.erro { background: #dc3545 !important; color: white !important; opacity: 1; }
+.face-status-ok { color: var(--success); font-weight: bold; font-size: 13px; }
+.face-status-none { color: #999; font-size: 13px; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -194,6 +199,7 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
             <button type="submit" id="loginButton">Entrar</button>
         </form>
         <p id="loginError" style="color: red; margin-top: 10px; display: none;">Usuário ou senha inválidos!</p>
+        <button type="button" id="faceLoginBtn" class="btn-face-login" onclick="iniciarLoginFacial()">🔓 Entrar com Reconhecimento Facial</button>
         <button type="button" id="installBtn" class="btn-install" onclick="instalarApp()" style="display: none;">📲 Instalar Aplicativo</button>
         <button type="button" id="installHelpBtn" class="btn-install-help" onclick="mostrarAjudaInstalacao()">📲 Como instalar no celular</button>
     </div>
@@ -391,6 +397,13 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
                     <div id="selfiePreviewUsuario" style="display: flex; align-items: center;"></div>
                 </div>
             </div>
+            <div class="form-group"><label>🧠 Rosto para Login Facial</label>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn-buscar" onclick="abrirCadastroRostoUsuario()" style="padding: 10px 20px; font-size: 14px;">🧠 Cadastrar Rosto</button>
+                    <button type="button" class="btn-danger" onclick="removerRostoUsuario()" style="padding: 10px 15px; font-size: 13px;">🗑️ Remover Rosto</button>
+                    <div id="faceDescriptorPreviewUsuario" style="display: flex; align-items: center;"></div>
+                </div>
+            </div>
         </div>
         <div class="config-section">
             <h3>🔐 Permissões de Acesso</h3>
@@ -401,7 +414,7 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
         <button class="btn-danger" data-permissao="usuario_excluir" onclick="excluirUsuario()">🗑️ Excluir</button>
         <button class="btn-secondary" data-permissao="usuario_limpar" onclick="limparCamposUsuario()">🔄 Limpar</button>
         <div class="table-container">
-            <table id="tabelaUsuario"><thead><tr><th>Nome</th><th>Tipo</th><th>Selfie</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            <table id="tabelaUsuario"><thead><tr><th>Nome</th><th>Tipo</th><th>Selfie</th><th>Rosto</th><th>Ações</th></tr></thead><tbody></tbody></table>
         </div>
     </div>
 
@@ -707,6 +720,33 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
     </div>
 </div>
 
+<!-- MODAL LOGIN FACIAL -->
+<div class="selfie-modal" id="facialLoginModal">
+    <div class="selfie-title">🔓 Reconhecimento Facial</div>
+    <div class="selfie-instructions" id="facialLoginStatus">Posicione seu rosto na câmera...</div>
+    <div class="selfie-container">
+        <video class="selfie-video" id="facialLoginVideo" autoplay playsinline></video>
+        <canvas class="selfie-canvas" id="facialLoginCanvas"></canvas>
+    </div>
+    <div class="selfie-controls">
+        <button class="selfie-btn-cancel" onclick="fecharLoginFacial()">❌ Cancelar</button>
+    </div>
+</div>
+
+<!-- MODAL CADASTRO DE ROSTO -->
+<div class="selfie-modal" id="faceRegisterModal">
+    <div class="selfie-title">🧠 Cadastrar Rosto</div>
+    <div class="selfie-instructions" id="faceRegisterStatus">Posicione seu rosto na câmera e clique em "Capturar Rosto"</div>
+    <div class="selfie-container">
+        <video class="selfie-video" id="faceRegisterVideo" autoplay playsinline></video>
+        <canvas class="selfie-canvas" id="faceRegisterCanvas"></canvas>
+    </div>
+    <div class="selfie-controls">
+        <button class="selfie-btn-capture" onclick="capturarRostoUsuario()">📸 Capturar Rosto</button>
+        <button class="selfie-btn-cancel" onclick="fecharCadastroRosto()">❌ Cancelar</button>
+    </div>
+</div>
+
 <div class="selfie-modal" id="vistoriaCameraModal">
     <div class="selfie-title">📷 Foto de Vistoria</div>
     <div class="selfie-instructions">Aponte a câmera para o veículo</div>
@@ -918,7 +958,6 @@ function mostrarErroSalvamento(msg) {
     el.textContent = '⚠️ ' + (msg || 'ERRO AO SALVAR - Verifique a conexão!');
 }
 
-// Hash simples para detectar mudanças
 function hashConteudo(obj) {
     try {
         const s = JSON.stringify(obj) || '';
@@ -927,15 +966,10 @@ function hashConteudo(obj) {
         return h >>> 0;
     } catch (e) { return Math.random() * 1e9 | 0; }
 }
-
-// Verifica tamanho em bytes do JSON
 function tamanhoJSON(obj) {
     try { return new Blob([JSON.stringify(obj) || '']).size; } catch (e) { return 0; }
 }
 
-// =============================================
-// SALVAR - grava cada doc individualmente, com retry próprio
-// =============================================
 async function salvarDB() {
     if (!db) return;
     if (_salvandoAgora) { _novaAlteracaoDuranteSave = true; return; }
@@ -943,13 +977,11 @@ async function salvarDB() {
     mostrarIndicadorSalvando();
 
     try {
-        // 1) Backup local SEMPRE primeiro
         try {
             localStorage.setItem('lobao_db_backup', JSON.stringify(db));
             localStorage.setItem('lobao_db_backup_time', new Date().toISOString());
         } catch (e) { console.warn('Backup local falhou:', e); }
 
-        // 2) Monta os documentos-alvo
         const docs = {
             meta: {
                 config: db.config || {},
@@ -961,12 +993,10 @@ async function salvarDB() {
         };
         COLECOES.forEach(nome => { docs[nome] = { itens: db[nome] || [] }; });
 
-        // 3) Grava cada doc independentemente
         const resultados = await Promise.all(Object.entries(docs).map(async ([nome, conteudoInicial]) => {
             try {
                 let conteudo = conteudoInicial;
 
-                // Verifica tamanho e comprime a coleção se necessário
                 if (tamanhoJSON(conteudo) > 900 * 1024) {
                     console.warn(`Coleção ${nome} grande, comprimindo...`);
                     await comprimirColecao(nome);
@@ -979,12 +1009,10 @@ async function salvarDB() {
                     }
                 }
 
-                // Se ainda for grande, divide em chunks
                 const json = JSON.stringify(conteudo);
                 const tamanho = new Blob([json]).size;
 
                 if (tamanho > 900 * 1024 && conteudo.itens && Array.isArray(conteudo.itens)) {
-                    // Chunking
                     const itens = conteudo.itens;
                     const chunks = [];
                     const maxItensPorChunk = Math.max(1, Math.ceil(itens.length * 700 * 1024 / tamanho));
@@ -994,19 +1022,16 @@ async function salvarDB() {
                     for (let i = 0; i < chunks.length; i++) {
                         await refDoc(`${nome}_chunk_${i}`).set({ itens: chunks[i], chunk: i });
                     }
-                    // Manifesto
                     await refDoc(`${nome}_meta`).set({ chunks: chunks.length, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() });
                     _hashesUltimoSucesso[nome] = hashConteudo(conteudo);
                     return { nome, ok: true, chunks: chunks.length };
                 }
 
-                // Hash check (só grava se mudou)
                 const hash = hashConteudo(conteudo);
                 if (_hashesUltimoSucesso[nome] === hash) {
                     return { nome, ok: true, skipped: true };
                 }
 
-                // Grava (set substitui doc inteiro)
                 await refDoc(nome).set({ ...conteudo, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() });
                 _hashesUltimoSucesso[nome] = hash;
                 return { nome, ok: true };
@@ -1066,9 +1091,6 @@ function contarItensDB(database) {
     return total;
 }
 
-// =============================================
-// COMPRESSÃO POR COLEÇÃO
-// =============================================
 async function comprimirColecao(nome) {
     if (nome === 'imagens') {
         const g = db.imagens?.garagem?.fotos || [];
@@ -1141,21 +1163,16 @@ function comprimirBase64(dataUrl, maxWidth = 400, qualidade = 0.4) {
     });
 }
 
-// =============================================
-// CARREGAR - lê todos os docs + chunks + merge com backup local
-// =============================================
 async function carregarDadosFirestore() {
     try {
         document.getElementById('loginButton').disabled = true;
 
-        // Lê meta, imagens, legado
         const [metaDoc, imagensDoc, legado] = await Promise.all([
             refDoc('meta').get(),
             refDoc('imagens').get(),
             DB_DOC_REF_LEGADO.get().catch(() => null)
         ]);
 
-        // Lê cada coleção e seus chunks
         const docsColecoes = {};
         await Promise.all(COLECOES.map(async nome => {
             const principal = await refDoc(nome).get();
@@ -1164,7 +1181,6 @@ async function carregarDadosFirestore() {
                 const d = principal.data() || {};
                 if (Array.isArray(d.itens)) itens = d.itens;
             }
-            // Verifica manifesto de chunks
             const metaChunk = await refDoc(`${nome}_meta`).get().catch(() => null);
             if (metaChunk && metaChunk.exists) {
                 const total = (metaChunk.data() || {}).chunks || 0;
@@ -1178,7 +1194,6 @@ async function carregarDadosFirestore() {
             docsColecoes[nome] = itens;
         }));
 
-        // Monta novoDB
         const novoDB = criarDBPadrao();
         if (metaDoc.exists) {
             const m = metaDoc.data() || {};
@@ -1194,7 +1209,6 @@ async function carregarDadosFirestore() {
         }
         COLECOES.forEach(nome => { novoDB[nome] = docsColecoes[nome] || []; });
 
-        // Migração de dados antigos (sistema/dados)
         if (contarItensDB(novoDB) === 0 && legado && legado.exists) {
             console.log('Migrando dados antigos...');
             const old = legado.data() || {};
@@ -1205,7 +1219,6 @@ async function carregarDadosFirestore() {
             if (old.imagens) novoDB.imagens = old.imagens;
         }
 
-        // MERGE com backup local (NUNCA perde dados)
         try {
             const backupStr = localStorage.getItem('lobao_db_backup');
             if (backupStr) {
@@ -1213,13 +1226,11 @@ async function carregarDadosFirestore() {
                 COLECOES.forEach(nome => {
                     const localArr = Array.isArray(backup[nome]) ? backup[nome] : [];
                     const cloudArr = novoDB[nome] || [];
-                    // Se o backup local tem MAIS itens, usa o local (nunca perde)
                     if (localArr.length > cloudArr.length) {
                         console.log(`Merge ${nome}: local (${localArr.length}) > nuvem (${cloudArr.length}), usando local`);
                         novoDB[nome] = localArr;
                     }
                 });
-                // Imagens
                 if (backup.imagens) {
                     const bg = backup.imagens.garagem?.fotos?.length || 0;
                     const cg = novoDB.imagens.garagem?.fotos?.length || 0;
@@ -1233,7 +1244,6 @@ async function carregarDadosFirestore() {
 
         db = novoDB;
 
-        // Saneamentos
         if (!db.pendentes) db.pendentes = [];
         if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
         if (!db.historico) db.historico = [];
@@ -1252,7 +1262,7 @@ async function carregarDadosFirestore() {
         if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
         db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
         if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
-            db.usuarios.push({ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null });
+            db.usuarios.push({ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null, faceDescriptor:null });
         }
 
         dbCarregado = true;
@@ -1261,7 +1271,6 @@ async function carregarDadosFirestore() {
         ativarAutoSaveEstadoCampos();
         restaurarEstadoCampos(db.estadoCampos);
 
-        // Se migrou legado ou mesclou local, salva imediatamente
         const precisaSalvar = (legado && legado.exists && contarItensDB(novoDB) > 0) || (localStorage.getItem('lobao_db_backup') && localStorage.getItem('lobao_db_synced') !== 'true');
         if (precisaSalvar) {
             setTimeout(() => { Object.keys(_hashesUltimoSucesso).forEach(k => delete _hashesUltimoSucesso[k]); salvarDB(); }, 1000);
@@ -1272,14 +1281,11 @@ async function carregarDadosFirestore() {
     }
 }
 
-// =============================================
-// CRIAR DB PADRÃO
-// =============================================
 function criarDBPadrao() {
     return {
         veiculos: [], clientes: [], locacoes: [], locacoesEncerradas: [],
         manutencao: [], mecanico: [],
-        usuarios: [{ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null }],
+        usuarios: [{ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null, faceDescriptor:null }],
         alugueis: [], fluxoCaixa: [], documentos: [], compras: [], auditoria: [],
         bancos: [], pendentes: [], historico: [], estadoCampos: {},
         contratos: { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} },
@@ -1296,9 +1302,6 @@ function criarDBPadrao() {
     };
 }
 
-// =============================================
-// UTILITÁRIOS
-// =============================================
 function formatarMoedaBR(valor) {
     return 'R$ ' + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -1374,6 +1377,224 @@ let _carregandoConfig = false;
 let _autoSaveEstadoCamposAtivo = false;
 let docPlacaSelecionada = '';
 let encerradasChart = null;
+
+// =============================================
+// RECONHECIMENTO FACIAL - VARIÁVEIS
+// =============================================
+let _faceApiCarregada = false;
+let _faceApiCarregando = false;
+let faceLoginStream = null;
+let faceLoginProcessando = false;
+let faceRegisterStream = null;
+let faceDescriptorUsuarioTemp = null;
+const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
+const FACE_MATCH_THRESHOLD = 0.5; // menor = mais restrito
+
+// Pré-carrega modelos em background (não bloqueia)
+window.addEventListener('load', () => {
+    setTimeout(() => { carregarFaceAPI().catch(() => {}); }, 2500);
+});
+
+async function carregarFaceAPI() {
+    if (_faceApiCarregada) return true;
+    if (typeof faceapi === 'undefined') {
+        console.warn('face-api.js não disponível');
+        return false;
+    }
+    if (_faceApiCarregando) {
+        while (_faceApiCarregando) await new Promise(r => setTimeout(r, 120));
+        return _faceApiCarregada;
+    }
+    _faceApiCarregando = true;
+    try {
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
+        ]);
+        _faceApiCarregada = true;
+        console.log('✅ Modelos de reconhecimento facial carregados');
+        return true;
+    } catch (e) {
+        console.error('Erro ao carregar modelos faciais:', e);
+        return false;
+    } finally {
+        _faceApiCarregando = false;
+    }
+}
+
+function obterUsuariosComRosto() {
+    return (db.usuarios || []).filter(u =>
+        u && Array.isArray(u.faceDescriptor) && u.faceDescriptor.length === 128
+    );
+}
+
+// ----- LOGIN FACIAL -----
+async function iniciarLoginFacial() {
+    if (!dbCarregado) { alert('Sistema ainda carregando... Aguarde alguns instantes.'); return; }
+    const usuariosComRosto = obterUsuariosComRosto();
+    if (usuariosComRosto.length === 0) {
+        alert('Nenhum usuário possui rosto cadastrado ainda.\n\nEntre com usuário/senha, vá em "Usuários" e clique em "🧠 Cadastrar Rosto".');
+        return;
+    }
+    const ok = await carregarFaceAPI();
+    if (!ok) { alert('Não foi possível carregar os modelos de reconhecimento facial. Verifique a conexão com a internet.'); return; }
+
+    document.getElementById('facialLoginModal').classList.add('active');
+    document.getElementById('facialLoginStatus').textContent = '📷 Iniciando câmera...';
+    faceLoginProcessando = false;
+
+    try {
+        faceLoginStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: {ideal: 640}, height: {ideal: 480} },
+            audio: false
+        });
+        const video = document.getElementById('facialLoginVideo');
+        video.srcObject = faceLoginStream;
+        await video.play();
+        document.getElementById('facialLoginStatus').textContent = '👤 Procurando rosto...';
+        iniciarLoopDeteccaoLogin();
+    } catch (e) {
+        console.error(e);
+        alert('Não foi possível acessar a câmera. Verifique as permissões.');
+        fecharLoginFacial();
+    }
+}
+
+function iniciarLoopDeteccaoLogin() {
+    const video = document.getElementById('facialLoginVideo');
+    const statusEl = document.getElementById('facialLoginStatus');
+    const usuariosComRosto = obterUsuariosComRosto();
+    const labeledDescriptors = usuariosComRosto.map(u =>
+        new faceapi.LabeledFaceDescriptors(u.nome, [new Float32Array(u.faceDescriptor)])
+    );
+    const matcher = new faceapi.FaceMatcher(labeledDescriptors, FACE_MATCH_THRESHOLD);
+    faceLoginProcessando = true;
+
+    const detectar = async () => {
+        if (!faceLoginProcessando) return;
+        if (!video || video.readyState < 2) { setTimeout(detectar, 250); return; }
+        try {
+            const det = await faceapi
+                .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+            if (!faceLoginProcessando) return;
+            if (det) {
+                const match = matcher.findBestMatch(det.descriptor);
+                if (match.label !== 'unknown' && match.distance <= FACE_MATCH_THRESHOLD) {
+                    statusEl.textContent = `✅ Olá, ${match.label}! Entrando...`;
+                    faceLoginProcessando = false;
+                    setTimeout(() => finalizarLoginFacial(match.label), 400);
+                    return;
+                } else {
+                    statusEl.textContent = '❌ Rosto não reconhecido. Tente novamente.';
+                }
+            } else {
+                statusEl.textContent = '👤 Procurando rosto...';
+            }
+        } catch (e) {
+            console.error('Erro na detecção:', e);
+        }
+        if (faceLoginProcessando) setTimeout(detectar, 650);
+    };
+    detectar();
+}
+
+function finalizarLoginFacial(nomeUsuario) {
+    const usuario = db.usuarios.find(u => u.nome === nomeUsuario);
+    fecharLoginFacial();
+    if (!usuario) { alert('Usuário não encontrado.'); return; }
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('mainContainer').style.display = 'block';
+    aplicarPermissoes(usuario);
+    enterFullscreen();
+    registrarAuditoria('Login', `Login facial de ${usuario.nome}`);
+    document.getElementById('loginError').style.display = 'none';
+    salvarDB();
+}
+
+function fecharLoginFacial() {
+    faceLoginProcessando = false;
+    if (faceLoginStream) { faceLoginStream.getTracks().forEach(t => t.stop()); faceLoginStream = null; }
+    const modal = document.getElementById('facialLoginModal');
+    if (modal) modal.classList.remove('active');
+    const v = document.getElementById('facialLoginVideo');
+    if (v) v.srcObject = null;
+}
+
+// ----- CADASTRO DE ROSTO (aba Usuário) -----
+async function abrirCadastroRostoUsuario() {
+    const nome = document.getElementById('userNome').value.trim();
+    if (!nome) { alert('Preencha o "Nome User" antes de cadastrar o rosto!'); return; }
+    const ok = await carregarFaceAPI();
+    if (!ok) { alert('Não foi possível carregar os modelos de reconhecimento facial.'); return; }
+    document.getElementById('faceRegisterModal').classList.add('active');
+    document.getElementById('faceRegisterStatus').textContent = 'Posicione seu rosto na câmera e clique em "Capturar Rosto".';
+    try {
+        faceRegisterStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user', width: {ideal: 640}, height: {ideal: 480} },
+            audio: false
+        });
+        const video = document.getElementById('faceRegisterVideo');
+        video.srcObject = faceRegisterStream;
+        await video.play();
+    } catch (e) {
+        console.error(e);
+        alert('Não foi possível acessar a câmera.');
+        fecharCadastroRosto();
+    }
+}
+
+async function capturarRostoUsuario() {
+    const video = document.getElementById('faceRegisterVideo');
+    const statusEl = document.getElementById('faceRegisterStatus');
+    if (!video || video.readyState < 2) { alert('Câmera não está pronta. Aguarde.'); return; }
+    statusEl.textContent = '🔍 Analisando rosto...';
+    try {
+        const det = await faceapi
+            .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+        if (!det) {
+            statusEl.textContent = '❌ Nenhum rosto detectado. Aproxime o rosto e tente novamente.';
+            return;
+        }
+        faceDescriptorUsuarioTemp = Array.from(det.descriptor);
+        statusEl.textContent = '✅ Rosto capturado com sucesso!';
+        mostrarPreviewFaceDescriptor();
+        setTimeout(() => fecharCadastroRosto(), 700);
+    } catch (e) {
+        console.error(e);
+        statusEl.textContent = '❌ Erro ao capturar. Tente novamente.';
+    }
+}
+
+function fecharCadastroRosto() {
+    if (faceRegisterStream) { faceRegisterStream.getTracks().forEach(t => t.stop()); faceRegisterStream = null; }
+    const modal = document.getElementById('faceRegisterModal');
+    if (modal) modal.classList.remove('active');
+    const v = document.getElementById('faceRegisterVideo');
+    if (v) v.srcObject = null;
+}
+
+function mostrarPreviewFaceDescriptor() {
+    const el = document.getElementById('faceDescriptorPreviewUsuario');
+    if (!el) return;
+    if (faceDescriptorUsuarioTemp && Array.isArray(faceDescriptorUsuarioTemp)) {
+        el.innerHTML = '<span class="face-status-ok">✅ Rosto cadastrado</span>';
+    } else {
+        el.innerHTML = '<span class="face-status-none">Sem rosto cadastrado</span>';
+    }
+}
+
+function removerRostoUsuario() {
+    if (!faceDescriptorUsuarioTemp) { alert('Este usuário não possui rosto cadastrado.'); return; }
+    if (!confirm('Remover rosto cadastrado deste usuário?')) return;
+    faceDescriptorUsuarioTemp = null;
+    mostrarPreviewFaceDescriptor();
+    alert('Rosto removido. Não esqueça de salvar o usuário.');
+}
 
 // =============================================
 // AUTO-SAVE DE CAMPOS (rascunhos)
@@ -1662,7 +1883,7 @@ function setupFilter(inputId, tableId) {
 // =============================================
 function inicializarSistema() {
     if (!db.usuarios.some(u => u.nome === 'LOBÃO')) {
-        db.usuarios.push({ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null });
+        db.usuarios.push({ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null, faceDescriptor:null });
     }
     const lobao = db.usuarios.find(u => u.nome === 'LOBÃO');
     if (lobao) {
@@ -1716,6 +1937,7 @@ function inicializarSistema() {
     atualizarVistoria();
     atualizarSelectPlacasDoc();
     atualizarSubAbasDoc();
+    mostrarPreviewFaceDescriptor();
 }
 
 // =============================================
@@ -1971,7 +2193,7 @@ function criarUsuarioDoCliente(cliente) {
     const tel = cliente.telefone.replace(/\D/g, '');
     let senha = tel.length >= 10 ? tel.substring(2) : tel;
     if (db.usuarios.find(u => u.nome === primeiroNome)) return;
-    db.usuarios.push({ nome: primeiroNome, senha, tipo:'MOTORISTA', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.MOTORISTA)), selfie: cliente.selfie || null });
+    db.usuarios.push({ nome: primeiroNome, senha, tipo:'MOTORISTA', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.MOTORISTA)), selfie: cliente.selfie || null, faceDescriptor: null });
     atualizarTabelaUsuario();
 }
 function atualizarTabelaClientes() {
@@ -2139,13 +2361,16 @@ function salvarUsuario() {
     const tipo = document.getElementById('userTipo').value;
     const permissoes = coletarPermissoes();
     if (campoVazio(nome) || campoVazio(senha)) { alert('Preencha nome e senha!'); return; }
+    const faceDescriptor = (faceDescriptorUsuarioTemp && Array.isArray(faceDescriptorUsuarioTemp) && faceDescriptorUsuarioTemp.length === 128)
+        ? faceDescriptorUsuarioTemp.slice()
+        : null;
     if (usuarioEditandoIndex !== null) {
-        db.usuarios[usuarioEditandoIndex] = { nome, senha, tipo, permissoes, selfie: selfieUsuarioTemp || null };
+        db.usuarios[usuarioEditandoIndex] = { nome, senha, tipo, permissoes, selfie: selfieUsuarioTemp || null, faceDescriptor };
         usuarioEditandoIndex = null;
         registrarAuditoria('Edição', `Usuário: ${nome}`);
     } else {
         if (db.usuarios.some(u => u.nome === nome)) { alert('Usuário já existe!'); return; }
-        db.usuarios.push({ nome, senha, tipo, permissoes, selfie: selfieUsuarioTemp || null });
+        db.usuarios.push({ nome, senha, tipo, permissoes, selfie: selfieUsuarioTemp || null, faceDescriptor });
         registrarAuditoria('Cadastro', `Usuário: ${nome}`);
     }
     atualizarTabelaUsuario();
@@ -2160,7 +2385,9 @@ function atualizarTabelaUsuario() {
     db.usuarios.forEach((u, index) => {
         const row = tbody.insertRow();
         const selfieHtml = u.selfie ? `<img src="${u.selfie}" class="selfie-thumbnail" onclick="openImageModal('${u.selfie}')">` : '<span style="color:#999;">Sem selfie</span>';
-        row.innerHTML = `<td>${u.nome}</td><td>${u.tipo}</td><td>${selfieHtml}</td>
+        const temRosto = Array.isArray(u.faceDescriptor) && u.faceDescriptor.length === 128;
+        const rostoHtml = temRosto ? '<span style="color:#28a745; font-weight:bold;">✅ Cadastrado</span>' : '<span style="color:#999;">—</span>';
+        row.innerHTML = `<td>${u.nome}</td><td>${u.tipo}</td><td>${selfieHtml}</td><td>${rostoHtml}</td>
             <td><button class="btn-warning" onclick="editarUsuario(${index})">✏️</button><button class="btn-danger" onclick="excluirUsuario(${index})">🗑️</button></td>`;
     });
 }
@@ -2173,6 +2400,8 @@ function editarUsuario(index) {
     document.getElementById('userTipo').value = u.tipo;
     selfieUsuarioTemp = u.selfie || null;
     mostrarPreviewSelfieUsuario();
+    faceDescriptorUsuarioTemp = (Array.isArray(u.faceDescriptor) && u.faceDescriptor.length === 128) ? u.faceDescriptor.slice() : null;
+    mostrarPreviewFaceDescriptor();
     todasAbas.forEach(aba => { const c = document.getElementById(`perm_aba_${aba.id}`); if (c) c.checked = u.permissoes.abas[aba.id] || false; });
     Object.values(todosBotoes).flat().forEach(b => { const c = document.getElementById(`perm_botao_${b.id}`); if (c) c.checked = u.permissoes.botoes[b.id] || false; });
     db.veiculos.forEach(v => { const c = document.getElementById(`perm_veiculo_${v.placa}`); if (c) c.checked = u.permissoes.veiculos[v.placa] || false; });
@@ -2196,6 +2425,8 @@ function limparCamposUsuario() {
     document.getElementById('userTipo').value = 'ADM';
     preencherPermissoesPadrao();
     limparSelfieUsuario();
+    faceDescriptorUsuarioTemp = null;
+    mostrarPreviewFaceDescriptor();
     usuarioEditandoIndex = null;
 }
 
@@ -2331,7 +2562,7 @@ function salvarLocacao() {
         const cli = db.clientes.find(c => c.nome === locatario);
         let senha = '';
         if (cli) { const tel = cli.telefone.replace(/\D/g,''); if (tel.length >= 10) senha = tel.substring(2); }
-        um = { nome: primeiroNome, senha, tipo:'MOTORISTA', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.MOTORISTA)), selfie: cli ? (cli.selfie || null) : null };
+        um = { nome: primeiroNome, senha, tipo:'MOTORISTA', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.MOTORISTA)), selfie: cli ? (cli.selfie || null) : null, faceDescriptor: null };
         db.usuarios.push(um);
     }
     if (!um.permissoes.veiculos[placa]) um.permissoes.veiculos[placa] = true;
