@@ -222,7 +222,6 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
         <button class="tab" data-tab="fluxocaixa">💵 Fluxo de Caixa</button>
         <button class="tab" data-tab="doc">📁 Comprovante</button>
         <button class="tab" data-tab="compras">🛒 Compras</button>
-        <button class="tab" data-tab="configuracao">⚙️ Configuração</button>
         <button class="tab" data-tab="auditoria">🔍 Auditoria</button>
         <button class="tab" data-tab="pendente">⏳ Pendente</button>
         <button class="tab" data-tab="historico">📜 HISTÓRICO</button>
@@ -592,39 +591,6 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
         </div>
     </div>
 
-    <div class="tab-content" id="configuracao">
-        <h2>⚙️ Configurações do Sistema</h2>
-        <div class="config-section">
-            <h3>🔧 Configurações Gerais</h3>
-            <div class="form-grid" id="formConfig">
-                <div class="form-group"><label>Nome da Empresa</label><input type="text" id="configEmpresa" value="LOBÃO" class="campo-enter"></div>
-                <div class="form-group"><label>CNPJ</label><input type="text" id="configCnpj" class="campo-enter"></div>
-                <div class="form-group"><label>Telefone</label><input type="text" id="configTelefone" class="campo-enter"></div>
-                <div class="form-group"><label>Email</label><input type="text" id="configEmail" class="campo-enter"></div>
-                <div class="form-group"><label>Endereço</label><input type="text" id="configEndereco" class="campo-enter"></div>
-            </div>
-        </div>
-        <div class="config-section">
-            <h3>💰 Configurações Financeiras</h3>
-            <div class="form-grid">
-                <div class="form-group"><label>Taxa de Juros (%)</label><input type="text" id="configJuros" class="campo-enter"></div>
-                <div class="form-group"><label>Multa por Atraso (%)</label><input type="text" id="configMulta" class="campo-enter"></div>
-                <div class="form-group"><label>Valor Mínimo de Aluguel</label><input type="text" id="configMinAluguel" class="money campo-enter"></div>
-                <div class="form-group"><label>Prazo Máximo de Locação (dias)</label><input type="text" id="configPrazoMax" class="campo-enter"></div>
-            </div>
-        </div>
-        <div class="config-section">
-            <h3>🔐 Segurança</h3>
-            <div class="form-grid">
-                <div class="form-group"><label>Senha Mínima (caracteres)</label><input type="text" id="configSenhaMin" class="campo-enter"></div>
-                <div class="form-group"><label>Tempo de Sessão (minutos)</label><input type="text" id="configSessao" class="campo-enter"></div>
-                <div class="form-group"><label>Backup Automático</label><select id="configBackup" class="campo-enter"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
-            </div>
-        </div>
-        <button class="btn-primary" data-permissao="config_salvar" onclick="salvarConfiguracao()">💾 Salvar Configurações</button>
-        <button class="btn-secondary" data-permissao="config_restaurar" onclick="restaurarPadroes()">🔄 Restaurar Padrões</button>
-    </div>
-
     <div class="tab-content" id="auditoria">
         <h2>🔍 Auditoria do Sistema</h2>
         <input type="text" class="filter-input" placeholder="🔍 Filtrar registros..." id="filterAuditoria">
@@ -698,6 +664,19 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
     <div class="modal-content">
         <button class="modal-close" onclick="closeImageModal()">×</button>
         <img id="modalImage" src="" alt="Imagem ampliada">
+    </div>
+</div>
+
+<!-- MODAL DE SENHA DO ADMINISTRADOR -->
+<div class="modal-overlay" id="passwordModal" style="display: none; z-index: 10000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 400px; background: white; padding: 25px; text-align: center; cursor: default; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 18px;">🔒 Confirmação de Administrador</h3>
+        <p style="margin-bottom: 15px; font-size: 14px; color: #555;">Digite a senha do administrador para continuar:</p>
+        <input type="password" id="passwordModalInput" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; margin-bottom: 20px; font-size: 16px; text-align: center; letter-spacing: 5px;" placeholder="******" onkeydown="if(event.key === 'Enter') fecharModalSenha(true)">
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button class="btn-secondary" onclick="fecharModalSenha(false)" style="padding: 10px 25px; font-size: 14px; margin: 0;">Cancelar</button>
+            <button class="btn-primary" onclick="fecharModalSenha(true)" style="padding: 10px 25px; font-size: 14px; margin: 0;">OK</button>
+        </div>
     </div>
 </div>
 
@@ -1373,7 +1352,6 @@ let relatorioMecFiltros = { dataInicio:'', dataFim:'', oficina:'', status:'todos
 let relatorioMecResultados = [];
 let compDocumentosTemp = [];
 let _carregandoContratos = false;
-let _carregandoConfig = false;
 let _autoSaveEstadoCamposAtivo = false;
 let docPlacaSelecionada = '';
 let encerradasChart = null;
@@ -1607,7 +1585,7 @@ function coletarEstadoCampos() {
         if (ignorarIds.has(el.id)) return;
         if (el.id.startsWith('perm_') || el.id.startsWith('filter') || el.id.startsWith('aud') || el.id.startsWith('mecRel')) return;
         if (el.readOnly) return;
-        if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal, #configuracao')) return;
+        if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal')) return;
         estado[el.id] = el.value;
     });
     return estado;
@@ -1621,7 +1599,7 @@ function restaurarEstadoCampos(estado) {
         if (el.type === 'file' || el.type === 'password') return;
         if (el.id.startsWith('perm_')) return;
         if (el.readOnly) return;
-        if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal, #configuracao')) return;
+        if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal')) return;
         if (el.value === undefined || el.value === null || String(el.value).trim() === '') {
             el.value = estado[id];
         }
@@ -1640,14 +1618,14 @@ function ativarAutoSaveEstadoCampos() {
         const el = e.target;
         if (!el || !el.id || el.type === 'file' || el.type === 'password') return;
         if (el.id.startsWith('perm_') || el.id.startsWith('filter') || el.id.startsWith('aud') || el.id.startsWith('mecRel')) return;
-        if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal, #configuracao')) return;
+        if (el.closest('.selfie-modal, .modal-overlay, .contrato-modal')) return;
         debounceAutoSave('estadoCampos', salvarEstado, 2000);
     }, true);
     document.addEventListener('change', e => {
         const el = e.target;
         if (!el || el.tagName !== 'SELECT' || !el.id) return;
         if (el.id.startsWith('perm_') || el.id.startsWith('filter') || el.id.startsWith('aud') || el.id.startsWith('mecRel')) return;
-        if (el.closest('.contrato-modal, #configuracao')) return;
+        if (el.closest('.contrato-modal')) return;
         debounceAutoSave('estadoCampos', salvarEstado, 2000);
     }, true);
 }
@@ -1663,9 +1641,9 @@ const todasAbas = [
     { id:'sos', label:'🆘 SOS' }, { id:'comprovantes', label:'📄 Documentos' },
     { id:'pagamentos', label:'💰 Sub Pagamentos' }, { id:'banco', label:'🏦 Banco' },
     { id:'fluxocaixa', label:'💵 Fluxo de Caixa' }, { id:'doc', label:'📁 Comprovante' },
-    { id:'compras', label:'🛒 Compras' }, { id:'configuracao', label:'⚙️ Configuração' },
-    { id:'auditoria', label:'🔍 Auditoria' }, { id:'pendente', label:'⏳ Pendente' },
-    { id:'historico', label:'📜 HISTÓRICO' }, { id:'vistoria', label:'📸 VISTORIA' }
+    { id:'compras', label:'🛒 Compras' }, { id:'auditoria', label:'🔍 Auditoria' }, 
+    { id:'pendente', label:'⏳ Pendente' }, { id:'historico', label:'📜 HISTÓRICO' }, 
+    { id:'vistoria', label:'📸 VISTORIA' }
 ];
 const todosBotoes = {
     veiculos:[{id:'veiculos_salvar',label:'💾 Salvar'},{id:'veiculos_rastreador',label:'📍 Rastreador'},{id:'veiculos_multas',label:'🚨 Multas'}],
@@ -1683,16 +1661,15 @@ const todosBotoes = {
     fluxocaixa:[{id:'fluxocaixa_salvar',label:'💾 Salvar'}],
     doc:[{id:'doc_salvar',label:'💾 Salvar'},{id:'doc_limpar',label:'🔄 Limpar'},{id:'doc_selecionar',label:'📂 Selecionar'}],
     compras:[{id:'compras_salvar',label:'💾 Salvar'},{id:'compras_editar',label:'✏️ Editar'},{id:'compras_limpar',label:'🔄 Limpar'},{id:'compras_excluir',label:'🗑️ Excluir'}],
-    configuracao:[{id:'config_salvar',label:'💾 Salvar'},{id:'config_restaurar',label:'🔄 Restaurar'}],
     auditoria:[{id:'auditoria_filtrar',label:'🔍 Filtrar'},{id:'auditoria_limpar',label:'🔄 Limpar'}],
     pendente:[{id:'pendente_salvar',label:'💾 Salvar'},{id:'pendente_editar',label:'✏️ Editar'},{id:'pendente_excluir',label:'🗑️ Excluir'}],
     vistoria:[{id:'vistoria_camera',label:'📷 Tirar Foto'}]
 };
 const permissoesPadrao = {
     ADM: { abas: Object.fromEntries(todasAbas.map(a => [a.id, true])), botoes: Object.fromEntries(Object.values(todosBotoes).flat().map(b => [b.id, true])), veiculos: {} },
-    MOTORISTA: { abas:{veiculos:false,clientes:false,locacoes:false,locEncerrada:false,manutencao:true,mecanico:false,usuario:false,garagem:true,sos:true,comprovantes:true,pagamentos:false,banco:true,fluxocaixa:false,doc:true,compras:false,configuracao:false,auditoria:false,pendente:false,historico:true,vistoria:true}, botoes:{garagem_salvar:true,sos_salvar:true,sos_baixar:true,banco_copiar:true,doc_salvar:true,doc_limpar:true,doc_selecionar:true}, veiculos:{} },
-    OFICINA: { abas:{veiculos:true,clientes:false,locacoes:false,locEncerrada:false,manutencao:true,mecanico:true,usuario:false,garagem:false,sos:false,comprovantes:false,pagamentos:false,banco:false,fluxocaixa:false,doc:false,compras:false,configuracao:false,auditoria:false,pendente:false,historico:false,vistoria:true}, botoes:{veiculos_salvar:true,veiculos_rastreador:false,veiculos_multas:false,manutencao_salvar:true,mecanico_salvar:true,vistoria_camera:true}, veiculos:{} },
-    VISITANTE: { abas:{veiculos:false,clientes:false,locacoes:false,locEncerrada:false,manutencao:false,mecanico:false,usuario:false,garagem:true,sos:false,comprovantes:false,pagamentos:false,banco:false,fluxocaixa:false,doc:false,compras:false,configuracao:false,auditoria:false,pendente:false,historico:false,vistoria:false}, botoes:{garagem_buscar:true,garagem_salvar:true}, veiculos:{} }
+    MOTORISTA: { abas:{veiculos:false,clientes:false,locacoes:false,locEncerrada:false,manutencao:true,mecanico:false,usuario:false,garagem:true,sos:true,comprovantes:true,pagamentos:false,banco:true,fluxocaixa:false,doc:true,compras:false,auditoria:false,pendente:false,historico:true,vistoria:true}, botoes:{garagem_salvar:true,sos_salvar:true,sos_baixar:true,banco_copiar:true,doc_salvar:true,doc_limpar:true,doc_selecionar:true}, veiculos:{} },
+    OFICINA: { abas:{veiculos:true,clientes:false,locacoes:false,locEncerrada:false,manutencao:true,mecanico:true,usuario:false,garagem:false,sos:false,comprovantes:false,pagamentos:false,banco:false,fluxocaixa:false,doc:false,compras:false,auditoria:false,pendente:false,historico:false,vistoria:true}, botoes:{veiculos_salvar:true,veiculos_rastreador:false,veiculos_multas:false,manutencao_salvar:true,mecanico_salvar:true,vistoria_camera:true}, veiculos:{} },
+    VISITANTE: { abas:{veiculos:false,clientes:false,locacoes:false,locEncerrada:false,manutencao:false,mecanico:false,usuario:false,garagem:true,sos:false,comprovantes:false,pagamentos:false,banco:false,fluxocaixa:false,doc:false,compras:false,auditoria:false,pendente:false,historico:false,vistoria:false}, botoes:{garagem_buscar:true,garagem_salvar:true}, veiculos:{} }
 };
 
 let usuarioLogado = null;
@@ -1736,14 +1713,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-    const configSection = document.getElementById('configuracao');
-    if (configSection) {
-        configSection.querySelectorAll('input, select').forEach(input => {
-            const h = function() { if (_carregandoConfig) return; debounceAutoSave('config', salvarConfiguracaoSilencioso, 1500); };
-            input.addEventListener('input', h);
-            input.addEventListener('change', h);
-        });
-    }
 });
 
 document.querySelectorAll('.money').forEach(input => {
@@ -1767,13 +1736,51 @@ function calcularValorTotal() {
 // =============================================
 // AUTENTICAÇÃO
 // =============================================
-function verificarSenhaAdmin() {
-    const senha = prompt("Digite a senha do administrador:");
-    if (senha === null) return false;
+let _resolverSenhaAdmin = null;
+function fecharModalSenha(isOk) {
+    const modal = document.getElementById('passwordModal');
+    if (modal) modal.style.display = 'none';
+    if (!_resolverSenhaAdmin) return;
+    if (!isOk) {
+        _resolverSenhaAdmin(false);
+        _resolverSenhaAdmin = null;
+        return;
+    }
+    const senha = document.getElementById('passwordModalInput').value;
     const admin = db.usuarios.find(u => u.tipo === 'ADM');
-    if (!admin) { alert("Nenhum administrador!"); return false; }
-    if (senha !== admin.senha) { alert("Senha incorreta!"); return false; }
-    return true;
+    if (!admin) {
+        alert("Nenhum administrador encontrado!");
+        _resolverSenhaAdmin(false);
+    } else if (senha !== admin.senha) {
+        alert("Senha incorreta!");
+        _resolverSenhaAdmin(false);
+    } else {
+        _resolverSenhaAdmin(true);
+    }
+    _resolverSenhaAdmin = null;
+}
+
+async function verificarSenhaAdmin() {
+    // Se for ADM, apenas pergunta Sim ou Não
+    if (usuarioLogado && usuarioLogado.tipo === 'ADM') {
+        return confirm("Deseja realmente realizar esta ação?");
+    }
+    // Se não for ADM, pede a senha (usando modal HTML para ocultar com *)
+    return new Promise((resolve) => {
+        _resolverSenhaAdmin = resolve;
+        const input = document.getElementById('passwordModalInput');
+        if (input) {
+            input.value = '';
+            document.getElementById('passwordModal').style.display = 'flex';
+            input.focus();
+        } else {
+            // Fallback se o modal não existir
+            const senha = prompt("Digite a senha do administrador:");
+            if (senha === null) return resolve(false);
+            const admin = db.usuarios.find(u => u.tipo === 'ADM');
+            resolve(senha === admin?.senha);
+        }
+    });
 }
 
 document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -1927,7 +1934,6 @@ function inicializarSistema() {
     atualizarGaleriaComprovantes();
     atualizarPlacasComprovantes();
     carregarDadosContratos();
-    carregarConfiguracoes();
     limparSelfieCliente();
     limparSelfieUsuario();
     atualizarPlacasManutencao();
@@ -2052,6 +2058,18 @@ function fecharDespesasModal() { document.getElementById('despesasModal').classL
 function fecharRelatorioMecanico() { document.getElementById('relatorioMecanicoModal').classList.remove('active'); }
 
 // =============================================
+// FUNÇÃO AUXILIAR PARA LIMPAR O AUTO-SAVE
+// =============================================
+function limparEstadoCampos(ids) {
+    if (!db || !db.estadoCampos) return;
+    ids.forEach(id => {
+        if (db.estadoCampos[id] !== undefined) {
+            delete db.estadoCampos[id];
+        }
+    });
+}
+
+// =============================================
 // VEÍCULOS
 // =============================================
 function salvarVeiculo() {
@@ -2091,7 +2109,9 @@ function salvarVeiculo() {
     limparCamposVeiculo();
 }
 function limparCamposVeiculo() {
-    ['veicFabricante','veicCor','veicPlaca','veicMotor','veicCambio','veicAnoFabr','veicAnoModel','veicKm','veicRenavan','veicChassi','veicFipe','veicCaucao','veicAluguel','veicProprietario','veicCpfPropr'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['veicFabricante','veicCor','veicPlaca','veicMotor','veicCambio','veicAnoFabr','veicAnoModel','veicKm','veicRenavan','veicChassi','veicFipe','veicCaucao','veicAluguel','veicProprietario','veicCpfPropr'];
+    ids.forEach(id => document.getElementById(id).value = '');
+    limparEstadoCampos(ids);
 }
 function atualizarTabelaVeiculos() {
     const tbody = document.querySelector('#tabelaVeiculos tbody');
@@ -2103,8 +2123,8 @@ function atualizarTabelaVeiculos() {
             <td><button class="btn-warning" onclick="editarVeiculo(${index})">✏️</button><button class="btn-danger" onclick="excluirVeiculo(${index})">🗑️</button></td>`;
     });
 }
-function editarVeiculo(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarVeiculo(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const lista = db.veiculos.filter(v => temPermissaoVeiculo(v.placa));
     const v = lista[index];
     if (!v) return;
@@ -2131,8 +2151,8 @@ function editarVeiculo(index) {
     atualizarPlacasComprovantes();
     salvarDB();
 }
-function excluirVeiculo(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirVeiculo(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const lista = db.veiculos.filter(v => temPermissaoVeiculo(v.placa));
     const v = lista[index];
     if (!v) return;
@@ -2206,8 +2226,8 @@ function atualizarTabelaClientes() {
             <td><button class="btn-warning" onclick="editarCliente(${index})">✏️</button><button class="btn-danger" onclick="excluirCliente(${index})">🗑️</button></td>`;
     });
 }
-function editarCliente(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarCliente(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const c = db.clientes[index];
     document.getElementById('cliDataCadastro').value = c.dataCadastro || '';
     document.getElementById('cliNome').value = c.nome;
@@ -2227,8 +2247,8 @@ function editarCliente(index) {
     atualizarCombosLocacao();
     salvarDB();
 }
-function excluirCliente(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirCliente(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir cliente?')) {
         const c = db.clientes[index];
         db.clientes.splice(index, 1);
@@ -2239,8 +2259,10 @@ function excluirCliente(index) {
     }
 }
 function limparCamposCliente() {
-    ['cliDataCadastro','cliNome','cliCpf','cliRg','cliCnh','cliDataCnh','cliTelefone','cliEndereco','cliCep','cliCidade','cliEstado'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['cliDataCadastro','cliNome','cliCpf','cliRg','cliCnh','cliDataCnh','cliTelefone','cliEndereco','cliCep','cliCidade','cliEstado'];
+    ids.forEach(id => document.getElementById(id).value = '');
     limparSelfieCliente();
+    limparEstadoCampos(ids);
 }
 
 // =============================================
@@ -2391,8 +2413,8 @@ function atualizarTabelaUsuario() {
             <td><button class="btn-warning" onclick="editarUsuario(${index})">✏️</button><button class="btn-danger" onclick="excluirUsuario(${index})">🗑️</button></td>`;
     });
 }
-function editarUsuario(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarUsuario(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (index === undefined) { alert('Selecione um usuário!'); return; }
     const u = db.usuarios[index];
     document.getElementById('userNome').value = u.nome;
@@ -2408,8 +2430,8 @@ function editarUsuario(index) {
     usuarioEditandoIndex = index;
     salvarDB();
 }
-function excluirUsuario(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirUsuario(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (index === undefined) { alert('Selecione um usuário!'); return; }
     const u = db.usuarios[index];
     if (u.nome === 'LOBÃO') { alert('Não pode excluir admin!'); return; }
@@ -2420,6 +2442,7 @@ function excluirUsuario(index) {
     }
 }
 function limparCamposUsuario() {
+    const ids = ['userNome','userSenha','userTipo'];
     document.getElementById('userNome').value = '';
     document.getElementById('userSenha').value = '';
     document.getElementById('userTipo').value = 'ADM';
@@ -2428,6 +2451,7 @@ function limparCamposUsuario() {
     faceDescriptorUsuarioTemp = null;
     mostrarPreviewFaceDescriptor();
     usuarioEditandoIndex = null;
+    limparEstadoCampos(ids);
 }
 
 // =============================================
@@ -2631,8 +2655,8 @@ function encerrarLocacao(index) {
     atualizarVistoria();
     alert('Locação encerrada!');
 }
-function editarLocacao(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarLocacao(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const l = db.locacoes[index];
     document.getElementById('locLocatario').value = l.locatario;
     document.getElementById('locVeiculo').value = l.veiculo;
@@ -2654,8 +2678,8 @@ function editarLocacao(index) {
     atualizarTabelaLocacoes();
     salvarDB();
 }
-function excluirLocacao(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirLocacao(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir locação?')) {
         const l = db.locacoes[index];
         db.locacoes.splice(index, 1);
@@ -2668,8 +2692,10 @@ function excluirLocacao(index) {
     }
 }
 function limparCamposLocacao() {
-    ['locLocatario','locVeiculo','locDataInicio','locDataFim','locFabModelo','locCor','locPlaca','locAnoFabr','locAnoModel','locCaucao','locValorAluguel','locAluguelMensal','locProprietario','locCpfPropr','locCaucaoPago'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['locLocatario','locVeiculo','locDataInicio','locDataFim','locFabModelo','locCor','locPlaca','locAnoFabr','locAnoModel','locCaucao','locValorAluguel','locAluguelMensal','locProprietario','locCpfPropr','locCaucaoPago','locPagCaucao'];
+    ids.forEach(id => document.getElementById(id).value = '');
     document.getElementById('locPagCaucao').value = 'avista';
+    limparEstadoCampos(ids);
 }
 
 // =============================================
@@ -2821,8 +2847,8 @@ function atualizarTabelaManutencao() {
             <td><button class="btn-warning" onclick="editarManutencao(${index})">✏️</button><button class="btn-danger" onclick="excluirManutencao(${index})">🗑️</button></td>`;
     });
 }
-function editarManutencao(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarManutencao(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const m = db.manutencao[index];
     document.getElementById('manVeiculo').value = m.veiculo;
     document.getElementById('manPlaca').value = m.placa;
@@ -2833,15 +2859,19 @@ function editarManutencao(index) {
     atualizarTabelaManutencao();
     salvarDB();
 }
-function excluirManutencao(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirManutencao(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir manutenção?')) {
         db.manutencao.splice(index, 1);
         atualizarTabelaManutencao();
         salvarDB();
     }
 }
-function limparCamposManutencao() { ['manVeiculo','manPlaca','manKm','manTipo','manObs'].forEach(id => document.getElementById(id).value = ''); }
+function limparCamposManutencao() { 
+    const ids = ['manVeiculo','manPlaca','manKm','manTipo','manObs'];
+    ids.forEach(id => document.getElementById(id).value = ''); 
+    limparEstadoCampos(ids);
+}
 
 // =============================================
 // MECÂNICO
@@ -2891,10 +2921,10 @@ function atualizarTabelaMecanico() {
             <td>${btn}<button class="btn-warning" onclick="editarMecanico(${index})">✏️</button><button class="btn-danger" onclick="excluirMecanico(${index})">🗑️</button></td>`;
     });
 }
-function pagamentoMecanico(index) {
+async function pagamentoMecanico(index) {
     const m = db.mecanico[index];
     if (!m || m.pago) { alert('Já pago!'); return; }
-    if (!verificarSenhaAdmin()) return;
+    if (!(await verificarSenhaAdmin())) return;
     const hoje = new Date().toISOString().split('T')[0];
     const desc = `Pagamento serviço mecânico: ${m.servico} - ${m.placa}`;
     const vn = parseValorMonetario(m.valor);
@@ -2910,8 +2940,8 @@ function pagamentoMecanico(index) {
     salvarDB();
     alert(`Pago: ${vf}`);
 }
-function editarMecanico(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarMecanico(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const m = db.mecanico[index];
     document.getElementById('mecData').value = m.data;
     document.getElementById('mecOficina').value = m.oficina;
@@ -2926,8 +2956,8 @@ function editarMecanico(index) {
     atualizarOficinasMecanico();
     salvarDB();
 }
-function excluirMecanico(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirMecanico(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir serviço?')) {
         db.mecanico.splice(index, 1);
         atualizarTabelaMecanico();
@@ -2936,10 +2966,12 @@ function excluirMecanico(index) {
     }
 }
 function limparCamposMecanico() {
-    ['mecData','mecOficina','mecServico','mecResponsavel','mecCarro','mecPlaca','mecValor','mecObs'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['mecData','mecOficina','mecServico','mecResponsavel','mecCarro','mecPlaca','mecValor','mecObs'];
+    ids.forEach(id => document.getElementById(id).value = '');
     document.getElementById('mecUpload').value = '';
     document.getElementById('mecPdfPreview').textContent = 'Nenhum arquivo';
     mecPdfDataUrl = null; mecPdfFileType = null;
+    limparEstadoCampos(ids);
 }
 async function previewMecPdf() {
     const f = document.getElementById('mecUpload').files[0];
@@ -3033,12 +3065,12 @@ function obterSelecionadosRelatorioMec() {
     });
     return r;
 }
-function pagarRelatorioMecanico() {
+async function pagarRelatorioMecanico() {
     const is = obterSelecionadosRelatorioMec();
     if (is.length === 0) { alert('Selecione pelo menos um!'); return; }
     const ps = is.filter(i => !db.mecanico[i].pago);
     if (ps.length === 0) { alert('Todos já pagos!'); return; }
-    if (!verificarSenhaAdmin()) return;
+    if (!(await verificarSenhaAdmin())) return;
     let t = 0;
     const ofs = new Set();
     const det = [];
@@ -3181,8 +3213,8 @@ function atualizarTabelaBancos() {
             <td><button class="btn-copy" onclick="copiarPix(${index})">📋 Copiar PIX</button><button class="btn-warning" onclick="editarBanco(${index})">✏️</button><button class="btn-danger" onclick="excluirBanco(${index})">🗑️</button></td>`;
     });
 }
-function editarBanco(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarBanco(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const b = db.bancos[index];
     document.getElementById('bancoNome').value = b.nome;
     document.getElementById('bancoAgencia').value = b.agencia;
@@ -3193,15 +3225,19 @@ function editarBanco(index) {
     atualizarTabelaBancos();
     salvarDB();
 }
-function excluirBanco(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirBanco(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir banco?')) {
         db.bancos.splice(index, 1);
         atualizarTabelaBancos();
         salvarDB();
     }
 }
-function limparCamposBanco() { ['bancoNome','bancoAgencia','bancoConta','bancoPix','bancoTitular'].forEach(id => document.getElementById(id).value = ''); }
+function limparCamposBanco() { 
+    const ids = ['bancoNome','bancoAgencia','bancoConta','bancoPix','bancoTitular'];
+    ids.forEach(id => document.getElementById(id).value = ''); 
+    limparEstadoCampos(ids);
+}
 function copiarPix(index) {
     const b = db.bancos[index];
     if (b && b.pix) {
@@ -3242,8 +3278,8 @@ function atualizarTabelaFluxoCaixa() {
             <td><button class="btn-warning" onclick="editarFluxoCaixa(${index})">✏️</button><button class="btn-danger" onclick="excluirFluxoCaixa(${index})">🗑️</button></td>`;
     });
 }
-function editarFluxoCaixa(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarFluxoCaixa(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const f = db.fluxoCaixa[index];
     document.getElementById('fcData').value = f.data;
     document.getElementById('fcDescricao').value = f.descricao;
@@ -3255,8 +3291,8 @@ function editarFluxoCaixa(index) {
     atualizarResumoFinanceiro();
     salvarDB();
 }
-function excluirFluxoCaixa(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirFluxoCaixa(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir lançamento?')) {
         db.fluxoCaixa.splice(index, 1);
         atualizarTabelaFluxoCaixa();
@@ -3265,8 +3301,10 @@ function excluirFluxoCaixa(index) {
     }
 }
 function limparCamposFluxoCaixa() {
-    ['fcData','fcDescricao','fcCategoria','fcValor'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['fcData','fcDescricao','fcCategoria','fcValor'];
+    ids.forEach(id => document.getElementById(id).value = '');
     document.getElementById('fcTipo').value = 'entrada';
+    limparEstadoCampos(ids);
 }
 function atualizarResumoFinanceiro() {
     let e = 0, s = 0;
@@ -3401,13 +3439,15 @@ function salvarDoc() {
     limparCamposDoc();
 }
 function limparCamposDoc() {
-    ['docNome','docTipo','docData','docReferencia','docObs'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['docNome','docTipo','docData','docReferencia','docObs'];
+    ids.forEach(id => document.getElementById(id).value = '');
     docUploadDataUrl = null; docUploadFileType = null;
     document.getElementById('docUpload').value = '';
     document.getElementById('docPreviewContainer').innerHTML = '';
     docPlacaSelecionada = '';
     atualizarSubAbasDoc();
     preencherPlacaUsuarioLogado();
+    limparEstadoCampos(ids);
 }
 function atualizarTabelaDoc() {
     const tbody = document.querySelector('#tabelaDoc tbody');
@@ -3421,8 +3461,8 @@ function atualizarTabelaDoc() {
             <td><button class="btn-warning" onclick="editarDoc(${oi})">✏️</button><button class="btn-danger" onclick="excluirDoc(${oi})">🗑️</button></td>`;
     });
 }
-function editarDoc(index) {
-    if (!verificarSenhaAdmin()) return;
+async function editarDoc(index) {
+    if (!(await verificarSenhaAdmin())) return;
     const d = db.documentos[index];
     document.getElementById('docNome').value = d.nome;
     document.getElementById('docTipo').value = d.tipo;
@@ -3435,8 +3475,8 @@ function editarDoc(index) {
     atualizarSubAbasDoc();
     salvarDB();
 }
-function excluirDoc(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirDoc(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir documento?')) {
         db.documentos.splice(index, 1);
         atualizarTabelaDoc();
@@ -3515,8 +3555,8 @@ function carregarCompraParaEdicao(index) {
     compraEditandoIndex = index;
     document.getElementById('formCompras').scrollIntoView({ behavior: 'smooth' });
 }
-function excluirCompraDireto(index) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirCompraDireto(index) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir compra?')) {
         db.compras.splice(index, 1);
         atualizarTabelaCompras();
@@ -3524,18 +3564,24 @@ function excluirCompraDireto(index) {
     }
 }
 function limparCamposCompra() {
-    ['compData','compProduto','compFornecedor','compCnpjFornecedor','compPlaca','compQuantidade','compValorUnitario','compValorTotal','compCategoria','compObs'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['compData','compProduto','compFornecedor','compCnpjFornecedor','compPlaca','compQuantidade','compValorUnitario','compValorTotal','compCategoria','compObs','compFormaPagamento','compStatus'];
+    ids.forEach(id => document.getElementById(id).value = '');
     document.getElementById('compFormaPagamento').value = 'dinheiro';
     document.getElementById('compStatus').value = 'pendente';
     document.getElementById('compUpload').value = '';
     document.getElementById('compPdfPreview').textContent = 'Nenhum arquivo';
     compPdfDataUrl = null; compPdfFileType = null;
     compraEditandoIndex = null;
+    limparEstadoCampos(ids);
 }
-function editarCompra() { if (compraEditandoIndex === null) { alert('Selecione uma compra!'); return; } salvarCompra(); }
-function excluirCompra() {
+async function editarCompra() { 
+    if (compraEditandoIndex === null) { alert('Selecione uma compra!'); return; } 
+    if (!(await verificarSenhaAdmin())) return; 
+    salvarCompra(); 
+}
+async function excluirCompra() {
     if (compraEditandoIndex === null) { alert('Selecione uma compra!'); return; }
-    if (!verificarSenhaAdmin()) return;
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir?')) {
         db.compras.splice(compraEditandoIndex, 1);
         compraEditandoIndex = null;
@@ -3577,10 +3623,10 @@ function atualizarTabelaHistorico() {
             <td><button class="btn-danger" onclick="excluirHistorico(${index})">🗑️ Excluir</button></td>`;
     });
 }
-function excluirHistorico(index) {
+async function excluirHistorico(index) {
     const item = db.historico[index];
     if (!item) return;
-    if (!verificarSenhaAdmin()) return;
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir lançamento?')) {
         db.historico.splice(index, 1);
         atualizarTabelaHistorico();
@@ -3654,8 +3700,8 @@ function toggleStatusImagemGaragem(index) {
     else if (ea === 'alugado') { div.dataset.estado = 'disponivel'; sb.classList.remove('alugado'); sb.classList.add('disponivel'); sb.textContent = 'DISPONÍVEL'; db.imagens.garagem.fotos[index].estado = 'disponivel'; }
     salvarDB();
 }
-function excluirImagemGaragem(i) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirImagemGaragem(i) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir imagem?')) { db.imagens.garagem.fotos.splice(i, 1); atualizarGaleriaGaragem(); salvarDB(); }
 }
 async function salvarSOS() {
@@ -3682,8 +3728,8 @@ function atualizarGaleriaSOS() {
         c.appendChild(div);
     });
 }
-function excluirImagemSOS(i) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirImagemSOS(i) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir?')) { db.imagens.sos.fotos.splice(i, 1); atualizarGaleriaSOS(); salvarDB(); }
 }
 function baixarSOS() {
@@ -3776,95 +3822,14 @@ function abrirPdfComprovante(p, i) {
         w.document.write(`<iframe src="${doc.data}" style="width:100%; height:100%; border:0;"></iframe>`);
     } else window.open(doc.data, '_blank');
 }
-function excluirComprovantePlaca(p, i) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirComprovantePlaca(p, i) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir?')) {
         db.imagens.comprovantes.placas[p].splice(i, 1);
         if (db.imagens.comprovantes.placas[p].length === 0) delete db.imagens.comprovantes.placas[p];
         atualizarGaleriaComprovantes();
         salvarDB();
     }
-}
-
-// =============================================
-// CONFIGURAÇÃO
-// =============================================
-function salvarConfiguracao() {
-    db.config = {
-        empresa: document.getElementById('configEmpresa').value,
-        cnpj: document.getElementById('configCnpj').value,
-        telefone: document.getElementById('configTelefone').value,
-        email: document.getElementById('configEmail').value,
-        endereco: document.getElementById('configEndereco').value,
-        juros: document.getElementById('configJuros').value,
-        multa: document.getElementById('configMulta').value,
-        minAluguel: document.getElementById('configMinAluguel').value,
-        prazoMax: document.getElementById('configPrazoMax').value,
-        senhaMin: document.getElementById('configSenhaMin').value,
-        sessao: document.getElementById('configSessao').value,
-        backup: document.getElementById('configBackup').value,
-        ultimaLimpezaAuditoria: db.config?.ultimaLimpezaAuditoria || null
-    };
-    salvarDB();
-    alert('Configurações salvas!');
-}
-function salvarConfiguracaoSilencioso() {
-    _carregandoConfig = true;
-    db.config = {
-        empresa: document.getElementById('configEmpresa').value,
-        cnpj: document.getElementById('configCnpj').value,
-        telefone: document.getElementById('configTelefone').value,
-        email: document.getElementById('configEmail').value,
-        endereco: document.getElementById('configEndereco').value,
-        juros: document.getElementById('configJuros').value,
-        multa: document.getElementById('configMulta').value,
-        minAluguel: document.getElementById('configMinAluguel').value,
-        prazoMax: document.getElementById('configPrazoMax').value,
-        senhaMin: document.getElementById('configSenhaMin').value,
-        sessao: document.getElementById('configSessao').value,
-        backup: document.getElementById('configBackup').value,
-        ultimaLimpezaAuditoria: db.config?.ultimaLimpezaAuditoria || null
-    };
-    salvarDB();
-    setTimeout(() => { _carregandoConfig = false; }, 100);
-}
-function restaurarPadroes() {
-    if (confirm('Restaurar padrões?')) {
-        const p = criarDBPadrao().config;
-        _carregandoConfig = true;
-        document.getElementById('configEmpresa').value = p.empresa;
-        document.getElementById('configCnpj').value = p.cnpj;
-        document.getElementById('configTelefone').value = p.telefone;
-        document.getElementById('configEmail').value = p.email;
-        document.getElementById('configEndereco').value = p.endereco;
-        document.getElementById('configJuros').value = p.juros;
-        document.getElementById('configMulta').value = p.multa;
-        document.getElementById('configMinAluguel').value = p.minAluguel;
-        document.getElementById('configPrazoMax').value = p.prazoMax;
-        document.getElementById('configSenhaMin').value = p.senhaMin;
-        document.getElementById('configSessao').value = p.sessao;
-        document.getElementById('configBackup').value = p.backup;
-        db.config = p;
-        salvarDB();
-        setTimeout(() => { _carregandoConfig = false; }, 100);
-    }
-}
-function carregarConfiguracoes() {
-    if (!db.config) return;
-    _carregandoConfig = true;
-    document.getElementById('configEmpresa').value = db.config.empresa || 'LOBÃO';
-    document.getElementById('configCnpj').value = db.config.cnpj || '';
-    document.getElementById('configTelefone').value = db.config.telefone || '';
-    document.getElementById('configEmail').value = db.config.email || '';
-    document.getElementById('configEndereco').value = db.config.endereco || '';
-    document.getElementById('configJuros').value = db.config.juros || '';
-    document.getElementById('configMulta').value = db.config.multa || '';
-    document.getElementById('configMinAluguel').value = db.config.minAluguel || '';
-    document.getElementById('configPrazoMax').value = db.config.prazoMax || '';
-    document.getElementById('configSenhaMin').value = db.config.senhaMin || '';
-    document.getElementById('configSessao').value = db.config.sessao || '';
-    document.getElementById('configBackup').value = db.config.backup || 'sim';
-    setTimeout(() => { _carregandoConfig = false; }, 100);
 }
 
 // =============================================
@@ -3907,8 +3872,8 @@ function limparFiltroAuditoria() {
     document.getElementById('audTipoAcao').value = 'todas';
     document.querySelectorAll('#tabelaAuditoria tbody tr').forEach(row => row.style.display = '');
 }
-function limparAuditoriaManual() {
-    if (!verificarSenhaAdmin()) return;
+async function limparAuditoriaManual() {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir TODOS os registros?')) {
         db.auditoria = [];
         if (db.config) db.config.ultimaLimpezaAuditoria = new Date().toISOString();
@@ -3957,10 +3922,10 @@ function atualizarTabelaPendentes() {
         row.innerHTML = `<td>${formatarDataBR(p.data)}</td><td>${p.descricao}</td><td>${p.credito}</td><td>${p.debito}</td><td>${formatarDataBR(p.vencimento)}</td><td><span class="${sc}">${st}</span></td><td>${ba}<button class="btn-warning" onclick="selecionarPendencia(${index})">✏️</button></td>`;
     });
 }
-function editarPendencia() {
+async function editarPendencia() {
     const i = pendenciaEditandoIndex;
     if (i === null) { alert('Selecione uma pendência!'); return; }
-    if (!verificarSenhaAdmin()) return;
+    if (!(await verificarSenhaAdmin())) return;
     const p = db.pendentes[i];
     document.getElementById('pendData').value = p.data;
     document.getElementById('pendDescricao').value = p.descricao;
@@ -3971,10 +3936,10 @@ function editarPendencia() {
     document.getElementById('pendDocPreview').textContent = p.docDataUrl ? (p.docFileType === 'pdf' ? '📄 PDF' : '📄 Imagem') : 'Nenhum arquivo';
     document.getElementById('formPendente').scrollIntoView({ behavior: 'smooth' });
 }
-function excluirPendencia() {
+async function excluirPendencia() {
     const i = pendenciaEditandoIndex;
     if (i === null) { alert('Selecione uma pendência!'); return; }
-    if (!verificarSenhaAdmin()) return;
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm(`Excluir "${db.pendentes[i].descricao}"?`)) {
         db.pendentes.splice(i, 1);
         pendenciaEditandoIndex = null;
@@ -3984,11 +3949,13 @@ function excluirPendencia() {
     }
 }
 function limparCamposPendencia() {
-    ['pendData','pendDescricao','pendCredito','pendDebito','pendVencimento'].forEach(id => document.getElementById(id).value = '');
+    const ids = ['pendData','pendDescricao','pendCredito','pendDebito','pendVencimento'];
+    ids.forEach(id => document.getElementById(id).value = '');
     document.getElementById('pendUpload').value = '';
     document.getElementById('pendDocPreview').textContent = 'Nenhum arquivo';
     pendDocDataUrl = null; pendDocFileType = null;
     pendenciaEditandoIndex = null;
+    limparEstadoCampos(ids);
 }
 async function processarPendenciaPDF(file) {
     if (!file) return;
@@ -4112,8 +4079,8 @@ function confirmarVistoria() {
     fecharCameraVistoria();
     alert('Foto salva!');
 }
-function excluirFotoVistoria(i) {
-    if (!verificarSenhaAdmin()) return;
+async function excluirFotoVistoria(i) {
+    if (!(await verificarSenhaAdmin())) return;
     if (confirm('Excluir foto?')) {
         const l = db.locacoes[vistoriaLocacaoIndex];
         if (l && l.vistoria) { l.vistoria.splice(i, 1); atualizarVistoria(); salvarDB(); }
@@ -4134,7 +4101,6 @@ function switchContratoTab(t) {
     document.querySelectorAll('.contrato-sub-tab').forEach(x => x.classList.remove('active'));
     document.querySelectorAll('.contrato-sub-content').forEach(x => x.classList.remove('active'));
     const map = { contratoLocacao: 'contratoLocacao', termoResponsabilidade: 'termoResponsabilidade', notaPromissoria: 'notaPromissoria' };
-    const sel = { contratoLocacao: 'contratoLocacao', termoResponsabilidade: 'termoResponsabilidade', notaPromissoria: 'notaPromissoria' };
     if (map[t]) {
         document.querySelector(`.contrato-sub-tab[onclick*="${t}"]`).classList.add('active');
         document.getElementById(map[t]).classList.add('active');
