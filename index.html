@@ -1482,10 +1482,7 @@ window.addEventListener('load', () => {
 
 async function carregarFaceAPI() {
     if (_faceApiCarregada) return true;
-    if (typeof faceapi === 'undefined') {
-        console.warn('face-api.js não disponível');
-        return false;
-    }
+    if (typeof faceapi === 'undefined') { console.warn('face-api.js não disponível'); return false; }
     if (_faceApiCarregando) {
         while (_faceApiCarregando) await new Promise(r => setTimeout(r, 120));
         return _faceApiCarregada;
@@ -2050,54 +2047,45 @@ function inicializarSistema() {
     atualizarSelectPlacasDoc();
     atualizarSubAbasDoc();
     mostrarPreviewFaceDescriptor();
-    // Configurar filtros dinâmicos
     configurarFiltrosExtras();
 }
 
 function configurarFiltrosExtras() {
-    // Histórico - lançamentos
     ['filterHistorico','filterHistDataIni','filterHistDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaHistorico);
         if (el) el.addEventListener('change', atualizarTabelaHistorico);
     });
-    // Histórico de aluguéis
     ['filterHistoricoAlugueis','filterHistAlugDataIni','filterHistAlugDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaHistoricoAlugueis);
         if (el) el.addEventListener('change', atualizarTabelaHistoricoAlugueis);
     });
-    // Loc Encerrada
     ['filterLocEncerrada','filterLocEncDataIni','filterLocEncDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaLocEncerrada);
         if (el) el.addEventListener('change', atualizarTabelaLocEncerrada);
     });
-    // Fluxo de caixa
     ['filterFluxoCaixa','filterFluxoDataIni','filterFluxoDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaFluxoCaixa);
         if (el) el.addEventListener('change', atualizarTabelaFluxoCaixa);
     });
-    // Mecânico
     ['filterMecanico','filterMecDataIni','filterMecDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaMecanico);
         if (el) el.addEventListener('change', atualizarTabelaMecanico);
     });
-    // Compras
     ['filterCompras','filterComprasDataIni','filterComprasDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaCompras);
         if (el) el.addEventListener('change', atualizarTabelaCompras);
     });
-    // Doc
     ['filterDoc','filterDocDataIni','filterDocDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaDoc);
         if (el) el.addEventListener('change', atualizarTabelaDoc);
     });
-    // Pendentes
     ['filterPendentes','filterPendDataIni','filterPendDataFim'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', atualizarTabelaPendentes);
@@ -2845,23 +2833,66 @@ function atualizarTabelaLocacoes() {
     const fi = document.getElementById('filterLocacoes');
     if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
+
+// =============================================
+// CÁLCULO DE RECEITA DA LOCAÇÃO (CORRIGIDO)
+// =============================================
+// Soma tudo que efetivamente entrou pelos pagamentos de aluguel registrados
+// no histórico de aluguéis desta locação (mesmo locatário + placa + contrato).
+function calcularTotalRecebidoLocacao(l) {
+    if (!l) return 0;
+    if (!db.historicoAlugueis) return 0;
+    const pagamentos = db.historicoAlugueis.filter(h =>
+        h.locatario === l.locatario &&
+        h.placa === l.placa &&
+        h.dataContrato === l.dataInicio
+    );
+    return pagamentos.reduce((s, h) => s + parseValorMonetario(h.valorAluguel), 0);
+}
+
+// Receita líquida da locação: total recebido; se a caução foi extornada no
+// encerramento, o valor da caução é subtraído (devolvido ao cliente).
+function calcularReceitaLiquidaLocacao(l) {
+    let total = calcularTotalRecebidoLocacao(l);
+    if (l && l.caucaoExtornada) {
+        let caucao = parseValorMonetario(l.caucaoPago);
+        if (caucao <= 0) caucao = parseValorMonetario(l.caucao);
+        total -= caucao;
+        if (total < 0) total = 0;
+    }
+    return total;
+}
+
 function encerrarLocacao(index) {
     const l = db.locacoes[index];
     if (!l) return;
     if (!confirm(`Encerrar locação de ${l.locatario} - ${l.placa}?`)) return;
-    const di = new Date(l.dataInicio);
-    const de = new Date();
-    const dias = Math.ceil((de - di) / (1000*60*60*24)) + 1;
-    let vd = 0;
-    const va = parseValorMonetario(l.valorAluguel);
-    const vm = parseValorMonetario(l.aluguelMensal);
-    if (vm > 0) vd = vm / 30;
-    else if (va > 0) vd = va / 7;
-    const tg = vd * dias;
-    l.totalGerado = formatarMoedaBR(tg);
+
+    // Base de cálculo: total REALMENTE RECEBIDO nos pagamentos de aluguel
+    const totalRecebido = calcularTotalRecebidoLocacao(l);
+    let caucaoPaga = parseValorMonetario(l.caucaoPago);
+    if (caucaoPaga <= 0) caucaoPaga = parseValorMonetario(l.caucao);
+
+    const extornarCaucao = confirm(
+        `Deseja EXTORNAR o valor da caução desta locação?\n\n` +
+        `Total recebido (aluguéis): ${formatarMoedaBR(totalRecebido)}\n` +
+        `Caução contratada: ${l.caucao || 'R$ 0,00'}\n` +
+        `Caução paga: ${formatarMoedaBR(caucaoPaga)}\n\n` +
+        `[OK]     = SIM, extornar (abate o valor da caução recebida)\n` +
+        `[Cancelar] = NÃO, não extornar (mantém o total recebido)`
+    );
+
+    let totalGerado = totalRecebido;
+    if (extornarCaucao) {
+        totalGerado -= caucaoPaga;
+        if (totalGerado < 0) totalGerado = 0;
+    }
+
+    l.totalGerado = formatarMoedaBR(totalGerado);
     l.dataEncerramento = new Date().toISOString().split('T')[0];
+    l.caucaoExtornada = extornarCaucao;
     const dNum = calcularDespesasLocacaoNumero(l);
-    const rNum = parseValorMonetario(l.totalGerado);
+    const rNum = totalGerado;
     l.despesas = formatarMoedaBR(dNum);
     l.lucro = formatarMoedaBR(rNum - dNum);
     db.locacoesEncerradas.unshift(l);
@@ -2870,11 +2901,12 @@ function encerrarLocacao(index) {
     atualizarTabelaLocacoes();
     atualizarTabelaLocEncerrada();
     atualizarTabelaAlugueis();
-    registrarAuditoria('Edição', `Locação encerrada: ${l.locatario}`);
+    registrarAuditoria('Edição', `Locação encerrada: ${l.locatario}${extornarCaucao ? ' (caução extornada)' : ''}`);
     salvarDB();
     atualizarVistoria();
-    alert('Locação encerrada!');
+    alert('Locação encerrada!' + (extornarCaucao ? '\n\n✅ Caução extornada do total recebido.' : '\n\n❌ Caução NÃO extornada.'));
 }
+
 async function editarLocacao(index) {
     if (!(await verificarSenhaAdmin())) return;
     const l = db.locacoes[index];
@@ -2951,15 +2983,20 @@ function atualizarTabelaLocEncerrada() {
             if (!txt.includes(ft)) continue;
         }
         const row = tbody.insertRow();
-        const tg = l.totalGerado || 'R$ 0,00';
-        const des = l.despesas || calcularDespesasLocacao(l);
-        const luc = l.lucro || formatarMoedaBR(calcularLucroLocacao(l));
-        const cls = parseValorMonetario(luc) >= 0 ? 'lucro-positivo' : 'lucro-negativo';
+        // Recalcula a receita líquida a partir do histórico de aluguéis
+        // (corrige automaticamente registros antigos que ficaram com valor errado)
+        const receitaNum = calcularReceitaLiquidaLocacao(l);
+        const despesasNum = calcularDespesasLocacaoNumero(l);
+        const lucroNum = receitaNum - despesasNum;
+        const tg = formatarMoedaBR(receitaNum);
+        const des = formatarMoedaBR(despesasNum);
+        const luc = formatarMoedaBR(lucroNum);
+        const cls = lucroNum >= 0 ? 'lucro-positivo' : 'lucro-negativo';
         row.innerHTML = `<td>${l.locatario}</td><td>${l.veiculo}</td><td>${l.placa}</td><td>${formatarDataBR(l.dataInicio)}</td><td>${formatarDataBR(l.dataFim)}</td><td>${formatarDataBR(l.dataEncerramento)}</td><td>${tg}</td><td>${des}</td><td class="${cls}">${luc}</td>
             <td><button class="btn-warning" onclick="reativarLocacao(${index})">🔄 Reativar</button><button class="btn-danger" onclick="excluirLocEncerrada(${index})">🗑️ Excluir</button><button class="btn-info" onclick="verDespesasLocacao(${index})">📋 Despesas</button></td>`;
-        rt += parseValorMonetario(tg);
-        dt += parseValorMonetario(des);
-        lt += parseValorMonetario(luc);
+        rt += receitaNum;
+        dt += despesasNum;
+        lt += lucroNum;
         count++;
     }
     const el = id => document.getElementById(id);
@@ -2986,9 +3023,9 @@ function atualizarGraficoEncerradas() {
         return true;
     });
     const labels = filtrados.map(l => `${l.locatario} - ${l.placa}`);
-    const receitas = filtrados.map(l => parseValorMonetario(l.totalGerado));
+    const receitas = filtrados.map(l => calcularReceitaLiquidaLocacao(l));
     const despesas = filtrados.map(l => calcularDespesasLocacaoNumero(l));
-    const lucros = filtrados.map(l => calcularLucroLocacao(l));
+    const lucros = filtrados.map(l => calcularReceitaLiquidaLocacao(l) - calcularDespesasLocacaoNumero(l));
     const ctx = canvas.getContext('2d');
     if (encerradasChart) encerradasChart.destroy();
     encerradasChart = new Chart(ctx, {
@@ -3016,13 +3053,13 @@ function calcularDespesasLocacaoNumero(l) {
     return total;
 }
 function calcularLucroLocacao(l) {
-    return parseValorMonetario(l.totalGerado) - calcularDespesasLocacaoNumero(l);
+    return calcularReceitaLiquidaLocacao(l) - calcularDespesasLocacaoNumero(l);
 }
 function reativarLocacao(index) {
     const l = db.locacoesEncerradas[index];
     if (!l) return;
     if (!confirm(`Reativar locação de ${l.locatario}?`)) return;
-    delete l.dataEncerramento; delete l.totalGerado; delete l.despesas; delete l.lucro;
+    delete l.dataEncerramento; delete l.totalGerado; delete l.despesas; delete l.lucro; delete l.caucaoExtornada;
     db.locacoes.unshift(l);
     db.locacoesEncerradas.splice(index, 1);
     criarAlugueisParaLocacao(l);
@@ -3993,7 +4030,6 @@ function atualizarTabelaHistorico() {
     const df = document.getElementById('filterHistDataFim')?.value || '';
     let totalValor = 0, count = 0;
     const placasSet = new Set(), oficinasSet = new Set();
-    // Renderizar em ordem inversa (novos primeiro)
     for (let index = db.historico.length - 1; index >= 0; index--) {
         const item = db.historico[index];
         if (di && item.data && item.data < di) continue;
