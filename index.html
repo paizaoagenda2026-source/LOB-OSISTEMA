@@ -64,6 +64,10 @@ th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-si
 th { background: var(--primary); color: white; font-weight: 600; }
 tr:hover { background: #f5f5f5; }
 .filter-input { margin-bottom: 15px; padding: 10px; width: 300px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px; }
+.filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+.filter-row .filter-input { margin-bottom: 0; }
+.filter-row label { font-weight: 600; font-size: 14px; color: var(--primary); }
+.filter-row input[type="date"] { padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px; }
 .subfolder { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin: 15px 0; }
 .subfolder-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
 .subfolder h4 { color: var(--primary); font-size: 16px; }
@@ -324,7 +328,12 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
             <div class="kpi-card orange"><div class="kpi-value" id="kpiLucroTotal">R$ 0,00</div><div class="kpi-label">Lucro Total</div></div>
         </div>
         <div class="chart-container"><canvas id="chartLocEncerradas"></canvas></div>
-        <input type="text" class="filter-input" placeholder="🔍 Filtrar locações encerradas..." id="filterLocEncerrada">
+        <div class="filter-row">
+            <input type="text" class="filter-input" placeholder="🔍 Filtrar locações encerradas..." id="filterLocEncerrada" style="width: 300px;">
+            <label>De:</label><input type="date" id="filterLocEncDataIni">
+            <label>Até:</label><input type="date" id="filterLocEncDataFim">
+            <button class="btn-buscar" onclick="limparFiltrosLocEncerrada()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+        </div>
         <div class="table-container">
             <table id="tabelaLocEncerrada"><thead><tr><th>Locatário</th><th>Veículo</th><th>Placa</th><th>Início</th><th>Fim</th><th>Encerrada em</th><th>R$ Gerado</th><th>Despesas</th><th>Lucro</th><th>Ações</th></tr></thead><tbody></tbody></table>
         </div>
@@ -349,6 +358,11 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
     <div class="tab-content" id="mecanico">
         <h2>👨‍🔧 Mecânico</h2>
         <input type="text" class="filter-input" placeholder="🔍 Filtrar serviços..." id="filterMecanico">
+        <div class="filter-row">
+            <label>De:</label><input type="date" id="filterMecDataIni">
+            <label>Até:</label><input type="date" id="filterMecDataFim">
+            <button class="btn-buscar" onclick="limparFiltrosMecanico()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+        </div>
         <div class="form-grid" id="formMecanico">
             <div class="form-group"><label>Data</label><input type="date" id="mecData" class="campo-enter"></div>
             <div class="form-group"><label>Oficina</label><input type="text" id="mecOficina" class="campo-enter"></div>
@@ -510,7 +524,12 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
 
     <div class="tab-content" id="fluxocaixa">
         <h2>💵 Fluxo de Caixa</h2>
-        <input type="text" class="filter-input" placeholder="🔍 Filtrar transações..." id="filterFluxoCaixa">
+        <div class="filter-row">
+            <input type="text" class="filter-input" placeholder="🔍 Filtrar transações..." id="filterFluxoCaixa" style="width: 300px;">
+            <label>De:</label><input type="date" id="filterFluxoDataIni">
+            <label>Até:</label><input type="date" id="filterFluxoDataFim">
+            <button class="btn-buscar" onclick="limparFiltrosFluxo()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+        </div>
         <div class="form-grid" id="formFluxoCaixa">
             <div class="form-group"><label>Data</label><input type="date" id="fcData" class="campo-enter"></div>
             <div class="form-group"><label>Descrição</label><input type="text" id="fcDescricao" class="campo-enter"></div>
@@ -531,7 +550,12 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
 
     <div class="tab-content" id="doc">
         <h2>📁 Comprovante</h2>
-        <input type="text" class="filter-input" placeholder="🔍 Filtrar comprovantes..." id="filterDoc">
+        <div class="filter-row">
+            <input type="text" class="filter-input" placeholder="🔍 Filtrar comprovantes..." id="filterDoc" style="width: 300px;">
+            <label>De:</label><input type="date" id="filterDocDataIni">
+            <label>Até:</label><input type="date" id="filterDocDataFim">
+            <button class="btn-buscar" onclick="limparFiltrosDoc()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+        </div>
         <div class="form-grid" id="formDoc">
             <div class="form-group"><label>Nome do Documento</label><input type="text" id="docNome" class="campo-enter"></div>
             <div class="form-group"><label>R$ LOCAÇÃO</label><input type="text" id="docTipo" class="money campo-enter"></div>
@@ -556,7 +580,12 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
 
     <div class="tab-content" id="compras">
         <h2>🛒 Compras</h2>
-        <input type="text" class="filter-input" placeholder="🔍 Filtrar compras..." id="filterCompras">
+        <div class="filter-row">
+            <input type="text" class="filter-input" placeholder="🔍 Filtrar compras..." id="filterCompras" style="width: 300px;">
+            <label>De:</label><input type="date" id="filterComprasDataIni">
+            <label>Até:</label><input type="date" id="filterComprasDataFim">
+            <button class="btn-buscar" onclick="limparFiltrosCompras()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+        </div>
         <div class="form-grid" id="formCompras">
             <div class="form-group"><label>Data da Compra</label><input type="date" id="compData" class="campo-enter"></div>
             <div class="form-group"><label>Produto/Serviço</label><input type="text" id="compProduto" class="campo-enter"></div>
@@ -611,7 +640,12 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
 
     <div class="tab-content" id="pendente">
         <h2>⏳ Pendências</h2>
-        <input type="text" class="filter-input" placeholder="🔍 Filtrar pendências..." id="filterPendentes">
+        <div class="filter-row">
+            <input type="text" class="filter-input" placeholder="🔍 Filtrar pendências..." id="filterPendentes" style="width: 300px;">
+            <label>De:</label><input type="date" id="filterPendDataIni">
+            <label>Até:</label><input type="date" id="filterPendDataFim">
+            <button class="btn-buscar" onclick="limparFiltrosPendentes()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+        </div>
         <div class="form-grid" id="formPendente">
             <div class="form-group"><label>Data</label><input type="date" id="pendData" class="campo-enter"></div>
             <div class="form-group"><label>Descrição</label><input type="text" id="pendDescricao" class="campo-enter"></div>
@@ -643,13 +677,35 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
             <button class="sub-tab" id="subTabHistAlugBtn" onclick="switchSubTabHistorico('alugueis')">💰 Histórico de Aluguéis</button>
         </div>
         <div class="sub-tab-content active" id="subTabHistLancamentos">
-            <input type="text" class="filter-input" placeholder="🔍 Pesquisar..." id="filterHistorico">
+            <div class="filter-row">
+                <input type="text" class="filter-input" placeholder="🔍 Pesquisar lançamentos..." id="filterHistorico" style="width: 280px;">
+                <label>De:</label><input type="date" id="filterHistDataIni">
+                <label>Até:</label><input type="date" id="filterHistDataFim">
+                <button class="btn-buscar" onclick="limparFiltrosHistorico()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+            </div>
+            <div class="dashboard-encerradas" id="dashboardHistorico">
+                <div class="kpi-card blue"><div class="kpi-value" id="histKpiTotal">0</div><div class="kpi-label">Lançamentos</div></div>
+                <div class="kpi-card green"><div class="kpi-value" id="histKpiValor">R$ 0,00</div><div class="kpi-label">Valor Total</div></div>
+                <div class="kpi-card orange"><div class="kpi-value" id="histKpiPlacas">0</div><div class="kpi-label">Placas Distintas</div></div>
+                <div class="kpi-card red"><div class="kpi-value" id="histKpiOficinas">0</div><div class="kpi-label">Oficinas</div></div>
+            </div>
             <div class="table-container">
                 <table id="tabelaHistorico"><thead><tr><th>Data</th><th>Descrição</th><th>Placa</th><th>Valor</th><th>Fornecedor</th><th>Oficina</th><th>Arquivo</th><th>Ações</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
         <div class="sub-tab-content" id="subTabHistAlugueis">
-            <input type="text" class="filter-input" placeholder="🔍 Pesquisar aluguéis pagos..." id="filterHistoricoAlugueis">
+            <div class="filter-row">
+                <input type="text" class="filter-input" placeholder="🔍 Pesquisar aluguéis pagos..." id="filterHistoricoAlugueis" style="width: 280px;">
+                <label>De:</label><input type="date" id="filterHistAlugDataIni">
+                <label>Até:</label><input type="date" id="filterHistAlugDataFim">
+                <button class="btn-buscar" onclick="limparFiltrosHistAlug()" style="padding: 8px 16px; font-size: 13px; margin: 0;">🔄 Limpar</button>
+            </div>
+            <div class="dashboard-encerradas" id="dashboardHistAlug">
+                <div class="kpi-card blue"><div class="kpi-value" id="histAlugKpiTotal">0</div><div class="kpi-label">Pagamentos</div></div>
+                <div class="kpi-card green"><div class="kpi-value" id="histAlugKpiValor">R$ 0,00</div><div class="kpi-label">Valor Total</div></div>
+                <div class="kpi-card orange"><div class="kpi-value" id="histAlugKpiLoc">0</div><div class="kpi-label">Locatários</div></div>
+                <div class="kpi-card red"><div class="kpi-value" id="histAlugKpiPlacas">0</div><div class="kpi-label">Placas</div></div>
+            </div>
             <div class="table-container">
                 <table id="tabelaHistoricoAlugueis"><thead><tr><th>Data Pgto</th><th>Locatário</th><th>Placa</th><th>Vencimento</th><th>Valor Pago</th><th>Parcela</th><th>Ações</th></tr></thead><tbody></tbody></table>
             </div>
@@ -679,7 +735,6 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
     </div>
 </div>
 
-<!-- MODAL DE SENHA DO ADMINISTRADOR -->
 <div class="modal-overlay" id="passwordModal" style="display: none; z-index: 10000; align-items: center; justify-content: center;">
     <div class="modal-content" style="max-width: 400px; background: white; padding: 25px; text-align: center; cursor: default; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
         <h3 style="color: var(--primary); margin-bottom: 15px; font-size: 18px;">🔒 Confirmação de Administrador</h3>
@@ -711,7 +766,6 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
     </div>
 </div>
 
-<!-- MODAL LOGIN FACIAL -->
 <div class="selfie-modal" id="facialLoginModal">
     <div class="selfie-title">🔓 Reconhecimento Facial</div>
     <div class="selfie-instructions" id="facialLoginStatus">Posicione seu rosto na câmera...</div>
@@ -724,7 +778,6 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
     </div>
 </div>
 
-<!-- MODAL CADASTRO DE ROSTO -->
 <div class="selfie-modal" id="faceRegisterModal">
     <div class="selfie-title">🧠 Cadastrar Rosto</div>
     <div class="selfie-instructions" id="faceRegisterStatus">Posicione seu rosto na câmera e clique em "Capturar Rosto"</div>
@@ -1309,6 +1362,47 @@ function formatarDataBR(data) {
 }
 function campoVazio(v) { return !v || v.trim() === ''; }
 
+// Helpers para filtros em tabelas
+function dataBRparaISO(dataBR) {
+    if (!dataBR) return '';
+    const p = dataBR.split('/');
+    if (p.length === 3) return `${p[2]}-${p[1]}-${p[0]}`;
+    return dataBR;
+}
+function aplicarFiltroDataTabela(tabelaId, dataIniId, dataFimId, colunaIdx) {
+    const di = document.getElementById(dataIniId)?.value || '';
+    const df = document.getElementById(dataFimId)?.value || '';
+    const linhas = document.querySelectorAll(`#${tabelaId} tbody tr`);
+    linhas.forEach(row => {
+        const cell = row.cells[colunaIdx];
+        const txt = cell ? cell.textContent.trim() : '';
+        const iso = dataBRparaISO(txt);
+        let mostra = true;
+        if (di && iso && iso < di) mostra = false;
+        if (df && iso && iso > df) mostra = false;
+        if (!mostra) row.style.display = 'none';
+        else if (row.dataset.hideByText !== '1') row.style.display = '';
+    });
+}
+function aplicarFiltroTextoEData(tabelaId, filtroTextoId, dataIniId, dataFimId, colunaIdx) {
+    const ft = (document.getElementById(filtroTextoId)?.value || '').toLowerCase();
+    const di = document.getElementById(dataIniId)?.value || '';
+    const df = document.getElementById(dataFimId)?.value || '';
+    document.querySelectorAll(`#${tabelaId} tbody tr`).forEach(row => {
+        const texto = row.textContent.toLowerCase();
+        let mostra = true;
+        if (ft && !texto.includes(ft)) mostra = false;
+        if (mostra && (di || df) && colunaIdx !== undefined && colunaIdx !== null) {
+            const cell = row.cells[colunaIdx];
+            const txt = cell ? cell.textContent.trim() : '';
+            const iso = dataBRparaISO(txt);
+            if (di && iso && iso < di) mostra = false;
+            if (df && iso && iso > df) mostra = false;
+        }
+        row.style.display = mostra ? '' : 'none';
+    });
+}
+
 // =============================================
 // PWA
 // =============================================
@@ -1380,9 +1474,8 @@ let faceLoginProcessando = false;
 let faceRegisterStream = null;
 let faceDescriptorUsuarioTemp = null;
 const FACE_MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
-const FACE_MATCH_THRESHOLD = 0.5; // menor = mais restrito
+const FACE_MATCH_THRESHOLD = 0.5;
 
-// Pré-carrega modelos em background (não bloqueia)
 window.addEventListener('load', () => {
     setTimeout(() => { carregarFaceAPI().catch(() => {}); }, 2500);
 });
@@ -1421,7 +1514,6 @@ function obterUsuariosComRosto() {
     );
 }
 
-// ----- LOGIN FACIAL -----
 async function iniciarLoginFacial() {
     if (!dbCarregado) { alert('Sistema ainda carregando... Aguarde alguns instantes.'); return; }
     const usuariosComRosto = obterUsuariosComRosto();
@@ -1515,7 +1607,6 @@ function fecharLoginFacial() {
     if (v) v.srcObject = null;
 }
 
-// ----- CADASTRO DE ROSTO (aba Usuário) -----
 async function abrirCadastroRostoUsuario() {
     const nome = document.getElementById('userNome').value.trim();
     if (!nome) { alert('Preencha o "Nome User" antes de cadastrar o rosto!'); return; }
@@ -1775,11 +1866,9 @@ function fecharModalSenha(isOk) {
 }
 
 async function verificarSenhaAdmin() {
-    // Se for ADM, apenas pergunta Sim ou Não
     if (usuarioLogado && usuarioLogado.tipo === 'ADM') {
         return confirm("Deseja realmente realizar esta ação?");
     }
-    // Se não for ADM, pede a senha (usando modal HTML para ocultar com *)
     return new Promise((resolve) => {
         _resolverSenhaAdmin = resolve;
         const input = document.getElementById('passwordModalInput');
@@ -1788,7 +1877,6 @@ async function verificarSenhaAdmin() {
             document.getElementById('passwordModal').style.display = 'flex';
             input.focus();
         } else {
-            // Fallback se o modal não existir
             const senha = prompt("Digite a senha do administrador:");
             if (senha === null) return resolve(false);
             const admin = db.usuarios.find(u => u.tipo === 'ADM');
@@ -1901,19 +1989,6 @@ document.getElementById('fullscreenBtn').addEventListener('click', function() {
     else { enterFullscreen(); this.textContent = '🖥️ Sair Tela Cheia'; }
 });
 
-function setupFilter(inputId, tableId) {
-    const input = document.getElementById(inputId);
-    if (input) {
-        input.addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
-            document.querySelectorAll(`#${tableId} tbody tr`).forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-            });
-        });
-    }
-}
-['filterVeiculos','filterClientes','filterLocacoes','filterManutencao','filterMecanico','filterUsuario','filterPagamentos','filterBancos','filterFluxoCaixa','filterDoc','filterCompras','filterAuditoria','filterLocEncerrada','filterPendentes','filterHistorico','filterHistoricoAlugueis'].forEach(id => setupFilter(id, id.replace('filter','tabela')));
-
 // =============================================
 // INIT
 // =============================================
@@ -1975,6 +2050,108 @@ function inicializarSistema() {
     atualizarSelectPlacasDoc();
     atualizarSubAbasDoc();
     mostrarPreviewFaceDescriptor();
+    // Configurar filtros dinâmicos
+    configurarFiltrosExtras();
+}
+
+function configurarFiltrosExtras() {
+    // Histórico - lançamentos
+    ['filterHistorico','filterHistDataIni','filterHistDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaHistorico);
+        if (el) el.addEventListener('change', atualizarTabelaHistorico);
+    });
+    // Histórico de aluguéis
+    ['filterHistoricoAlugueis','filterHistAlugDataIni','filterHistAlugDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaHistoricoAlugueis);
+        if (el) el.addEventListener('change', atualizarTabelaHistoricoAlugueis);
+    });
+    // Loc Encerrada
+    ['filterLocEncerrada','filterLocEncDataIni','filterLocEncDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaLocEncerrada);
+        if (el) el.addEventListener('change', atualizarTabelaLocEncerrada);
+    });
+    // Fluxo de caixa
+    ['filterFluxoCaixa','filterFluxoDataIni','filterFluxoDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaFluxoCaixa);
+        if (el) el.addEventListener('change', atualizarTabelaFluxoCaixa);
+    });
+    // Mecânico
+    ['filterMecanico','filterMecDataIni','filterMecDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaMecanico);
+        if (el) el.addEventListener('change', atualizarTabelaMecanico);
+    });
+    // Compras
+    ['filterCompras','filterComprasDataIni','filterComprasDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaCompras);
+        if (el) el.addEventListener('change', atualizarTabelaCompras);
+    });
+    // Doc
+    ['filterDoc','filterDocDataIni','filterDocDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaDoc);
+        if (el) el.addEventListener('change', atualizarTabelaDoc);
+    });
+    // Pendentes
+    ['filterPendentes','filterPendDataIni','filterPendDataFim'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', atualizarTabelaPendentes);
+        if (el) el.addEventListener('change', atualizarTabelaPendentes);
+    });
+}
+
+function limparFiltrosHistorico() {
+    ['filterHistorico','filterHistDataIni','filterHistDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaHistorico();
+}
+function limparFiltrosHistAlug() {
+    ['filterHistoricoAlugueis','filterHistAlugDataIni','filterHistAlugDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaHistoricoAlugueis();
+}
+function limparFiltrosLocEncerrada() {
+    ['filterLocEncerrada','filterLocEncDataIni','filterLocEncDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaLocEncerrada();
+}
+function limparFiltrosFluxo() {
+    ['filterFluxoCaixa','filterFluxoDataIni','filterFluxoDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaFluxoCaixa();
+}
+function limparFiltrosMecanico() {
+    ['filterMecanico','filterMecDataIni','filterMecDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaMecanico();
+}
+function limparFiltrosCompras() {
+    ['filterCompras','filterComprasDataIni','filterComprasDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaCompras();
+}
+function limparFiltrosDoc() {
+    ['filterDoc','filterDocDataIni','filterDocDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaDoc();
+}
+function limparFiltrosPendentes() {
+    ['filterPendentes','filterPendDataIni','filterPendDataFim'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    atualizarTabelaPendentes();
 }
 
 // =============================================
@@ -2088,16 +2265,9 @@ function closeImageModal() { document.getElementById('imageModal').classList.rem
 function fecharDespesasModal() { document.getElementById('despesasModal').classList.remove('active'); }
 function fecharRelatorioMecanico() { document.getElementById('relatorioMecanicoModal').classList.remove('active'); }
 
-// =============================================
-// FUNÇÃO AUXILIAR PARA LIMPAR O AUTO-SAVE
-// =============================================
 function limparEstadoCampos(ids) {
     if (!db || !db.estadoCampos) return;
-    ids.forEach(id => {
-        if (db.estadoCampos[id] !== undefined) {
-            delete db.estadoCampos[id];
-        }
-    });
+    ids.forEach(id => { if (db.estadoCampos[id] !== undefined) delete db.estadoCampos[id]; });
 }
 
 // =============================================
@@ -2115,7 +2285,7 @@ function salvarVeiculo() {
     const cpfPropr = document.getElementById('veicCpfPropr').value;
     if (campoVazio(fabricante)||campoVazio(cor)||campoVazio(placa)||campoVazio(anoFabr)||campoVazio(anoModel)||campoVazio(aluguel)||campoVazio(caucao)||campoVazio(proprietario)||campoVazio(cpfPropr)) { alert('Preencha todos os campos!'); return; }
     if (db.veiculos.some(v => v.placa.toLowerCase() === placa.toLowerCase())) { alert('Placa já existe!'); return; }
-    db.veiculos.push({
+    db.veiculos.unshift({
         fabricante, cor, placa,
         motor: document.getElementById('veicMotor').value,
         cambio: document.getElementById('veicCambio').value,
@@ -2148,11 +2318,14 @@ function atualizarTabelaVeiculos() {
     const tbody = document.querySelector('#tabelaVeiculos tbody');
     tbody.innerHTML = '';
     const lista = db.veiculos.filter(v => temPermissaoVeiculo(v.placa));
-    lista.forEach((v, index) => {
+    for (let index = 0; index < lista.length; index++) {
+        const v = lista[index];
         const row = tbody.insertRow();
         row.innerHTML = `<td>${v.fabricante}</td><td>${v.placa}</td><td>${v.cor}</td><td>${v.anoFabr}/${v.anoModel}</td><td>${v.aluguel}</td>
             <td><button class="btn-warning" onclick="editarVeiculo(${index})">✏️</button><button class="btn-danger" onclick="excluirVeiculo(${index})">🗑️</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterVeiculos');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 async function editarVeiculo(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -2227,7 +2400,7 @@ async function salvarCliente() {
         cidade, estado,
         selfie: selfieFinal || null
     };
-    db.clientes.push(cliente);
+    db.clientes.unshift(cliente);
     criarUsuarioDoCliente(cliente);
     atualizarTabelaClientes();
     atualizarCombosLocacao();
@@ -2250,12 +2423,15 @@ function criarUsuarioDoCliente(cliente) {
 function atualizarTabelaClientes() {
     const tbody = document.querySelector('#tabelaClientes tbody');
     tbody.innerHTML = '';
-    db.clientes.forEach((c, index) => {
+    for (let index = 0; index < db.clientes.length; index++) {
+        const c = db.clientes[index];
         const row = tbody.insertRow();
         const selfieHtml = c.selfie ? `<img src="${c.selfie}" class="selfie-thumbnail" onclick="openImageModal('${c.selfie}')">` : '<span style="color:#999;">Sem selfie</span>';
         row.innerHTML = `<td>${c.nome}</td><td>${c.cpf}</td><td>${c.telefone}</td><td>${c.cidade}</td><td>${selfieHtml}</td>
             <td><button class="btn-warning" onclick="editarCliente(${index})">✏️</button><button class="btn-danger" onclick="excluirCliente(${index})">🗑️</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterClientes');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 async function editarCliente(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -2283,7 +2459,6 @@ async function excluirCliente(index) {
     const c = db.clientes[index];
     if (!c) return;
     if (confirm(`Excluir cliente ${c.nome}?\n\nO usuário criado automaticamente para este cliente também será excluído.`)) {
-        // Excluir usuário vinculado (mesmo primeiro nome, tipo MOTORISTA)
         const primeiroNome = c.nome.trim().split(/\s+/)[0].toUpperCase();
         const userIndex = db.usuarios.findIndex(u => u.nome === primeiroNome && u.tipo === 'MOTORISTA');
         if (userIndex > -1) {
@@ -2443,14 +2618,17 @@ function atualizarTabelaUsuario() {
     const tbody = document.querySelector('#tabelaUsuario tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    db.usuarios.forEach((u, index) => {
+    for (let index = 0; index < db.usuarios.length; index++) {
+        const u = db.usuarios[index];
         const row = tbody.insertRow();
         const selfieHtml = u.selfie ? `<img src="${u.selfie}" class="selfie-thumbnail" onclick="openImageModal('${u.selfie}')">` : '<span style="color:#999;">Sem selfie</span>';
         const temRosto = Array.isArray(u.faceDescriptor) && u.faceDescriptor.length === 128;
         const rostoHtml = temRosto ? '<span style="color:#28a745; font-weight:bold;">✅ Cadastrado</span>' : '<span style="color:#999;">—</span>';
         row.innerHTML = `<td>${u.nome}</td><td>${u.tipo}</td><td>${selfieHtml}</td><td>${rostoHtml}</td>
             <td><button class="btn-warning" onclick="editarUsuario(${index})">✏️</button><button class="btn-danger" onclick="excluirUsuario(${index})">🗑️</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterUsuario');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 async function editarUsuario(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -2609,7 +2787,7 @@ function salvarLocacao() {
         pagCaucao: document.getElementById('locPagCaucao').value,
         vistoria: []
     };
-    db.locacoes.push(locacao);
+    db.locacoes.unshift(locacao);
     atualizarTabelaLocacoes();
     criarAlugueisParaLocacao(locacao);
     preencherContratosComLocacao(locacao);
@@ -2656,13 +2834,16 @@ function criarAlugueisParaLocacao(locacao) {
 function atualizarTabelaLocacoes() {
     const tbody = document.querySelector('#tabelaLocacoes tbody');
     tbody.innerHTML = '';
-    db.locacoes.forEach((l, index) => {
+    for (let index = 0; index < db.locacoes.length; index++) {
+        const l = db.locacoes[index];
         const row = tbody.insertRow();
         let valor = l.valorAluguel || 'R$ 0,00';
         if (l.aluguelMensal && parseValorMonetario(l.aluguelMensal) > 0) valor = l.aluguelMensal;
         row.innerHTML = `<td>${l.locatario}</td><td>${l.veiculo}</td><td>${l.placa}</td><td>${formatarDataBR(l.dataInicio)}</td><td>${formatarDataBR(l.dataFim)}</td><td>${valor}</td>
             <td><button class="btn-warning" onclick="editarLocacao(${index})">✏️</button><button class="btn-danger" onclick="excluirLocacao(${index})">🗑️</button><button class="btn-success" onclick="encerrarLocacao(${index})">🏁 Encerrar</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterLocacoes');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 function encerrarLocacao(index) {
     const l = db.locacoes[index];
@@ -2683,7 +2864,7 @@ function encerrarLocacao(index) {
     const rNum = parseValorMonetario(l.totalGerado);
     l.despesas = formatarMoedaBR(dNum);
     l.lucro = formatarMoedaBR(rNum - dNum);
-    db.locacoesEncerradas.push(l);
+    db.locacoesEncerradas.unshift(l);
     db.locacoes.splice(index, 1);
     db.alugueis = db.alugueis.filter(a => !(a.locatario === l.locatario && a.placa === l.placa && a.dataContrato === l.dataInicio));
     atualizarTabelaLocacoes();
@@ -2722,9 +2903,7 @@ async function excluirLocacao(index) {
     const l = db.locacoes[index];
     if (!l) return;
     if (confirm(`Excluir locação de ${l.locatario} - ${l.placa}?\n\nTodos os lançamentos (aluguéis e despesas) relacionados a esta locação também serão excluídos.`)) {
-        // Excluir aluguéis vinculados
         db.alugueis = db.alugueis.filter(a => !(a.locatario === l.locatario && a.placa === l.placa && a.dataContrato === l.dataInicio));
-        // Excluir histórico (despesas) vinculados à placa dentro do período da locação
         if (l.dataInicio && l.dataFim) {
             const di = new Date(l.dataInicio);
             const df = new Date(l.dataFim);
@@ -2758,7 +2937,19 @@ function limparCamposLocacao() {
 function atualizarTabelaLocEncerrada() {
     const tbody = document.querySelector('#tabelaLocEncerrada tbody');
     tbody.innerHTML = '';
-    db.locacoesEncerradas.forEach((l, index) => {
+    const ft = (document.getElementById('filterLocEncerrada')?.value || '').toLowerCase();
+    const di = document.getElementById('filterLocEncDataIni')?.value || '';
+    const df = document.getElementById('filterLocEncDataFim')?.value || '';
+    let rt = 0, dt = 0, lt = 0, count = 0;
+    for (let index = 0; index < db.locacoesEncerradas.length; index++) {
+        const l = db.locacoesEncerradas[index];
+        const dataEnc = l.dataEncerramento || l.dataFim || '';
+        if (di && dataEnc && dataEnc < di) continue;
+        if (df && dataEnc && dataEnc > df) continue;
+        if (ft) {
+            const txt = `${l.locatario||''} ${l.veiculo||''} ${l.placa||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         const tg = l.totalGerado || 'R$ 0,00';
         const des = l.despesas || calcularDespesasLocacao(l);
@@ -2766,8 +2957,49 @@ function atualizarTabelaLocEncerrada() {
         const cls = parseValorMonetario(luc) >= 0 ? 'lucro-positivo' : 'lucro-negativo';
         row.innerHTML = `<td>${l.locatario}</td><td>${l.veiculo}</td><td>${l.placa}</td><td>${formatarDataBR(l.dataInicio)}</td><td>${formatarDataBR(l.dataFim)}</td><td>${formatarDataBR(l.dataEncerramento)}</td><td>${tg}</td><td>${des}</td><td class="${cls}">${luc}</td>
             <td><button class="btn-warning" onclick="reativarLocacao(${index})">🔄 Reativar</button><button class="btn-danger" onclick="excluirLocEncerrada(${index})">🗑️ Excluir</button><button class="btn-info" onclick="verDespesasLocacao(${index})">📋 Despesas</button></td>`;
+        rt += parseValorMonetario(tg);
+        dt += parseValorMonetario(des);
+        lt += parseValorMonetario(luc);
+        count++;
+    }
+    const el = id => document.getElementById(id);
+    if (el('kpiTotalLocs')) el('kpiTotalLocs').textContent = count;
+    if (el('kpiReceitaTotal')) el('kpiReceitaTotal').textContent = formatarMoedaBR(rt);
+    if (el('kpiDespesasTotal')) el('kpiDespesasTotal').textContent = formatarMoedaBR(dt);
+    if (el('kpiLucroTotal')) el('kpiLucroTotal').textContent = formatarMoedaBR(lt);
+    atualizarGraficoEncerradas();
+}
+function atualizarGraficoEncerradas() {
+    const canvas = document.getElementById('chartLocEncerradas');
+    if (!canvas) return;
+    const ft = (document.getElementById('filterLocEncerrada')?.value || '').toLowerCase();
+    const di = document.getElementById('filterLocEncDataIni')?.value || '';
+    const df = document.getElementById('filterLocEncDataFim')?.value || '';
+    const filtrados = db.locacoesEncerradas.filter(l => {
+        const dataEnc = l.dataEncerramento || l.dataFim || '';
+        if (di && dataEnc && dataEnc < di) return false;
+        if (df && dataEnc && dataEnc > df) return false;
+        if (ft) {
+            const txt = `${l.locatario||''} ${l.veiculo||''} ${l.placa||''}`.toLowerCase();
+            if (!txt.includes(ft)) return false;
+        }
+        return true;
     });
-    atualizarDashboardEncerradas();
+    const labels = filtrados.map(l => `${l.locatario} - ${l.placa}`);
+    const receitas = filtrados.map(l => parseValorMonetario(l.totalGerado));
+    const despesas = filtrados.map(l => calcularDespesasLocacaoNumero(l));
+    const lucros = filtrados.map(l => calcularLucroLocacao(l));
+    const ctx = canvas.getContext('2d');
+    if (encerradasChart) encerradasChart.destroy();
+    encerradasChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [
+            { label:'Receita', data: receitas, backgroundColor:'rgba(40,167,69,0.7)' },
+            { label:'Despesas', data: despesas, backgroundColor:'rgba(220,53,69,0.7)' },
+            { label:'Lucro', data: lucros, backgroundColor:'rgba(23,162,184,0.7)' }
+        ]},
+        options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+    });
 }
 function calcularDespesasLocacao(l) { return formatarMoedaBR(calcularDespesasLocacaoNumero(l)); }
 function calcularDespesasLocacaoNumero(l) {
@@ -2791,7 +3023,7 @@ function reativarLocacao(index) {
     if (!l) return;
     if (!confirm(`Reativar locação de ${l.locatario}?`)) return;
     delete l.dataEncerramento; delete l.totalGerado; delete l.despesas; delete l.lucro;
-    db.locacoes.push(l);
+    db.locacoes.unshift(l);
     db.locacoesEncerradas.splice(index, 1);
     criarAlugueisParaLocacao(l);
     atualizarTabelaLocEncerrada();
@@ -2832,37 +3064,7 @@ function verDespesasLocacao(index) {
     }
     document.getElementById('despesasModal').classList.add('active');
 }
-function atualizarDashboardEncerradas() {
-    const locs = db.locacoesEncerradas;
-    let rt = 0, dt = 0, lt = 0;
-    locs.forEach(l => {
-        rt += parseValorMonetario(l.totalGerado);
-        dt += calcularDespesasLocacaoNumero(l);
-        lt += calcularLucroLocacao(l);
-    });
-    const el = id => document.getElementById(id);
-    if (el('kpiTotalLocs')) el('kpiTotalLocs').textContent = locs.length;
-    if (el('kpiReceitaTotal')) el('kpiReceitaTotal').textContent = formatarMoedaBR(rt);
-    if (el('kpiDespesasTotal')) el('kpiDespesasTotal').textContent = formatarMoedaBR(dt);
-    if (el('kpiLucroTotal')) el('kpiLucroTotal').textContent = formatarMoedaBR(lt);
-    const canvas = el('chartLocEncerradas');
-    if (!canvas) return;
-    const labels = locs.map(l => `${l.locatario} - ${l.placa}`);
-    const receitas = locs.map(l => parseValorMonetario(l.totalGerado));
-    const despesas = locs.map(l => calcularDespesasLocacaoNumero(l));
-    const lucros = locs.map(l => calcularLucroLocacao(l));
-    const ctx = canvas.getContext('2d');
-    if (encerradasChart) encerradasChart.destroy();
-    encerradasChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels, datasets: [
-            { label:'Receita', data: receitas, backgroundColor:'rgba(40,167,69,0.7)' },
-            { label:'Despesas', data: despesas, backgroundColor:'rgba(220,53,69,0.7)' },
-            { label:'Lucro', data: lucros, backgroundColor:'rgba(23,162,184,0.7)' }
-        ]},
-        options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
-    });
-}
+function atualizarDashboardEncerradas() { atualizarTabelaLocEncerrada(); }
 
 // =============================================
 // MANUTENÇÃO
@@ -2885,7 +3087,7 @@ function salvarManutencao() {
     const tipo = document.getElementById('manTipo').value;
     const obs = document.getElementById('manObs').value;
     if (campoVazio(veiculo)||campoVazio(placa)||campoVazio(km)||campoVazio(tipo)) { alert('Preencha todos os campos!'); return; }
-    db.manutencao.push({ veiculo, placa, km, tipo, obs });
+    db.manutencao.unshift({ veiculo, placa, km, tipo, obs });
     atualizarTabelaManutencao();
     registrarAuditoria('Cadastro', `Manutenção: ${veiculo}`);
     salvarDB();
@@ -2895,11 +3097,14 @@ function salvarManutencao() {
 function atualizarTabelaManutencao() {
     const tbody = document.querySelector('#tabelaManutencao tbody');
     tbody.innerHTML = '';
-    db.manutencao.forEach((m, index) => {
+    for (let index = 0; index < db.manutencao.length; index++) {
+        const m = db.manutencao[index];
         const row = tbody.insertRow();
         row.innerHTML = `<td>${m.veiculo}</td><td>${m.placa}</td><td>${m.tipo}</td><td>${m.km}</td>
             <td><button class="btn-warning" onclick="editarManutencao(${index})">✏️</button><button class="btn-danger" onclick="excluirManutencao(${index})">🗑️</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterManutencao');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 async function editarManutencao(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -2955,8 +3160,8 @@ async function salvarMecanico() {
     let pdfData = null, pdfTipo = null;
     const f = document.getElementById('mecUpload').files[0];
     if (f) { pdfData = await comprimirImagem(f, 400, 0.4); pdfTipo = f.name.split('.').pop().toLowerCase(); }
-    db.mecanico.push({ data, oficina, servico, responsavel, carro, placa, valor, obs, pdfData: pdfData||null, pdfTipo: pdfTipo||null, pago: false });
-    db.historico.push({ data, descricao: servico, placa, valor, fornecedor: responsavel, oficina, arquivo: pdfData||null, arquivoTipo: pdfTipo||null });
+    db.mecanico.unshift({ data, oficina, servico, responsavel, carro, placa, valor, obs, pdfData: pdfData||null, pdfTipo: pdfTipo||null, pago: false });
+    db.historico.unshift({ data, descricao: servico, placa, valor, fornecedor: responsavel, oficina, arquivo: pdfData||null, arquivoTipo: pdfTipo||null });
     atualizarTabelaHistorico();
     atualizarTabelaMecanico();
     atualizarOficinasMecanico();
@@ -2968,12 +3173,22 @@ async function salvarMecanico() {
 function atualizarTabelaMecanico() {
     const tbody = document.querySelector('#tabelaMecanico tbody');
     tbody.innerHTML = '';
-    db.mecanico.forEach((m, index) => {
+    const ft = (document.getElementById('filterMecanico')?.value || '').toLowerCase();
+    const di = document.getElementById('filterMecDataIni')?.value || '';
+    const df = document.getElementById('filterMecDataFim')?.value || '';
+    for (let index = 0; index < db.mecanico.length; index++) {
+        const m = db.mecanico[index];
+        if (di && m.data && m.data < di) continue;
+        if (df && m.data && m.data > df) continue;
+        if (ft) {
+            const txt = `${m.data||''} ${m.oficina||''} ${m.servico||''} ${m.carro||''} ${m.placa||''} ${m.valor||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         const btn = m.pago ? '<button class="btn-success" disabled style="opacity:0.6;">💰 Pago</button>' : `<button class="btn-success" onclick="pagamentoMecanico(${index})">💰 Pagamento</button>`;
         row.innerHTML = `<td>${formatarDataBR(m.data)}</td><td>${m.oficina}</td><td>${m.servico}</td><td>${m.carro}</td><td>${m.valor}</td>
             <td>${btn}<button class="btn-warning" onclick="editarMecanico(${index})">✏️</button><button class="btn-danger" onclick="excluirMecanico(${index})">🗑️</button></td>`;
-    });
+    }
 }
 async function pagamentoMecanico(index) {
     const m = db.mecanico[index];
@@ -2985,12 +3200,11 @@ async function pagamentoMecanico(index) {
     if (vn <= 0) { alert('Valor inválido!'); return; }
     const vf = formatarMoedaBR(vn);
     if (db.fluxoCaixa.some(f => f.data === hoje && f.descricao === desc && f.valor === vf && f.tipo === 'saida')) { alert('Já lançado!'); return; }
-    db.fluxoCaixa.push({ data: hoje, descricao: desc, categoria: 'Mecânico', valor: vf, tipo: 'saida' });
+    db.fluxoCaixa.unshift({ data: hoje, descricao: desc, categoria: 'Mecânico', valor: vf, tipo: 'saida' });
     m.pago = true;
     m.dataPagamento = hoje;
     atualizarTabelaMecanico();
     atualizarTabelaFluxoCaixa();
-    atualizarResumoFinanceiro();
     salvarDB();
     alert(`Pago: ${vf}`);
 }
@@ -3142,10 +3356,9 @@ async function pagarRelatorioMecanico() {
     let d = `Pagamento Oficina(s): ${ofsStr} - ${ps.length} serviço(s)`;
     let df = d, c = 1;
     while (db.fluxoCaixa.some(f => f.data === hoje && f.descricao === df && f.valor === vf && f.tipo === 'saida')) { c++; df = d + ` (${c})`; }
-    db.fluxoCaixa.push({ data: hoje, descricao: df, categoria: 'Mecânico', valor: vf, tipo: 'saida' });
+    db.fluxoCaixa.unshift({ data: hoje, descricao: df, categoria: 'Mecânico', valor: vf, tipo: 'saida' });
     atualizarTabelaMecanico();
     atualizarTabelaFluxoCaixa();
-    atualizarResumoFinanceiro();
     salvarDB();
     gerarRelatorioMecanico();
     alert(`✅ Pago!\n\nOficina(s): ${ofsStr}\nTotal: ${vf}`);
@@ -3182,7 +3395,8 @@ function gerarPdfPagamentoMecanico(servicos, total, oficinasStr, apenasRelatorio
 function atualizarTabelaAlugueis() {
     const tbody = document.querySelector('#tabelaPagamentos tbody');
     tbody.innerHTML = '';
-    db.alugueis.forEach((a, index) => {
+    for (let index = 0; index < db.alugueis.length; index++) {
+        const a = db.alugueis[index];
         const row = tbody.insertRow();
         let sc = a.status === 'Pendente' ? 'status-pendente' : a.status === 'Pago' ? 'status-pago' : 'status-atrasado';
         const hoje = new Date();
@@ -3190,15 +3404,14 @@ function atualizarTabelaAlugueis() {
         if (a.status === 'Pendente' && venc < hoje) sc = 'status-atrasado';
         row.innerHTML = `<td>${a.locatario}</td><td>${formatarDataBR(a.dataContrato)}</td><td>${a.placa}</td><td>${a.valorAluguel}</td><td>${formatarDataBR(a.dataVencimento)}</td><td><span class="${sc}">${a.status}</span></td>
             <td><button class="btn-success" onclick="marcarComoPago(${index})">✓ Pago</button><button class="btn-danger" onclick="excluirAluguel(${index})">🗑️</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterPagamentos');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 function marcarComoPago(index) {
     const a = db.alugueis[index];
     if (!a || a.status === 'Pago') return;
     const hoje = new Date().toISOString().split('T')[0];
-
-    // 1) Lançar no fluxo de caixa (entrada)
-    // Regra: se houver dois pagamentos no mesmo dia, só aceita se as datas de vencimento forem diferentes
     const desc = `Pagamento Aluguel - ${a.locatario} - ${a.placa}`;
     const vn = parseValorMonetario(a.valorAluguel);
     const jaExisteMesmoVenc = db.fluxoCaixa.some(f =>
@@ -3209,7 +3422,7 @@ function marcarComoPago(index) {
         f.dataVencimento === a.dataVencimento
     );
     if (vn > 0 && !jaExisteMesmoVenc) {
-        db.fluxoCaixa.push({
+        db.fluxoCaixa.unshift({
             data: hoje,
             dataVencimento: a.dataVencimento || null,
             descricao: desc,
@@ -3220,10 +3433,8 @@ function marcarComoPago(index) {
     } else if (vn > 0 && jaExisteMesmoVenc) {
         alert('Já existe um pagamento lançado no Fluxo de Caixa hoje com a mesma Data de Vencimento. O lançamento não foi duplicado.');
     }
-
-    // 2) Lançar no histórico de aluguéis
     if (!db.historicoAlugueis) db.historicoAlugueis = [];
-    db.historicoAlugueis.push({
+    db.historicoAlugueis.unshift({
         dataPagamento: hoje,
         locatario: a.locatario,
         placa: a.placa,
@@ -3233,8 +3444,6 @@ function marcarComoPago(index) {
         tipo: a.tipo,
         numeroParcela: a.numeroParcela || 1
     });
-
-    // 3) Lançar o próximo pagamento no Sub Pagamentos (se houver)
     const int = a.tipo === 'mensal' ? 30 : 7;
     const nd = new Date(a.dataVencimento);
     nd.setDate(nd.getDate() + int);
@@ -3261,14 +3470,10 @@ function marcarComoPago(index) {
             db.alugueis.push({ locatario: a.locatario, dataContrato: a.dataContrato, placa: a.placa, valorAluguel: formatarMoedaBR(vf), dataVencimento: nd.toISOString().split('T')[0], status: 'Pendente', tipo: a.tipo, numeroParcela: np });
         }
     }
-
-    // 4) Excluir o lançamento que foi marcado como pago
     db.alugueis.splice(index, 1);
-
     atualizarTabelaAlugueis();
     atualizarTabelaFluxoCaixa();
     atualizarTabelaHistoricoAlugueis();
-    atualizarResumoFinanceiro();
     salvarDB();
 }
 function excluirAluguel(index) {
@@ -3283,11 +3488,32 @@ function atualizarTabelaHistoricoAlugueis() {
     if (!tbody) return;
     tbody.innerHTML = '';
     if (!db.historicoAlugueis) db.historicoAlugueis = [];
-    db.historicoAlugueis.forEach((h, index) => {
+    const ft = (document.getElementById('filterHistoricoAlugueis')?.value || '').toLowerCase();
+    const di = document.getElementById('filterHistAlugDataIni')?.value || '';
+    const df = document.getElementById('filterHistAlugDataFim')?.value || '';
+    let totalValor = 0, count = 0;
+    const locSet = new Set(), placaSet = new Set();
+    for (let index = 0; index < db.historicoAlugueis.length; index++) {
+        const h = db.historicoAlugueis[index];
+        if (di && h.dataPagamento && h.dataPagamento < di) continue;
+        if (df && h.dataPagamento && h.dataPagamento > df) continue;
+        if (ft) {
+            const txt = `${h.dataPagamento||''} ${h.locatario||''} ${h.placa||''} ${h.dataVencimento||''} ${h.valorAluguel||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         row.innerHTML = `<td>${formatarDataBR(h.dataPagamento)}</td><td>${h.locatario}</td><td>${h.placa}</td><td>${formatarDataBR(h.dataVencimento)}</td><td>${h.valorAluguel}</td><td>${h.numeroParcela||1}ª</td>
             <td><button class="btn-danger" onclick="excluirHistoricoAluguel(${index})">🗑️</button></td>`;
-    });
+        totalValor += parseValorMonetario(h.valorAluguel);
+        if (h.locatario) locSet.add(h.locatario);
+        if (h.placa) placaSet.add(h.placa);
+        count++;
+    }
+    const el = id => document.getElementById(id);
+    if (el('histAlugKpiTotal')) el('histAlugKpiTotal').textContent = count;
+    if (el('histAlugKpiValor')) el('histAlugKpiValor').textContent = formatarMoedaBR(totalValor);
+    if (el('histAlugKpiLoc')) el('histAlugKpiLoc').textContent = locSet.size;
+    if (el('histAlugKpiPlacas')) el('histAlugKpiPlacas').textContent = placaSet.size;
 }
 async function excluirHistoricoAluguel(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -3309,7 +3535,7 @@ function salvarBanco() {
     const titular = document.getElementById('bancoTitular').value;
     if (campoVazio(nome)||campoVazio(agencia)||campoVazio(conta)||campoVazio(titular)) { alert('Preencha tudo!'); return; }
     if (db.bancos.some(b => b.nome.toLowerCase() === nome.toLowerCase() && b.agencia === agencia && b.conta === conta)) { alert('Banco já cadastrado!'); return; }
-    db.bancos.push({ nome, agencia, conta, pix, titular });
+    db.bancos.unshift({ nome, agencia, conta, pix, titular });
     atualizarTabelaBancos();
     limparCamposBanco();
     salvarDB();
@@ -3318,11 +3544,14 @@ function salvarBanco() {
 function atualizarTabelaBancos() {
     const tbody = document.querySelector('#tabelaBancos tbody');
     tbody.innerHTML = '';
-    db.bancos.forEach((b, index) => {
+    for (let index = 0; index < db.bancos.length; index++) {
+        const b = db.bancos[index];
         const row = tbody.insertRow();
         row.innerHTML = `<td>${b.nome}</td><td>${b.agencia}</td><td>${b.conta}</td><td>${b.pix}</td><td>${b.titular}</td>
             <td><button class="btn-copy" onclick="copiarPix(${index})">📋 Copiar PIX</button><button class="btn-warning" onclick="editarBanco(${index})">✏️</button><button class="btn-danger" onclick="excluirBanco(${index})">🗑️</button></td>`;
-    });
+    }
+    const fi = document.getElementById('filterBancos');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 async function editarBanco(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -3375,10 +3604,9 @@ function salvarFluxoCaixa() {
     if (db.fluxoCaixa.some(f => f.data === data && f.descricao === desc && f.valor === valor && f.tipo === tipo)) { alert('Lançamento idêntico!'); return; }
     const entry = { data, descricao: desc, categoria: cat, valor, tipo };
     if (_fcEditandoDataVenc) entry.dataVencimento = _fcEditandoDataVenc;
-    db.fluxoCaixa.push(entry);
+    db.fluxoCaixa.unshift(entry);
     _fcEditandoDataVenc = null;
     atualizarTabelaFluxoCaixa();
-    atualizarResumoFinanceiro();
     salvarDB();
     alert('Lançamento salvo!');
     limparCamposFluxoCaixa();
@@ -3386,12 +3614,29 @@ function salvarFluxoCaixa() {
 function atualizarTabelaFluxoCaixa() {
     const tbody = document.querySelector('#tabelaFluxoCaixa tbody');
     tbody.innerHTML = '';
-    db.fluxoCaixa.forEach((f, index) => {
+    const ft = (document.getElementById('filterFluxoCaixa')?.value || '').toLowerCase();
+    const di = document.getElementById('filterFluxoDataIni')?.value || '';
+    const df = document.getElementById('filterFluxoDataFim')?.value || '';
+    let e = 0, s = 0;
+    for (let index = 0; index < db.fluxoCaixa.length; index++) {
+        const f = db.fluxoCaixa[index];
+        if (di && f.data && f.data < di) continue;
+        if (df && f.data && f.data > df) continue;
+        if (ft) {
+            const txt = `${f.data||''} ${f.dataVencimento||''} ${f.descricao||''} ${f.categoria||''} ${f.valor||''} ${f.tipo||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         const dv = f.dataVencimento ? formatarDataBR(f.dataVencimento) : '-';
         row.innerHTML = `<td>${formatarDataBR(f.data)}</td><td>${dv}</td><td>${f.descricao}</td><td>${f.categoria}</td><td>${f.valor}</td><td>${f.tipo}</td>
             <td><button class="btn-warning" onclick="editarFluxoCaixa(${index})">✏️</button><button class="btn-danger" onclick="excluirFluxoCaixa(${index})">🗑️</button></td>`;
-    });
+        const v = parseValorMonetario(f.valor);
+        if (f.tipo === 'entrada') e += v; else s += v;
+    }
+    const el = id => document.getElementById(id);
+    if (el('totalEntradas')) el('totalEntradas').textContent = formatarMoedaBR(e);
+    if (el('totalSaidas')) el('totalSaidas').textContent = formatarMoedaBR(s);
+    if (el('saldoTotal')) el('saldoTotal').textContent = formatarMoedaBR(e - s);
 }
 async function editarFluxoCaixa(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -3404,7 +3649,6 @@ async function editarFluxoCaixa(index) {
     _fcEditandoDataVenc = f.dataVencimento || null;
     db.fluxoCaixa.splice(index, 1);
     atualizarTabelaFluxoCaixa();
-    atualizarResumoFinanceiro();
     salvarDB();
 }
 async function excluirFluxoCaixa(index) {
@@ -3412,7 +3656,6 @@ async function excluirFluxoCaixa(index) {
     if (confirm('Excluir lançamento?')) {
         db.fluxoCaixa.splice(index, 1);
         atualizarTabelaFluxoCaixa();
-        atualizarResumoFinanceiro();
         salvarDB();
     }
 }
@@ -3547,7 +3790,7 @@ function salvarDoc() {
     const obs = document.getElementById('docObs').value;
     if (campoVazio(nome)||campoVazio(tipo)||campoVazio(data)||campoVazio(ref)) { alert('Preencha tudo!'); return; }
     if (db.documentos.some(d => d.nome.toLowerCase() === nome.toLowerCase())) { alert('Documento já existe!'); return; }
-    db.documentos.push({ nome, tipo, data, referencia: ref, obs, imagem: docUploadDataUrl || null, fileType: docUploadFileType || null });
+    db.documentos.unshift({ nome, tipo, data, referencia: ref, obs, imagem: docUploadDataUrl || null, fileType: docUploadFileType || null });
     atualizarTabelaDoc();
     atualizarSubAbasDoc();
     salvarDB();
@@ -3568,14 +3811,22 @@ function limparCamposDoc() {
 function atualizarTabelaDoc() {
     const tbody = document.querySelector('#tabelaDoc tbody');
     tbody.innerHTML = '';
-    let docs = db.documentos;
-    if (docPlacaSelecionada) docs = docs.filter(d => d.referencia === docPlacaSelecionada);
-    docs.forEach(d => {
-        const oi = db.documentos.indexOf(d);
+    const ft = (document.getElementById('filterDoc')?.value || '').toLowerCase();
+    const di = document.getElementById('filterDocDataIni')?.value || '';
+    const df = document.getElementById('filterDocDataFim')?.value || '';
+    for (let index = 0; index < db.documentos.length; index++) {
+        const d = db.documentos[index];
+        if (docPlacaSelecionada && d.referencia !== docPlacaSelecionada) continue;
+        if (di && d.data && d.data < di) continue;
+        if (df && d.data && d.data > df) continue;
+        if (ft) {
+            const txt = `${d.nome||''} ${d.tipo||''} ${d.data||''} ${d.referencia||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         row.innerHTML = `<td>${d.nome}</td><td>${d.tipo}</td><td>${formatarDataBR(d.data)}</td><td>${d.referencia}</td>
-            <td><button class="btn-warning" onclick="editarDoc(${oi})">✏️</button><button class="btn-danger" onclick="excluirDoc(${oi})">🗑️</button></td>`;
-    });
+            <td><button class="btn-warning" onclick="editarDoc(${index})">✏️</button><button class="btn-danger" onclick="excluirDoc(${index})">🗑️</button></td>`;
+    }
 }
 async function editarDoc(index) {
     if (!(await verificarSenhaAdmin())) return;
@@ -3628,16 +3879,15 @@ async function salvarCompra() {
             tipo = 'pdf';
         } else { arq = await comprimirImagem(f, 400, 0.4); tipo = 'jpg'; }
     }
-    db.compras.push({ data, produto, fornecedor, cnpjFornecedor: cnpj, placa, quantidade: qtd, valorUnitario: vu, valorTotal: vt, formaPagamento: fp, status: st, categoria: cat, obs, arquivo: arq, arquivoTipo: tipo });
-    db.historico.push({ data, descricao: produto, placa, valor: vt, fornecedor, oficina: '', arquivo: arq || null, arquivoTipo: tipo || null });
+    db.compras.unshift({ data, produto, fornecedor, cnpjFornecedor: cnpj, placa, quantidade: qtd, valorUnitario: vu, valorTotal: vt, formaPagamento: fp, status: st, categoria: cat, obs, arquivo: arq, arquivoTipo: tipo });
+    db.historico.unshift({ data, descricao: produto, placa, valor: vt, fornecedor, oficina: '', arquivo: arq || null, arquivoTipo: tipo || null });
     const descF = `Compra: ${produto}`;
     if (!db.fluxoCaixa.some(f => f.data === data && f.descricao === descF && f.valor === vt && f.tipo === 'saida')) {
-        db.fluxoCaixa.push({ data, descricao: descF, categoria: 'Compras', valor: vt, tipo: 'saida' });
+        db.fluxoCaixa.unshift({ data, descricao: descF, categoria: 'Compras', valor: vt, tipo: 'saida' });
     }
     atualizarTabelaCompras();
     atualizarTabelaHistorico();
     atualizarTabelaFluxoCaixa();
-    atualizarResumoFinanceiro();
     salvarDB();
     alert('Compra salva!');
     limparCamposCompra();
@@ -3645,13 +3895,23 @@ async function salvarCompra() {
 function atualizarTabelaCompras() {
     const tbody = document.querySelector('#tabelaCompras tbody');
     tbody.innerHTML = '';
-    db.compras.forEach((c, index) => {
+    const ft = (document.getElementById('filterCompras')?.value || '').toLowerCase();
+    const di = document.getElementById('filterComprasDataIni')?.value || '';
+    const df = document.getElementById('filterComprasDataFim')?.value || '';
+    for (let index = 0; index < db.compras.length; index++) {
+        const c = db.compras[index];
+        if (di && c.data && c.data < di) continue;
+        if (df && c.data && c.data > df) continue;
+        if (ft) {
+            const txt = `${c.data||''} ${c.produto||''} ${c.fornecedor||''} ${c.placa||''} ${c.valorTotal||''} ${c.status||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         const sc = c.status === 'pago' ? 'status-pago' : c.status === 'cancelado' ? 'status-atrasado' : 'status-pendente';
         const sl = c.status === 'pago' ? 'Pago' : c.status === 'cancelado' ? 'Cancelado' : 'Pendente';
         row.innerHTML = `<td>${formatarDataBR(c.data)}</td><td>${c.produto}</td><td>${c.fornecedor}</td><td>${c.placa||''}</td><td>${c.valorTotal}</td><td><span class="${sc}">${sl}</span></td>
             <td><button class="btn-warning" onclick="carregarCompraParaEdicao(${index})">✏️</button><button class="btn-danger" onclick="excluirCompraDireto(${index})">🗑️</button></td>`;
-    });
+    }
 }
 function carregarCompraParaEdicao(index) {
     if (!verificarSenhaAdmin()) return;
@@ -3728,7 +3988,20 @@ function atualizarTabelaHistorico() {
     const tbody = document.querySelector('#tabelaHistorico tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    db.historico.forEach((item, index) => {
+    const ft = (document.getElementById('filterHistorico')?.value || '').toLowerCase();
+    const di = document.getElementById('filterHistDataIni')?.value || '';
+    const df = document.getElementById('filterHistDataFim')?.value || '';
+    let totalValor = 0, count = 0;
+    const placasSet = new Set(), oficinasSet = new Set();
+    // Renderizar em ordem inversa (novos primeiro)
+    for (let index = db.historico.length - 1; index >= 0; index--) {
+        const item = db.historico[index];
+        if (di && item.data && item.data < di) continue;
+        if (df && item.data && item.data > df) continue;
+        if (ft) {
+            const txt = `${item.data||''} ${item.descricao||''} ${item.placa||''} ${item.valor||''} ${item.fornecedor||''} ${item.oficina||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         let ah = '<span style="color:#999;">Sem arquivo</span>';
         if (item.arquivo) {
@@ -3737,7 +4010,16 @@ function atualizarTabelaHistorico() {
         }
         row.innerHTML = `<td>${formatarDataBR(item.data)}</td><td>${item.descricao}</td><td>${item.placa||'-'}</td><td>${item.valor||'R$ 0,00'}</td><td>${item.fornecedor||'-'}</td><td>${item.oficina||'-'}</td><td>${ah}</td>
             <td><button class="btn-danger" onclick="excluirHistorico(${index})">🗑️ Excluir</button></td>`;
-    });
+        totalValor += parseValorMonetario(item.valor);
+        if (item.placa) placasSet.add(item.placa);
+        if (item.oficina) oficinasSet.add(item.oficina);
+        count++;
+    }
+    const el = id => document.getElementById(id);
+    if (el('histKpiTotal')) el('histKpiTotal').textContent = count;
+    if (el('histKpiValor')) el('histKpiValor').textContent = formatarMoedaBR(totalValor);
+    if (el('histKpiPlacas')) el('histKpiPlacas').textContent = placasSet.size;
+    if (el('histKpiOficinas')) el('histKpiOficinas').textContent = oficinasSet.size;
 }
 async function excluirHistorico(index) {
     const item = db.historico[index];
@@ -3953,7 +4235,7 @@ async function excluirComprovantePlaca(p, i) {
 // =============================================
 function registrarAuditoria(acao, descricao) {
     if (!db.auditoria) db.auditoria = [];
-    db.auditoria.push({
+    db.auditoria.unshift({
         data: new Date().toISOString(),
         usuario: usuarioLogado ? usuarioLogado.nome : 'LOBÃO',
         acao, descricao, ip: '192.168.1.1'
@@ -3963,10 +4245,13 @@ function registrarAuditoria(acao, descricao) {
 function atualizarTabelaAuditoria() {
     const tbody = document.querySelector('#tabelaAuditoria tbody');
     tbody.innerHTML = '';
-    db.auditoria.forEach(a => {
+    for (let i = 0; i < db.auditoria.length; i++) {
+        const a = db.auditoria[i];
         const row = tbody.insertRow();
         row.innerHTML = `<td>${a.data ? new Date(a.data).toLocaleString('pt-BR') : ''}</td><td>${a.usuario}</td><td>${a.acao}</td><td>${a.descricao}</td><td>${a.ip}</td>`;
-    });
+    }
+    const fi = document.getElementById('filterAuditoria');
+    if (fi && fi.value) fi.dispatchEvent(new Event('keyup'));
 }
 function aplicarFiltroAuditoria() {
     const di = document.getElementById('audDataInicio').value;
@@ -4020,7 +4305,7 @@ async function salvarPendencia() {
     if (pendenciaEditandoIndex !== null) { db.pendentes[pendenciaEditandoIndex] = p; pendenciaEditandoIndex = null; }
     else {
         if (db.pendentes.some(x => x.data === data && x.descricao === desc && x.vencimento === venc)) { alert('Pendência idêntica!'); return; }
-        db.pendentes.push(p);
+        db.pendentes.unshift(p);
     }
     atualizarTabelaPendentes();
     salvarDB();
@@ -4030,13 +4315,23 @@ async function salvarPendencia() {
 function atualizarTabelaPendentes() {
     const tbody = document.querySelector('#tabelaPendentes tbody');
     tbody.innerHTML = '';
-    db.pendentes.forEach((p, index) => {
+    const ft = (document.getElementById('filterPendentes')?.value || '').toLowerCase();
+    const di = document.getElementById('filterPendDataIni')?.value || '';
+    const df = document.getElementById('filterPendDataFim')?.value || '';
+    for (let index = 0; index < db.pendentes.length; index++) {
+        const p = db.pendentes[index];
+        if (di && p.data && p.data < di) continue;
+        if (df && p.data && p.data > df) continue;
+        if (ft) {
+            const txt = `${p.data||''} ${p.descricao||''} ${p.credito||''} ${p.debito||''} ${p.vencimento||''} ${p.status||''}`.toLowerCase();
+            if (!txt.includes(ft)) continue;
+        }
         const row = tbody.insertRow();
         const sc = p.status === 'Pago' ? 'status-pago' : 'status-pendente';
         const st = p.status === 'Pago' ? 'Pago' : 'Pendente';
         const ba = p.status === 'Pendente' ? `<button class="btn-success" onclick="marcarPendenciaComoPago(${index})" style="font-size:12px; padding:5px 10px;">✓ Pago</button>` : '<span style="color:#28a745; font-weight:bold;">✓</span>';
         row.innerHTML = `<td>${formatarDataBR(p.data)}</td><td>${p.descricao}</td><td>${p.credito}</td><td>${p.debito}</td><td>${formatarDataBR(p.vencimento)}</td><td><span class="${sc}">${st}</span></td><td>${ba}<button class="btn-warning" onclick="selecionarPendencia(${index})">✏️</button></td>`;
-    });
+    }
 }
 async function editarPendencia() {
     const i = pendenciaEditandoIndex;
@@ -4088,19 +4383,18 @@ function marcarPendenciaComoPago(index) {
     if (p.credito && p.credito !== 'R$ 0,00') {
         const d = `Pendência paga: ${p.descricao}`;
         if (!db.fluxoCaixa.some(f => f.data === hoje && f.descricao === d && f.valor === p.credito && f.tipo === 'entrada'))
-            db.fluxoCaixa.push({ data: hoje, descricao: d, categoria: 'Pendências', valor: p.credito, tipo: 'entrada' });
+            db.fluxoCaixa.unshift({ data: hoje, descricao: d, categoria: 'Pendências', valor: p.credito, tipo: 'entrada' });
     }
     if (p.debito && p.debito !== 'R$ 0,00') {
         const d = `Pendência paga: ${p.descricao}`;
         if (!db.fluxoCaixa.some(f => f.data === hoje && f.descricao === d && f.valor === p.debito && f.tipo === 'saida'))
-            db.fluxoCaixa.push({ data: hoje, descricao: d, categoria: 'Pendências', valor: p.debito, tipo: 'saida' });
+            db.fluxoCaixa.unshift({ data: hoje, descricao: d, categoria: 'Pendências', valor: p.debito, tipo: 'saida' });
     }
     p.status = 'Pago';
     const nv = new Date(p.vencimento); nv.setDate(nv.getDate() + 30);
     db.pendentes.push({ data: hoje, descricao: p.descricao, credito: p.credito, debito: p.debito, vencimento: nv.toISOString().split('T')[0], status: 'Pendente', docDataUrl: null, docFileType: null });
     atualizarTabelaPendentes();
     atualizarTabelaFluxoCaixa();
-    atualizarResumoFinanceiro();
     salvarDB();
     alert('Pagamento registrado!');
 }
@@ -4350,6 +4644,20 @@ function gerarHtmlTermoResponsabilidade() {
     <p style="text-align:center;">RG ${d.trRg||''}</p>
     <p style="text-align:center;">CNH ${d.trCnhRegistro||''}</p></div>`;
 }
+
+// setupFilter para tabelas com filtro de texto simples
+function setupFilter(inputId, tableId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            document.querySelectorAll(`#${tableId} tbody tr`).forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
+        });
+    }
+}
+['filterVeiculos','filterClientes','filterLocacoes','filterManutencao','filterUsuario','filterPagamentos','filterBancos','filterAuditoria'].forEach(id => setupFilter(id, id.replace('filter','tabela')));
 
 // =============================================
 // INICIALIZAÇÃO
