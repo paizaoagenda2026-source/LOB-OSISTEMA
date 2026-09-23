@@ -525,7 +525,7 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
             <div class="kpi-card blue"><div class="kpi-value" id="saldoTotal">R$ 0,00</div><div class="kpi-label">Saldo</div></div>
         </div>
         <div class="table-container" style="margin-top: 20px;">
-            <table id="tabelaFluxoCaixa"><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Tipo</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            <table id="tabelaFluxoCaixa"><thead><tr><th>Data</th><th>Data Vencimento</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Tipo</th><th>Ações</th></tr></thead><tbody></tbody></table>
         </div>
     </div>
 
@@ -638,9 +638,21 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
 
     <div class="tab-content" id="historico">
         <h2>📜 Histórico de Lançamentos</h2>
-        <input type="text" class="filter-input" placeholder="🔍 Pesquisar..." id="filterHistorico">
-        <div class="table-container">
-            <table id="tabelaHistorico"><thead><tr><th>Data</th><th>Descrição</th><th>Placa</th><th>Valor</th><th>Fornecedor</th><th>Oficina</th><th>Arquivo</th><th>Ações</th></tr></thead><tbody></tbody></table>
+        <div class="sub-tabs">
+            <button class="sub-tab active" id="subTabHistLancBtn" onclick="switchSubTabHistorico('lancamentos')">📜 Lançamentos</button>
+            <button class="sub-tab" id="subTabHistAlugBtn" onclick="switchSubTabHistorico('alugueis')">💰 Histórico de Aluguéis</button>
+        </div>
+        <div class="sub-tab-content active" id="subTabHistLancamentos">
+            <input type="text" class="filter-input" placeholder="🔍 Pesquisar..." id="filterHistorico">
+            <div class="table-container">
+                <table id="tabelaHistorico"><thead><tr><th>Data</th><th>Descrição</th><th>Placa</th><th>Valor</th><th>Fornecedor</th><th>Oficina</th><th>Arquivo</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+        <div class="sub-tab-content" id="subTabHistAlugueis">
+            <input type="text" class="filter-input" placeholder="🔍 Pesquisar aluguéis pagos..." id="filterHistoricoAlugueis">
+            <div class="table-container">
+                <table id="tabelaHistoricoAlugueis"><thead><tr><th>Data Pgto</th><th>Locatário</th><th>Placa</th><th>Vencimento</th><th>Valor Pago</th><th>Parcela</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            </div>
         </div>
     </div>
 
@@ -892,7 +904,7 @@ const firestoreDB = firebase.firestore();
 const FS_COL = 'lobao_sistema';
 const COLECOES = [
     'veiculos','clientes','locacoes','locacoesEncerradas','manutencao',
-    'mecanico','usuarios','alugueis','fluxoCaixa','documentos','compras',
+    'mecanico','usuarios','alugueis','historicoAlugueis','fluxoCaixa','documentos','compras',
     'auditoria','bancos','pendentes','historico'
 ];
 const refDoc = (nome) => firestoreDB.collection(FS_COL).doc(nome);
@@ -1226,6 +1238,7 @@ async function carregarDadosFirestore() {
         if (!db.pendentes) db.pendentes = [];
         if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
         if (!db.historico) db.historico = [];
+        if (!db.historicoAlugueis) db.historicoAlugueis = [];
         if (!db.estadoCampos) db.estadoCampos = {};
         if (!db.contratos) db.contratos = { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} };
         if (!db.imagens) db.imagens = { garagem:{subpasta:'Fotos da Garagem',fotos:[]}, sos:{subpasta:'Imagens SOS',fotos:[]}, comprovantes:{subpasta:'Comprovantes',placas:{}} };
@@ -1265,7 +1278,7 @@ function criarDBPadrao() {
         veiculos: [], clientes: [], locacoes: [], locacoesEncerradas: [],
         manutencao: [], mecanico: [],
         usuarios: [{ nome:'LOBÃO', senha:'18998211', tipo:'ADM', permissoes: JSON.parse(JSON.stringify(permissoesPadrao.ADM)), selfie:null, faceDescriptor:null }],
-        alugueis: [], fluxoCaixa: [], documentos: [], compras: [], auditoria: [],
+        alugueis: [], historicoAlugueis: [], fluxoCaixa: [], documentos: [], compras: [], auditoria: [],
         bancos: [], pendentes: [], historico: [], estadoCampos: {},
         contratos: { contratoLocacao:{}, termoResponsabilidade:{}, notaPromissoria:{} },
         imagens: {
@@ -1355,6 +1368,7 @@ let _carregandoContratos = false;
 let _autoSaveEstadoCamposAtivo = false;
 let docPlacaSelecionada = '';
 let encerradasChart = null;
+let _fcEditandoDataVenc = null;
 
 // =============================================
 // RECONHECIMENTO FACIAL - VARIÁVEIS
@@ -1842,7 +1856,7 @@ document.querySelectorAll('.tab').forEach(tab => {
         if (tabId === 'doc') { preencherPlacaUsuarioLogado(); atualizarTabelaDoc(); atualizarSubAbasDoc(); }
         if (tabId === 'locEncerrada') atualizarTabelaLocEncerrada();
         if (tabId === 'pendente') atualizarTabelaPendentes();
-        if (tabId === 'historico') atualizarTabelaHistorico();
+        if (tabId === 'historico') { atualizarTabelaHistorico(); atualizarTabelaHistoricoAlugueis(); }
         if (tabId === 'vistoria') atualizarVistoria();
         if (tabId === 'comprovantes') { atualizarPlacasComprovantes(); atualizarGaleriaComprovantes(); }
         setTimeout(function() {
@@ -1865,6 +1879,21 @@ function switchSubTabPagamentos(tabName) {
     document.getElementById('subTabAluguel').classList.add('active');
     atualizarTabelaAlugueis();
 }
+function switchSubTabHistorico(tabName) {
+    const btnL = document.getElementById('subTabHistLancBtn');
+    const btnA = document.getElementById('subTabHistAlugBtn');
+    const contL = document.getElementById('subTabHistLancamentos');
+    const contA = document.getElementById('subTabHistAlugueis');
+    if (!btnL || !btnA || !contL || !contA) return;
+    if (tabName === 'lancamentos') {
+        btnL.classList.add('active'); btnA.classList.remove('active');
+        contL.classList.add('active'); contA.classList.remove('active');
+    } else {
+        btnA.classList.add('active'); btnL.classList.remove('active');
+        contA.classList.add('active'); contL.classList.remove('active');
+        atualizarTabelaHistoricoAlugueis();
+    }
+}
 
 function enterFullscreen() { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
 document.getElementById('fullscreenBtn').addEventListener('click', function() {
@@ -1883,7 +1912,7 @@ function setupFilter(inputId, tableId) {
         });
     }
 }
-['filterVeiculos','filterClientes','filterLocacoes','filterManutencao','filterMecanico','filterUsuario','filterPagamentos','filterBancos','filterFluxoCaixa','filterDoc','filterCompras','filterAuditoria','filterLocEncerrada','filterPendentes','filterHistorico'].forEach(id => setupFilter(id, id.replace('filter','tabela')));
+['filterVeiculos','filterClientes','filterLocacoes','filterManutencao','filterMecanico','filterUsuario','filterPagamentos','filterBancos','filterFluxoCaixa','filterDoc','filterCompras','filterAuditoria','filterLocEncerrada','filterPendentes','filterHistorico','filterHistoricoAlugueis'].forEach(id => setupFilter(id, id.replace('filter','tabela')));
 
 // =============================================
 // INIT
@@ -1902,6 +1931,7 @@ function inicializarSistema() {
     if (!db.locacoesEncerradas) db.locacoesEncerradas = [];
     if (!db.pendentes) db.pendentes = [];
     if (!db.historico) db.historico = [];
+    if (!db.historicoAlugueis) db.historicoAlugueis = [];
     if (!db.estadoCampos) db.estadoCampos = {};
     if (db.locacoes) db.locacoes.forEach(l => { if (!l.vistoria) l.vistoria = []; });
     db.pendentes.forEach(p => { if (!p.status) p.status = 'Pendente'; });
@@ -1929,6 +1959,7 @@ function inicializarSistema() {
     atualizarTabelaAuditoria();
     atualizarTabelaPendentes();
     atualizarTabelaHistorico();
+    atualizarTabelaHistoricoAlugueis();
     atualizarGaleriaGaragem();
     atualizarGaleriaSOS();
     atualizarGaleriaComprovantes();
@@ -2249,8 +2280,16 @@ async function editarCliente(index) {
 }
 async function excluirCliente(index) {
     if (!(await verificarSenhaAdmin())) return;
-    if (confirm('Excluir cliente?')) {
-        const c = db.clientes[index];
+    const c = db.clientes[index];
+    if (!c) return;
+    if (confirm(`Excluir cliente ${c.nome}?\n\nO usuário criado automaticamente para este cliente também será excluído.`)) {
+        // Excluir usuário vinculado (mesmo primeiro nome, tipo MOTORISTA)
+        const primeiroNome = c.nome.trim().split(/\s+/)[0].toUpperCase();
+        const userIndex = db.usuarios.findIndex(u => u.nome === primeiroNome && u.tipo === 'MOTORISTA');
+        if (userIndex > -1) {
+            db.usuarios.splice(userIndex, 1);
+            atualizarTabelaUsuario();
+        }
         db.clientes.splice(index, 1);
         atualizarTabelaClientes();
         atualizarCombosLocacao();
@@ -2680,15 +2719,30 @@ async function editarLocacao(index) {
 }
 async function excluirLocacao(index) {
     if (!(await verificarSenhaAdmin())) return;
-    if (confirm('Excluir locação?')) {
-        const l = db.locacoes[index];
-        db.locacoes.splice(index, 1);
+    const l = db.locacoes[index];
+    if (!l) return;
+    if (confirm(`Excluir locação de ${l.locatario} - ${l.placa}?\n\nTodos os lançamentos (aluguéis e despesas) relacionados a esta locação também serão excluídos.`)) {
+        // Excluir aluguéis vinculados
         db.alugueis = db.alugueis.filter(a => !(a.locatario === l.locatario && a.placa === l.placa && a.dataContrato === l.dataInicio));
+        // Excluir histórico (despesas) vinculados à placa dentro do período da locação
+        if (l.dataInicio && l.dataFim) {
+            const di = new Date(l.dataInicio);
+            const df = new Date(l.dataFim);
+            db.historico = db.historico.filter(h => {
+                if (h.placa !== l.placa) return true;
+                if (!h.data) return true;
+                const d = new Date(h.data);
+                return !(d >= di && d <= df);
+            });
+        }
+        db.locacoes.splice(index, 1);
         atualizarTabelaLocacoes();
         atualizarTabelaAlugueis();
+        atualizarTabelaHistorico();
         registrarAuditoria('Exclusão', `Locação: ${l.locatario}`);
         salvarDB();
         atualizarVistoria();
+        alert('Locação e lançamentos relacionados excluídos!');
     }
 }
 function limparCamposLocacao() {
@@ -3141,20 +3195,53 @@ function atualizarTabelaAlugueis() {
 function marcarComoPago(index) {
     const a = db.alugueis[index];
     if (!a || a.status === 'Pago') return;
-    a.status = 'Pago';
     const hoje = new Date().toISOString().split('T')[0];
+
+    // 1) Lançar no fluxo de caixa (entrada)
+    // Regra: se houver dois pagamentos no mesmo dia, só aceita se as datas de vencimento forem diferentes
     const desc = `Pagamento Aluguel - ${a.locatario} - ${a.placa}`;
     const vn = parseValorMonetario(a.valorAluguel);
-    if (vn > 0 && !db.fluxoCaixa.some(f => f.data === hoje && f.descricao === desc && f.valor === a.valorAluguel && f.tipo === 'entrada')) {
-        db.fluxoCaixa.push({ data: hoje, descricao: desc, categoria: 'Locação de Veículos', valor: a.valorAluguel, tipo: 'entrada' });
+    const jaExisteMesmoVenc = db.fluxoCaixa.some(f =>
+        f.data === hoje &&
+        f.tipo === 'entrada' &&
+        f.dataVencimento &&
+        a.dataVencimento &&
+        f.dataVencimento === a.dataVencimento
+    );
+    if (vn > 0 && !jaExisteMesmoVenc) {
+        db.fluxoCaixa.push({
+            data: hoje,
+            dataVencimento: a.dataVencimento || null,
+            descricao: desc,
+            categoria: 'Locação de Veículos',
+            valor: a.valorAluguel,
+            tipo: 'entrada'
+        });
+    } else if (vn > 0 && jaExisteMesmoVenc) {
+        alert('Já existe um pagamento lançado no Fluxo de Caixa hoje com a mesma Data de Vencimento. O lançamento não foi duplicado.');
     }
+
+    // 2) Lançar no histórico de aluguéis
+    if (!db.historicoAlugueis) db.historicoAlugueis = [];
+    db.historicoAlugueis.push({
+        dataPagamento: hoje,
+        locatario: a.locatario,
+        placa: a.placa,
+        dataContrato: a.dataContrato,
+        dataVencimento: a.dataVencimento,
+        valorAluguel: a.valorAluguel,
+        tipo: a.tipo,
+        numeroParcela: a.numeroParcela || 1
+    });
+
+    // 3) Lançar o próximo pagamento no Sub Pagamentos (se houver)
     const int = a.tipo === 'mensal' ? 30 : 7;
     const nd = new Date(a.dataVencimento);
     nd.setDate(nd.getDate() + int);
     const loc = db.locacoes.find(l => l.locatario === a.locatario && l.placa === a.placa && l.dataInicio === a.dataContrato);
     if (loc) {
         const dfim = new Date(loc.dataFim);
-        const pex = db.alugueis.find(x => x.locatario === a.locatario && x.placa === a.placa && x.dataVencimento === nd.toISOString().split('T')[0]);
+        const pex = db.alugueis.find(x => x.locatario === a.locatario && x.placa === a.placa && x.dataVencimento === nd.toISOString().split('T')[0] && x !== a);
         if (!pex && nd <= dfim) {
             let vb = a.tipo === 'semanal' ? parseValorMonetario(loc.valorAluguel) : parseValorMonetario(loc.aluguelMensal);
             const cn = parseValorMonetario(loc.caucao);
@@ -3174,8 +3261,13 @@ function marcarComoPago(index) {
             db.alugueis.push({ locatario: a.locatario, dataContrato: a.dataContrato, placa: a.placa, valorAluguel: formatarMoedaBR(vf), dataVencimento: nd.toISOString().split('T')[0], status: 'Pendente', tipo: a.tipo, numeroParcela: np });
         }
     }
+
+    // 4) Excluir o lançamento que foi marcado como pago
+    db.alugueis.splice(index, 1);
+
     atualizarTabelaAlugueis();
     atualizarTabelaFluxoCaixa();
+    atualizarTabelaHistoricoAlugueis();
     atualizarResumoFinanceiro();
     salvarDB();
 }
@@ -3183,6 +3275,25 @@ function excluirAluguel(index) {
     if (confirm('Excluir este aluguel?')) {
         db.alugueis.splice(index, 1);
         atualizarTabelaAlugueis();
+        salvarDB();
+    }
+}
+function atualizarTabelaHistoricoAlugueis() {
+    const tbody = document.querySelector('#tabelaHistoricoAlugueis tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!db.historicoAlugueis) db.historicoAlugueis = [];
+    db.historicoAlugueis.forEach((h, index) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `<td>${formatarDataBR(h.dataPagamento)}</td><td>${h.locatario}</td><td>${h.placa}</td><td>${formatarDataBR(h.dataVencimento)}</td><td>${h.valorAluguel}</td><td>${h.numeroParcela||1}ª</td>
+            <td><button class="btn-danger" onclick="excluirHistoricoAluguel(${index})">🗑️</button></td>`;
+    });
+}
+async function excluirHistoricoAluguel(index) {
+    if (!(await verificarSenhaAdmin())) return;
+    if (confirm('Excluir registro do histórico de aluguéis?')) {
+        db.historicoAlugueis.splice(index, 1);
+        atualizarTabelaHistoricoAlugueis();
         salvarDB();
     }
 }
@@ -3262,7 +3373,10 @@ function salvarFluxoCaixa() {
     const tipo = document.getElementById('fcTipo').value;
     if (campoVazio(data)||campoVazio(desc)||campoVazio(cat)||campoVazio(valor)) { alert('Preencha tudo!'); return; }
     if (db.fluxoCaixa.some(f => f.data === data && f.descricao === desc && f.valor === valor && f.tipo === tipo)) { alert('Lançamento idêntico!'); return; }
-    db.fluxoCaixa.push({ data, descricao: desc, categoria: cat, valor, tipo });
+    const entry = { data, descricao: desc, categoria: cat, valor, tipo };
+    if (_fcEditandoDataVenc) entry.dataVencimento = _fcEditandoDataVenc;
+    db.fluxoCaixa.push(entry);
+    _fcEditandoDataVenc = null;
     atualizarTabelaFluxoCaixa();
     atualizarResumoFinanceiro();
     salvarDB();
@@ -3274,7 +3388,8 @@ function atualizarTabelaFluxoCaixa() {
     tbody.innerHTML = '';
     db.fluxoCaixa.forEach((f, index) => {
         const row = tbody.insertRow();
-        row.innerHTML = `<td>${formatarDataBR(f.data)}</td><td>${f.descricao}</td><td>${f.categoria}</td><td>${f.valor}</td><td>${f.tipo}</td>
+        const dv = f.dataVencimento ? formatarDataBR(f.dataVencimento) : '-';
+        row.innerHTML = `<td>${formatarDataBR(f.data)}</td><td>${dv}</td><td>${f.descricao}</td><td>${f.categoria}</td><td>${f.valor}</td><td>${f.tipo}</td>
             <td><button class="btn-warning" onclick="editarFluxoCaixa(${index})">✏️</button><button class="btn-danger" onclick="excluirFluxoCaixa(${index})">🗑️</button></td>`;
     });
 }
@@ -3286,6 +3401,7 @@ async function editarFluxoCaixa(index) {
     document.getElementById('fcCategoria').value = f.categoria;
     document.getElementById('fcValor').value = f.valor;
     document.getElementById('fcTipo').value = f.tipo;
+    _fcEditandoDataVenc = f.dataVencimento || null;
     db.fluxoCaixa.splice(index, 1);
     atualizarTabelaFluxoCaixa();
     atualizarResumoFinanceiro();
