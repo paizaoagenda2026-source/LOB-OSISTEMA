@@ -2967,7 +2967,7 @@ function atualizarTabelaLocEncerrada() {
     if (el('kpiReceitaTotal')) el('kpiReceitaTotal').textContent = formatarMoedaBR(rt);
     if (el('kpiDespesasTotal')) el('kpiDespesasTotal').textContent = formatarMoedaBR(dt);
     if (el('kpiLucroTotal')) el('kpiLucroTotal').textContent = formatarMoedaBR(lt);
-    atualizarGraficoEncerradas();
+    try { atualizarGraficoEncerradas(); } catch(e) { console.warn('Erro no gráfico de encerradas:', e); }
 }
 function atualizarGraficoEncerradas() {
     const canvas = document.getElementById('chartLocEncerradas');
