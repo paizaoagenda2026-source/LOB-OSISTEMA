@@ -257,7 +257,9 @@ input[type="text"], input[type="search"], textarea { text-transform: uppercase; 
         </div>
         <button class="btn-primary" data-permissao="veiculos_salvar" onclick="salvarVeiculo()">💾 Salvar</button>
         <button class="btn-info" data-permissao="veiculos_rastreador" onclick="abrirRastreador()">📍 Rastreador</button>
-        <button class="btn-warning" data-permissao="veiculos_multas" onclick="abrirMultas()">🚨 Multas</button>
+        <!-- ALTERAÇÃO SOLICITADA AQUI -->
+        <button class="btn-warning" data-permissao="veiculos_multas" onclick="var w = window.open('https://sempararempresas.usezapay.com.br/', '_blank'); if (w) { w.focus(); w.moveTo(0, 0); w.resizeTo(screen.availWidth, screen.availHeight); }">🚨 Multas</button>
+        <!-- FIM DA ALTERAÇÃO -->
         <div class="table-container">
             <table id="tabelaVeiculos"><thead><tr><th>Fab/Modelo</th><th>Placa</th><th>Cor</th><th>Ano</th><th>Aluguel</th><th>Ações</th></tr></thead><tbody></tbody></table>
         </div>
